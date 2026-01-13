@@ -62,7 +62,7 @@ echo "Installing foreman..."
 gem install foreman
 
 echo "Setup.."
-bin/setup
+rails db:create db:migrate
 
 # echo "Seeding database..."
 # bin/rails db:seed

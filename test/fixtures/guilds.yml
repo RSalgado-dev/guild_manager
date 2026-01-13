@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  name: "Guilda dos Guerreiros"
+  description: "Uma guilda focada em combate e estratégia"
+
+two:
+  name: "Guilda dos Magos"
+  description: "Uma guilda dedicada ao estudo das artes arcanas"

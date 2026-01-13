@@ -1,0 +1,22 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  guild: one
+  action: "create_squad"
+  entity_type: "Squad"
+  entity_id: 1
+
+two:
+  user: one
+  guild: one
+  action: "approve_emblem"
+  entity_type: "Squad"
+  entity_id: 1
+
+three:
+  user: three
+  guild: two
+  action: "create_role"
+  entity_type: "Role"
+  entity_id: 3

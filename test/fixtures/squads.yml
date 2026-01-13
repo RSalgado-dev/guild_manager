@@ -1,0 +1,34 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  guild: one
+  leader: one
+  name: "Esquadrão Alpha"
+  description: "Primeiro esquadrão de elite"
+  emblem_status: approved
+  emblem_uploaded_by: one
+  emblem_reviewed_by: one
+  emblem_reviewed_at: 2026-01-13 15:08:08
+  emblem_rejection_reason:
+
+two:
+  guild: two
+  leader: three
+  name: "Esquadrão Arcano"
+  description: "Especialistas em magia"
+  emblem_status: pending
+  emblem_uploaded_by: three
+  emblem_reviewed_by:
+  emblem_reviewed_at:
+  emblem_rejection_reason:
+
+three:
+  guild: one
+  leader: two
+  name: "Esquadrão Beta"
+  description: "Segundo esquadrão tático"
+  emblem_status: no_emblem
+  emblem_uploaded_by:
+  emblem_reviewed_by:
+  emblem_reviewed_at:
+  emblem_rejection_reason:

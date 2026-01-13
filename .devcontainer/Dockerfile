@@ -18,6 +18,7 @@ RUN apt-get update && \
     chromium-driver \
     automake \
     libtool \
+    libsodium-dev \
     bison \
     && apt-get clean -y && rm -rf /var/lib/apt/lists/*
 

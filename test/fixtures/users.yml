@@ -1,0 +1,40 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  guild: one
+  squad: one
+  discord_id: "111111111111111111"
+  discord_username: "warrior_one"
+  discord_nickname: "Guerreiro Alpha"
+  discord_avatar_url: "https://cdn.discordapp.com/avatars/111111111111111111/avatar.png"
+  discord_access_token: "access_token_1"
+  discord_refresh_token: "refresh_token_1"
+  discord_token_expires_at: 2026-02-13 15:15:38
+  xp_points: 100
+  currency_balance: 500
+
+two:
+  guild: one
+  squad: one
+  discord_id: "222222222222222222"
+  discord_username: "warrior_two"
+  discord_nickname: "Guerreiro Beta"
+  discord_avatar_url: "https://cdn.discordapp.com/avatars/222222222222222222/avatar.png"
+  discord_access_token: "access_token_2"
+  discord_refresh_token: "refresh_token_2"
+  discord_token_expires_at: 2026-02-13 15:15:38
+  xp_points: 50
+  currency_balance: 200
+
+three:
+  guild: two
+  squad:
+  discord_id: "333333333333333333"
+  discord_username: "mage_one"
+  discord_nickname: "Mago Supremo"
+  discord_avatar_url: "https://cdn.discordapp.com/avatars/333333333333333333/avatar.png"
+  discord_access_token: "access_token_3"
+  discord_refresh_token: "refresh_token_3"
+  discord_token_expires_at: 2026-02-13 15:15:38
+  xp_points: 200
+  currency_balance: 1000

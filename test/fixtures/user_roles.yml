@@ -1,0 +1,21 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  role: one
+  primary: true
+
+two:
+  user: two
+  role: two
+  primary: true
+
+three:
+  user: three
+  role: three
+  primary: true
+
+four:
+  user: one
+  role: two
+  primary: false
