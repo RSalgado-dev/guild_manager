@@ -1,7 +1,7 @@
 class CreateRoles < ActiveRecord::Migration[8.1]
   def change
     create_table :roles do |t|
-      t.references :guild, null: false, foreign_key: true
+      t.references :guild, null: false, foreign_key: { on_delete: :cascade }
       t.string :name, null: false
       t.text :description
       t.boolean :is_admin, default: false, null: false

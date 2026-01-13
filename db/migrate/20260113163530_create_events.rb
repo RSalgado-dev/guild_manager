@@ -1,7 +1,7 @@
 class CreateEvents < ActiveRecord::Migration[8.1]
   def change
     create_table :events do |t|
-      t.references :guild, null: false, foreign_key: true, on_delete: :cascade
+      t.references :guild, null: false, foreign_key: { on_delete: :cascade }
       t.string :title, null: false
       t.text :description
       t.string :event_type, null: false

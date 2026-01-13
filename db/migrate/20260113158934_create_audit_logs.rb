@@ -1,8 +1,8 @@
 class CreateAuditLogs < ActiveRecord::Migration[8.1]
   def change
     create_table :audit_logs do |t|
-      t.references :user, null: true, foreign_key: true, on_delete: :nullify
-      t.references :guild, null: true, foreign_key: true, on_delete: :nullify
+      t.references :user, null: true, foreign_key: { on_delete: :cascade }
+      t.references :guild, null: true, foreign_key: { on_delete: :cascade }
 
       t.string :action, null: false
 

@@ -1,8 +1,8 @@
 class CreateEventParticipations < ActiveRecord::Migration[8.1]
   def change
     create_table :event_participations do |t|
-      t.references :event, null: false, foreign_key: true, on_delete: :cascade
-      t.references :user, null: false, foreign_key: true, on_delete: :cascade
+      t.references :event, null: false, foreign_key: { on_delete: :cascade }
+      t.references :user, null: false, foreign_key: { on_delete: :cascade }
 
       t.string :rsvp_status
 

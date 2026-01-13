@@ -1,7 +1,7 @@
 class CreateUsers < ActiveRecord::Migration[8.1]
   def change
     create_table :users do |t|
-      t.references :guild, null: false, foreign_key: true
+      t.references :guild, null: false, foreign_key: { on_delete: :cascade }
 
       t.string :discord_id, null: false
       t.string :discord_username

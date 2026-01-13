@@ -7,14 +7,15 @@ class User < ApplicationRecord
 
   has_one :squad_led, class_name: "Squad", foreign_key: "leader_id", dependent: :destroy
 
-  # Engajamento
   has_many :event_participations, dependent: :destroy
   has_many :events, through: :event_participations
 
   has_many :mission_submissions, dependent: :destroy
   has_many :missions, through: :mission_submissions
 
-  # Moderação / auditoria
+  has_many :user_achievements, dependent: :destroy
+  has_many :achievements, through: :user_achievements
+
   has_many :audit_logs, dependent: :nullify
 
   has_many :uploaded_squad_emblems,
@@ -37,5 +38,17 @@ class User < ApplicationRecord
 
   def primary_role
     user_roles.primary.includes(:role).first&.role || roles.first
+  end
+
+  def grant_achievement(achievement, source: nil)
+    UserAchievement.create!(
+      user: self,
+      achievement:,
+      source_type: source&.class&.name,
+      source_id: source&.id
+    )
+  rescue ActiveRecord::RecordNotUnique
+    # já possui, ignora silenciosamente
+    user_achievements.find_by(achievement: achievement)
   end
 end

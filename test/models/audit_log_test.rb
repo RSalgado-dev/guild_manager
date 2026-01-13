@@ -51,14 +51,18 @@ class AuditLogTest < ActiveSupport::TestCase
   # === Método entity ===
 
   test "#entity deve retornar a entidade relacionada quando válida" do
-    audit_log = audit_logs(:one)
-    # Fixture one tem entity_type: Squad e entity_id: 1
+    squad = squads(:one)
+    audit_log = AuditLog.create!(
+      user: users(:one),
+      guild: guilds(:one),
+      action: "test_action",
+      entity_type: "Squad",
+      entity_id: squad.id
+    )
+    
     entity = audit_log.entity
-
-    if Squad.exists?(1)
-      assert_instance_of Squad, entity
-      assert_equal 1, entity.id
-    end
+    assert_instance_of Squad, entity
+    assert_equal squad.id, entity.id
   end
 
   test "#entity deve retornar nil quando entity_type está em branco" do

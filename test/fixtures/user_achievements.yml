@@ -1,0 +1,22 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  achievement: one
+  earned_at: <%= 5.days.ago %>
+  source_type: "Event"
+  source_id: 1
+
+two:
+  user: one
+  achievement: two
+  earned_at: <%= 3.days.ago %>
+  source_type: "Event"
+  source_id: 2
+
+three:
+  user: three
+  achievement: three
+  earned_at: <%= 1.day.ago %>
+  source_type: "Squad"
+  source_id: 1 

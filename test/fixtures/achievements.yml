@@ -1,0 +1,37 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  guild: one
+  code: "first_raid"
+  name: "Primeira Raid"
+  description: "Complete sua primeira raid com a guilda"
+  category: "raids"
+  icon_url: "https://example.com/icons/first_raid.png"
+  active: true
+
+two:
+  guild: one
+  code: "event_organizer"
+  name: "Organizador de Eventos"
+  description: "Organize 5 eventos da guilda"
+  category: "events"
+  icon_url: "https://example.com/icons/organizer.png"
+  active: true
+
+three:
+  guild: two
+  code: "squad_leader"
+  name: "Líder de Esquadrão"
+  description: "Torne-se líder de um esquadrão"
+  category: "leadership"
+  icon_url: "https://example.com/icons/leader.png"
+  active: true
+
+inactive:
+  guild: one
+  code: "old_achievement"
+  name: "Conquista Antiga"
+  description: "Esta conquista não está mais disponível"
+  category: "legacy"
+  icon_url: "https://example.com/icons/old.png"
+  active: false

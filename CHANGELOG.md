@@ -4,9 +4,9 @@
 
 ### 📝 Resumo das Alterações
 
-Este documento descreve todas as alterações implementadas no sistema de guildas, incluindo 10 modelos principais, relacionamentos complexos, sistema de gamificação, eventos e missões.
+Este documento descreve todas as alterações implementadas no sistema de guildas, incluindo 12 modelos principais, relacionamentos complexos, sistema de gamificação completo, eventos e missões.
 
-**Total de Testes**: 135 testes (todos passando ✅)
+**Total de Testes**: 155 testes (todos passando ✅)
 
 ---
 
@@ -278,13 +278,14 @@ Sistema de auditoria para rastrear ações importantes no sistema, incluindo:
 ---
 
 ### 10. MissionSubmission (Submissão de Missão)
-**Arquivo**: `app/models/mission_submission.rb`
+**Arquivo**: `app/models/mission_submission.rb`  
+**Migração**: `db/migrate/20260113165554_create_mission_submissions.rb`
 
 #### Atributos:
 - `mission_id` (referência, obrigatório)
 - `user_id` (referência, obrigatório)
 - `week_reference` (string, obrigatório) - Formato ISO 8601 (ex: "2026-W03")
-- `answers_json` (text) - JSON com respostas da missão
+- `answers_json` (jsonb, padrão: {}) - JSON com respostas da missão
 - `rewarded_at` (datetime)
 
 #### Relacionamentos:
@@ -297,6 +298,62 @@ Sistema de auditoria para rastrear ações importantes no sistema, incluindo:
 #### Validações:
 - `week_reference` deve estar presente
 - Combinação de `mission_id`, `user_id` e `week_reference` deve ser única
+
+---
+
+### 11. Achievement (Conquista)
+**Arquivo**: `app/models/achievement.rb`  
+**Migração**: `db/migrate/20260113182143_create_achievements.rb`
+
+#### Atributos:
+- `guild_id` (referência, obrigatório)
+- `code` (string, obrigatório) - Código único da conquista por guilda
+- `name` (string, obrigatório) - Nome da conquista
+- `description` (text) - Descrição da conquista
+- `category` (string) - Categoria (raids, events, leadership, etc)
+- `icon_url` (string) - URL do ícone
+- `active` (boolean, padrão: true) - Se a conquista está ativa
+
+#### Relacionamentos:
+- `belongs_to :guild`
+- `has_many :user_achievements` (dependent: destroy)
+- `has_many :users, through: :user_achievements`
+
+#### Validações:
+- `code` deve estar presente e ser único por guilda
+- `name` deve estar presente
+
+#### Índices:
+- Índice único em `[guild_id, code]`
+- Índice em `[guild_id, name]`
+
+---
+
+### 12. UserAchievement (Conquista do Usuário)
+**Arquivo**: `app/models/user_achievement.rb`  
+**Migração**: `db/migrate/20260113182402_create_user_achievements.rb`
+
+#### Atributos:
+- `user_id` (referência, obrigatório)
+- `achievement_id` (referência, obrigatório)
+- `earned_at` (datetime, obrigatório) - Quando foi conquistada
+- `source_type` (string) - Tipo polimórfico da origem (Event, Mission, etc)
+- `source_id` (bigint) - ID polimórfico da origem
+
+#### Relacionamentos:
+- `belongs_to :user`
+- `belongs_to :achievement`
+- Associação polimórfica com `source` (Event, Mission, Squad, etc)
+
+#### Callbacks:
+- `set_default_earned_at` - Define `earned_at` como `Time.current` ao criar se não fornecido
+
+#### Validações:
+- Combinação de `user_id` e `achievement_id` deve ser única
+
+#### Índices:
+- Índice único em `[user_id, achievement_id]`
+- Índice em `[source_type, source_id]`
 
 ---
 
@@ -324,6 +381,15 @@ Adiciona a coluna `squad_id` à tabela `users` para permitir que usuários perte
 - Rastreamento de ações
 - Associação com usuários e guildas
 - Busca e filtragem de logs
+
+### Sistema de Conquistas (Achievements)
+- Conquistas configuráveis por guilda
+- Código único por guilda
+- Categorização de conquistas
+- Rastreamento de quando foi conquistada
+- Origem polimórfica (de qual evento/missão veio)
+- Sistema ativo/inativo para conquistas legadas
+- Método helper `grant_achievement` no User
 
 ### Sistema de Eventos
 - Criação e gerenciamento de eventos da guilda
@@ -362,6 +428,7 @@ Guild (Guilda)
 ├── has_many Squads (Esquadrões)
 ├── has_many Missions (Missões)
 ├── has_many Events (Eventos)
+├── has_many Achievements (Conquistas)
 └── has_many AuditLogs
 
 Role (Cargo)
@@ -372,6 +439,59 @@ Role (Cargo)
 User (Usuário)
 ├── belongs_to Guild
 ├── belongs_to Squad (opcional)
+├── has_many UserRoles
+├── has_many Roles (through UserRoles)
+├── has_one Squad (como líder)
+├── has_many EventParticipations
+├── has_many Events (through EventParticipations)
+├── has_many MissionSubmissions
+├── has_many Missions (through MissionSubmissions)
+├── has_many UserAchievements
+├── has_many Achievements (through UserAchievements)
+└── has_many AuditLogs
+
+Squad (Esquadrão)
+├── belongs_to Guild
+├── belongs_to Leader (User)
+└── has_many Users (membros)
+
+UserRole (Cargo do Usuário)
+├── belongs_to User
+└── belongs_to Role
+
+Achievement (Conquista)
+├── belongs_to Guild
+├── has_many UserAchievements
+└── has_many Users (through UserAchievements)
+
+UserAchievement (Conquista do Usuário)
+├── belongs_to User
+├── belongs_to Achievement
+└── belongs_to Source (polimórfico: Event, Mission, etc)
+
+Event (Evento)
+├── belongs_to Guild
+├── belongs_to Creator (User)
+├── has_many EventParticipations
+└── has_many Users (through EventParticipations)
+
+EventParticipation (Participação em Evento)
+├── belongs_to Event
+└── belongs_to User
+
+Mission (Missão)
+├── belongs_to Guild
+├── has_many MissionSubmissions
+└── has_many Users (through MissionSubmissions)
+
+MissionSubmission (Submissão de Missão)
+├── belongs_to Mission
+└── belongs_to User
+
+AuditLog (Log de Auditoria)
+├── belongs_to User (opcional)
+└── belongs_to Guild (opcional)
+```
 ├── has_many UserRoles
 ├── has_many Roles (through UserRoles)
 ├── has_one Squad (como líder)
@@ -419,81 +539,31 @@ AuditLog (Log de Auditoria)
 ## 🧪 Testes
 
 Testes unitários foram implementados para todos os modelos em:
-- `test/models/guild_test.rb` (8 testes)
-- `test/models/role_test.rb` (9 testes)
-- `test/models/user_test.rb` (15 testes)
-- `test/models/squad_test.rb` (11 testes)
-- `test/models/user_role_test.rb` (11 testes)
-- `test/models/audit_log_test.rb` (16 testes)
-- `test/models/event_test.rb` (15 testes)
-- `test/models/event_participation_test.rb` (13 testes)
-- `test/models/mission_test.rb` (14 testes)
-- `test/models/mission_submission_test.rb` (12 testes)
-
-**Total: 124 testes**
-
-Cada teste cobre:
-- ✅ Validações de presença e formato
-- ✅ Relacionamentos entre modelos
-- ✅ Métodos customizados
-- ✅ Scopes e queries
-- ✅ Comportamento de dependent destroy/nullify
-- ✅ Enums e estados
-- ✅ Validações numéricas
-- ✅ Validações de unicidade
-├── belongs_to Guild
-├── has_many UserRoles
-└── has_many Users (through UserRoles)
-
-User (Usuário)
-├── belongs_to Guild
-├── belongs_to Squad (opcional)
-├── has_many UserRoles
-├── has_many Roles (through UserRoles)
-├── has_one Squad (como líder)
-└── has_many AuditLogs
-
-Squad (Esquadrão)
-├── belongs_to Guild
-├── belongs_to Leader (User)
-└── has_many Users (membros)
-
-UserRole (Cargo do Usuário)
-├── belongs_to User
-└── belongs_to Role
-
-AuditLog (Log de Auditoria)
-├── belongs_to User (opcional)
-└── belongs_to Guild (opcional)
-```
-
----
-
-## 🧪 Testes
-
-Testes unitários foram implementados para todos os modelos em:
 - `test/models/guild_test.rb` (7 testes)
 - `test/models/role_test.rb` (7 testes)
 - `test/models/user_test.rb` (11 testes)
-- `test/models/squad_test.rb` (9 testes)
+- `test/models/squad_test.rb` (8 testes)
 - `test/models/user_role_test.rb` (11 testes)
 - `test/models/audit_log_test.rb` (15 testes)
-- `test/models/event_test.rb` (15 testes)
+- `test/models/event_test.rb` (14 testes)
 - `test/models/event_participation_test.rb` (13 testes)
 - `test/models/mission_test.rb` (14 testes)
 - `test/models/mission_submission_test.rb` (12 testes)
+- `test/models/achievement_test.rb` (11 testes)
+- `test/models/user_achievement_test.rb` (12 testes)
 
-**Total: 135 testes** (todos passando ✅)
+**Total: 155 testes** (todos passando ✅)
 
 Cada teste cobre:
 - ✅ Validações de presença e formato
 - ✅ Relacionamentos entre modelos
-- ✅ Métodos customizados
+- ✅ Métodos customizados e callbacks
 - ✅ Scopes e queries
-- ✅ Comportamento de dependent destroy/nullify
+- ✅ Comportamento de dependent destroy/nullify/cascade
 - ✅ Enums e estados
 - ✅ Validações numéricas
-- ✅ Validações de unicidade
+- ✅ Validações de unicidade (simples e com scope)
+- ✅ Associações polimórficas
 
 ---
 
@@ -515,13 +585,17 @@ As seguintes migrações foram criadas:
 13. `20260113174018_change_foreign_keys_on_events_and_squads.rb` - Adiciona cascade em FKs
 14. `20260113174142_add_cascade_to_event_participations.rb` - Adiciona cascade em mais FKs
 15. `20260113174257_change_audit_logs_foreign_keys.rb` - Configura nullify em audit_logs
+16. `20260113182143_create_achievements.rb` - Tabela de conquistas
+17. `20260113182402_create_user_achievements.rb` - Tabela de conquistas dos usuários
+18. `20260113194307_add_cascade_to_achievements_foreign_keys.rb` - Adiciona cascade em conquistas
 
 ### Estratégia de Foreign Keys:
 - **CASCADE**: Usado em relacionamentos onde a destruição do pai deve destruir os filhos
-  - Guild → Users, Roles, Squads, Missions, Events
+  - Guild → Users, Roles, Squads, Missions, Events, Achievements
   - Event → EventParticipations
   - Mission → MissionSubmissions
-  - User → Events (como creator), Squads (como leader)
+  - Achievement → UserAchievements
+  - User → Events (como creator), Squads (como leader), UserAchievements
   
 - **NULLIFY**: Usado em relacionamentos opcionais ou de auditoria
   - User → Squad (membership)
@@ -534,9 +608,11 @@ As seguintes migrações foram criadas:
 - [ ] Implementar controllers e rotas
 - [ ] Adicionar views para gerenciamento
 - [ ] Implementar autenticação OAuth com Discord
-- [ ] Criar dashboard de gamificação
+- [ ] Criar dashboard de gamificação com conquistas
 - [ ] Adicionar notificações de eventos e missões
 - [ ] Implementar sistema de recompensas automáticas
+- [ ] Sistema de níveis baseado em XP
+- [ ] Leaderboards de conquistas por guilda
 - [ ] Adicionar validações de negócio mais complexas
 - [ ] Implementar webhooks do Discord
 - [ ] Adicionar testes de integração
@@ -550,3 +626,4 @@ As seguintes migrações foram criadas:
 - Sistema de permissões baseado em cargos
 - Validações de unicidade para prevenir duplicatas
 - Foreign keys configuradas adequadamente para integridade de dados
+- Índices únicos compostos para garantir integridade referencial

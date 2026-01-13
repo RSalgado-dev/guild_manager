@@ -10,9 +10,24 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_13_174257) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
+
+  create_table "achievements", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "category"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "guild_id", null: false
+    t.string "icon_url"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guild_id", "code"], name: "index_achievements_on_guild_id_and_code", unique: true
+    t.index ["guild_id", "name"], name: "index_achievements_on_guild_id_and_name"
+    t.index ["guild_id"], name: "index_achievements_on_guild_id"
+  end
 
   create_table "active_storage_attachments", force: :cascade do |t|
     t.bigint "blob_id", null: false
@@ -155,6 +170,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_174257) do
     t.index ["leader_id"], name: "index_squads_on_leader_id"
   end
 
+  create_table "user_achievements", force: :cascade do |t|
+    t.bigint "achievement_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "earned_at", null: false
+    t.bigint "source_id"
+    t.string "source_type"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["achievement_id"], name: "index_user_achievements_on_achievement_id"
+    t.index ["source_type", "source_id"], name: "index_user_achievements_on_source_type_and_source_id"
+    t.index ["user_id", "achievement_id"], name: "index_user_achievements_on_user_id_and_achievement_id", unique: true
+    t.index ["user_id"], name: "index_user_achievements_on_user_id"
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "primary"
@@ -184,24 +213,27 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_174257) do
     t.index ["squad_id"], name: "index_users_on_squad_id"
   end
 
+  add_foreign_key "achievements", "guilds", on_delete: :cascade
   add_foreign_key "active_storage_attachments", "active_storage_blobs", column: "blob_id"
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
-  add_foreign_key "audit_logs", "guilds", on_delete: :nullify
-  add_foreign_key "audit_logs", "users", on_delete: :nullify
+  add_foreign_key "audit_logs", "guilds", on_delete: :cascade
+  add_foreign_key "audit_logs", "users", on_delete: :cascade
   add_foreign_key "event_participations", "events", on_delete: :cascade
   add_foreign_key "event_participations", "users", on_delete: :cascade
-  add_foreign_key "events", "guilds"
-  add_foreign_key "events", "users", column: "creator_id", on_delete: :cascade
+  add_foreign_key "events", "guilds", on_delete: :cascade
+  add_foreign_key "events", "users", column: "creator_id", on_delete: :nullify
   add_foreign_key "mission_submissions", "missions", on_delete: :cascade
   add_foreign_key "mission_submissions", "users", on_delete: :cascade
   add_foreign_key "missions", "guilds", on_delete: :cascade
-  add_foreign_key "roles", "guilds"
-  add_foreign_key "squads", "guilds"
+  add_foreign_key "roles", "guilds", on_delete: :cascade
+  add_foreign_key "squads", "guilds", on_delete: :cascade
   add_foreign_key "squads", "users", column: "emblem_reviewed_by_id"
   add_foreign_key "squads", "users", column: "emblem_uploaded_by_id"
   add_foreign_key "squads", "users", column: "leader_id", on_delete: :cascade
-  add_foreign_key "user_roles", "roles"
-  add_foreign_key "user_roles", "users"
-  add_foreign_key "users", "guilds"
-  add_foreign_key "users", "squads"
+  add_foreign_key "user_achievements", "achievements", on_delete: :cascade
+  add_foreign_key "user_achievements", "users", on_delete: :cascade
+  add_foreign_key "user_roles", "roles", on_delete: :cascade
+  add_foreign_key "user_roles", "users", on_delete: :cascade
+  add_foreign_key "users", "guilds", on_delete: :cascade
+  add_foreign_key "users", "squads", on_delete: :nullify
 end
