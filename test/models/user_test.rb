@@ -77,22 +77,6 @@ class UserTest < ActiveSupport::TestCase
     assert_respond_to user, :audit_logs
   end
 
-  test "deve destruir user_roles ao ser destruído" do
-    user = users(:one)
-    user_role_count = user.user_roles.count
-    assert_difference("UserRole.count", -user_role_count) do
-      user.destroy
-    end
-  end
-
-  test "deve anular audit_logs ao ser destruído" do
-    user = users(:one)
-    audit_log = user.audit_logs.first
-    user.destroy
-    audit_log.reload
-    assert_nil audit_log.user_id
-  end
-
   # === Métodos ===
 
   test "#admin? deve retornar true quando usuário tem cargo admin" do

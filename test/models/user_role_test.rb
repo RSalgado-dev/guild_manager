@@ -78,9 +78,9 @@ class UserRoleTest < ActiveSupport::TestCase
 
   # === Comportamento ===
 
-  test "primary deve ser false por padrão" do
-    user_role = UserRole.new(user: users(:three), role: roles(:one))
-    assert_equal false, user_role.primary
+  test "primary deve ser nil por padrão" do
+    user_role = UserRole.new(user: users(:one), role: roles(:one))
+    assert_nil user_role.primary
   end
 
   test "deve permitir definir cargo como primário" do

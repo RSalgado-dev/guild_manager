@@ -1,0 +1,28 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  guild: one
+  name: "Missão Semanal de Dungeons"
+  description: "Complete 5 dungeons durante a semana"
+  frequency: weekly
+  reward_currency: 100
+  reward_xp: 50
+  active: true
+
+two:
+  guild: one
+  name: "Missão de Crafting"
+  description: "Crie 10 itens de qualidade superior"
+  frequency: weekly
+  reward_currency: 75
+  reward_xp: 30
+  active: true
+
+three:
+  guild: two
+  name: "Missão Inativa"
+  description: "Esta missão está desativada"
+  frequency: weekly
+  reward_currency: 50
+  reward_xp: 25
+  active: false

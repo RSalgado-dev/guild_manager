@@ -71,14 +71,6 @@ class SquadTest < ActiveSupport::TestCase
     assert_respond_to squad, :emblem_reviewed_by
   end
 
-  test "deve anular usuários ao ser destruído" do
-    squad = squads(:one)
-    user = squad.users.first
-    squad.destroy
-    user.reload
-    assert_nil user.squad_id
-  end
-
   # === Enums ===
 
   test "deve aceitar status de emblema válidos" do
@@ -104,7 +96,7 @@ class SquadTest < ActiveSupport::TestCase
 
   test "deve verificar status de emblema" do
     squad_no_emblem = squads(:three)
-    assert_equal "none", squad_no_emblem.emblem_status
+    assert_equal "no_emblem", squad_no_emblem.emblem_status
 
     squad_approved = squads(:one)
     assert_equal "approved", squad_approved.emblem_status

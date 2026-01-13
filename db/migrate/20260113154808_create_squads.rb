@@ -16,7 +16,7 @@ class CreateSquads < ActiveRecord::Migration[8.1]
 
     add_index :squads, [ :guild_id, :name ], unique: true
     add_index :squads, :emblem_status
-    add_index :squads, :leader_id
+    add_index :squads, :leader_id, on_delete: :cascade
 
     add_foreign_key :squads, :users, column: :leader_id
     add_foreign_key :squads, :users, column: :emblem_uploaded_by_id

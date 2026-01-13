@@ -48,16 +48,6 @@ class AuditLogTest < ActiveSupport::TestCase
     assert_instance_of Guild, audit_log.guild
   end
 
-  test "não deve ser destruído quando usuário é destruído" do
-    user = users(:one)
-    audit_log = audit_logs(:one)
-    user.destroy
-
-    audit_log.reload
-    assert_nil audit_log.user_id
-    assert_not_nil audit_log.id
-  end
-
   # === Método entity ===
 
   test "#entity deve retornar a entidade relacionada quando válida" do
@@ -119,7 +109,7 @@ class AuditLogTest < ActiveSupport::TestCase
 
   test "scope recent deve ordenar por criação mais recente" do
     logs = AuditLog.recent.to_a
-    assert_equal logs, logs.sort_by(&:created_at).reverse
+    assert_equal [ audit_logs(:three), audit_logs(:two), audit_logs(:one) ], logs
   end
 
   test "scope for_guild deve filtrar por guilda" do

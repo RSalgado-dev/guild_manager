@@ -42,19 +42,22 @@ class GuildTest < ActiveSupport::TestCase
     assert_respond_to guild, :squads
   end
 
-  test "deve destruir cargos ao ser destruída" do
+  test "deve destruir dependências ao ser destruída" do
     guild = guilds(:one)
     role_count = guild.roles.count
-    assert_difference("Role.count", -role_count) do
-      guild.destroy
-    end
-  end
+    user_count = guild.users.count
+    event_count = guild.events.count
+    squad_count = guild.squads.count
 
-  test "deve anular a referência de usuários ao ser destruída" do
-    guild = guilds(:one)
-    user = guild.users.first
+    assert role_count > 0, "Deve ter pelo menos um role"
+    assert user_count > 0, "Deve ter pelo menos um usuário"
+
     guild.destroy
-    user.reload
-    assert_nil user.guild_id
+
+    # Verifica que roles, users, events e squads foram destruídos
+    assert_equal 0, Role.where(guild_id: guild.id).count
+    assert_equal 0, User.where(guild_id: guild.id).count
+    assert_equal 0, Event.where(guild_id: guild.id).count
+    assert_equal 0, Squad.where(guild_id: guild.id).count
   end
 end

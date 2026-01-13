@@ -1,0 +1,22 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  mission: one
+  user: one
+  week_reference: "2026-W03"
+  answers_json: '{"dungeons_completed": 5, "time_spent": "3 hours"}'
+  rewarded_at: 2026-01-13 16:55:55
+
+two:
+  mission: two
+  user: two
+  week_reference: "2026-W03"
+  answers_json: '{"items_crafted": 10, "quality": "superior"}'
+  rewarded_at: 2026-01-13 16:55:55
+
+three:
+  mission: one
+  user: two
+  week_reference: "2026-W02"
+  answers_json: '{"dungeons_completed": 3}'
+  rewarded_at:

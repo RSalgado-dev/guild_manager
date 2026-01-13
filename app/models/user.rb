@@ -5,7 +5,7 @@ class User < ApplicationRecord
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
 
-  has_one :squad_led, class_name: "Squad", foreign_key: "leader_id", dependent: :nullify
+  has_one :squad_led, class_name: "Squad", foreign_key: "leader_id", dependent: :destroy
 
   # Engajamento
   has_many :event_participations, dependent: :destroy
@@ -13,16 +13,6 @@ class User < ApplicationRecord
 
   has_many :mission_submissions, dependent: :destroy
   has_many :missions, through: :mission_submissions
-
-  # Gamificação
-  has_many :currency_transactions, dependent: :destroy
-
-  has_many :user_achievements, dependent: :destroy
-  has_many :achievements, through: :user_achievements
-
-  # Certificados
-  has_many :user_certificates, dependent: :destroy
-  has_many :certificates, through: :user_certificates
 
   # Moderação / auditoria
   has_many :audit_logs, dependent: :nullify

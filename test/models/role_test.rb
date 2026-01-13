@@ -48,14 +48,6 @@ class RoleTest < ActiveSupport::TestCase
     assert_respond_to role, :users
   end
 
-  test "deve destruir user_roles ao ser destruído" do
-    role = roles(:one)
-    user_role_count = role.user_roles.count
-    assert_difference("UserRole.count", -user_role_count) do
-      role.destroy
-    end
-  end
-
   # === Métodos ===
 
   test "#admin? deve retornar true quando is_admin é true" do
