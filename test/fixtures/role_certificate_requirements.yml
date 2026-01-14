@@ -1,0 +1,16 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  role: one
+  certificate: one
+  required: true
+
+two:
+  role: one
+  certificate: two
+  required: false
+
+three:
+  role: three
+  certificate: three
+  required: true

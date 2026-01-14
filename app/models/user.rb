@@ -16,6 +16,11 @@ class User < ApplicationRecord
   has_many :user_achievements, dependent: :destroy
   has_many :achievements, through: :user_achievements
 
+  has_many :user_certificates, dependent: :destroy
+  has_many :certificates, through: :user_certificates
+
+  has_many :currency_transactions, dependent: :destroy
+
   has_many :audit_logs, dependent: :nullify
 
   has_many :uploaded_squad_emblems,
@@ -50,5 +55,22 @@ class User < ApplicationRecord
   rescue ActiveRecord::RecordNotUnique
     # já possui, ignora silenciosamente
     user_achievements.find_by(achievement: achievement)
+  end
+
+  def apply_currency!(delta, reason: nil, description: nil, metadata: {})
+    new_balance = currency_balance + delta
+
+    transaction do
+      update!(currency_balance: new_balance)
+
+      currency_transactions.create!(
+        amount:        delta,
+        balance_after: new_balance,
+        reason_type:   reason&.class&.name,
+        reason_id:     reason&.id,
+        description:   description,
+        metadata:      metadata
+      )
+    end
   end
 end

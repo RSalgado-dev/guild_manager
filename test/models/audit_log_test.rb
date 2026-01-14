@@ -59,7 +59,7 @@ class AuditLogTest < ActiveSupport::TestCase
       entity_type: "Squad",
       entity_id: squad.id
     )
-    
+
     entity = audit_log.entity
     assert_instance_of Squad, entity
     assert_equal squad.id, entity.id

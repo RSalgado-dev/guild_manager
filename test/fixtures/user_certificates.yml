@@ -1,0 +1,33 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  certificate: one
+  granted_by: one
+  granted_at: <%= 10.days.ago %>
+  expires_at: <%= 1.year.from_now %>
+  status: "granted"
+
+two:
+  user: one
+  certificate: two
+  granted_by: one
+  granted_at: <%= 5.days.ago %>
+  expires_at: nil
+  status: "granted"
+
+three:
+  user: two
+  certificate: three
+  granted_by: three
+  granted_at: <%= 2.days.ago %>
+  expires_at: <%= 1.day.ago %>
+  status: "granted"
+
+revoked:
+  user: three
+  certificate: three
+  granted_by: three
+  granted_at: <%= 30.days.ago %>
+  expires_at: nil
+  status: "revoked"

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_14_021825) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -71,6 +71,36 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
     t.index ["entity_type", "entity_id"], name: "index_audit_logs_on_entity_type_and_entity_id"
     t.index ["guild_id"], name: "index_audit_logs_on_guild_id"
     t.index ["user_id"], name: "index_audit_logs_on_user_id"
+  end
+
+  create_table "certificates", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.string "category"
+    t.string "code", null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "guild_id", null: false
+    t.string "icon_url"
+    t.string "name", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guild_id", "code"], name: "index_certificates_on_guild_id_and_code", unique: true
+    t.index ["guild_id", "name"], name: "index_certificates_on_guild_id_and_name"
+    t.index ["guild_id"], name: "index_certificates_on_guild_id"
+  end
+
+  create_table "currency_transactions", force: :cascade do |t|
+    t.integer "amount", null: false
+    t.integer "balance_after", null: false
+    t.datetime "created_at", null: false
+    t.string "description"
+    t.jsonb "metadata", default: {}, null: false
+    t.bigint "reason_id"
+    t.string "reason_type"
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["created_at"], name: "index_currency_transactions_on_created_at"
+    t.index ["reason_type", "reason_id"], name: "index_currency_transactions_on_reason_type_and_reason_id"
+    t.index ["user_id"], name: "index_currency_transactions_on_user_id"
   end
 
   create_table "event_participations", force: :cascade do |t|
@@ -140,6 +170,17 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
     t.index ["guild_id"], name: "index_missions_on_guild_id"
   end
 
+  create_table "role_certificate_requirements", force: :cascade do |t|
+    t.bigint "certificate_id", null: false
+    t.datetime "created_at", null: false
+    t.boolean "required", default: true, null: false
+    t.bigint "role_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["certificate_id"], name: "index_role_certificate_requirements_on_certificate_id"
+    t.index ["role_id", "certificate_id"], name: "idx_on_role_id_certificate_id_f279b4b99a", unique: true
+    t.index ["role_id"], name: "index_role_certificate_requirements_on_role_id"
+  end
+
   create_table "roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -184,6 +225,21 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
     t.index ["user_id"], name: "index_user_achievements_on_user_id"
   end
 
+  create_table "user_certificates", force: :cascade do |t|
+    t.bigint "certificate_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "expires_at"
+    t.datetime "granted_at", null: false
+    t.bigint "granted_by_id"
+    t.string "status", default: "granted", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["certificate_id"], name: "index_user_certificates_on_certificate_id"
+    t.index ["status"], name: "index_user_certificates_on_status"
+    t.index ["user_id", "certificate_id"], name: "index_user_certificates_on_user_id_and_certificate_id", unique: true
+    t.index ["user_id"], name: "index_user_certificates_on_user_id"
+  end
+
   create_table "user_roles", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.boolean "primary"
@@ -218,6 +274,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
   add_foreign_key "active_storage_variant_records", "active_storage_blobs", column: "blob_id"
   add_foreign_key "audit_logs", "guilds", on_delete: :cascade
   add_foreign_key "audit_logs", "users", on_delete: :cascade
+  add_foreign_key "certificates", "guilds", on_delete: :cascade
+  add_foreign_key "currency_transactions", "users", on_delete: :cascade
   add_foreign_key "event_participations", "events", on_delete: :cascade
   add_foreign_key "event_participations", "users", on_delete: :cascade
   add_foreign_key "events", "guilds", on_delete: :cascade
@@ -225,6 +283,8 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
   add_foreign_key "mission_submissions", "missions", on_delete: :cascade
   add_foreign_key "mission_submissions", "users", on_delete: :cascade
   add_foreign_key "missions", "guilds", on_delete: :cascade
+  add_foreign_key "role_certificate_requirements", "certificates", on_delete: :cascade
+  add_foreign_key "role_certificate_requirements", "roles", on_delete: :cascade
   add_foreign_key "roles", "guilds", on_delete: :cascade
   add_foreign_key "squads", "guilds", on_delete: :cascade
   add_foreign_key "squads", "users", column: "emblem_reviewed_by_id"
@@ -232,6 +292,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_13_182402) do
   add_foreign_key "squads", "users", column: "leader_id", on_delete: :cascade
   add_foreign_key "user_achievements", "achievements", on_delete: :cascade
   add_foreign_key "user_achievements", "users", on_delete: :cascade
+  add_foreign_key "user_certificates", "certificates", on_delete: :cascade
+  add_foreign_key "user_certificates", "users", column: "granted_by_id", on_delete: :nullify
+  add_foreign_key "user_certificates", "users", on_delete: :cascade
   add_foreign_key "user_roles", "roles", on_delete: :cascade
   add_foreign_key "user_roles", "users", on_delete: :cascade
   add_foreign_key "users", "guilds", on_delete: :cascade

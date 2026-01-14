@@ -1,0 +1,31 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  user: one
+  amount: 100
+  balance_after: 600
+  reason_type: "Event"
+  reason_id: 1
+  description: "Recompensa por participar do evento de raid"
+  metadata: {}
+  created_at: <%= 5.days.ago %>
+
+two:
+  user: one
+  amount: -50
+  balance_after: 550
+  reason_type: nil
+  reason_id: nil
+  description: "Compra de item na loja da guilda"
+  metadata: {item: "Poção Rara"}
+  created_at: <%= 3.days.ago %>
+
+three:
+  user: two
+  amount: 200
+  balance_after: 200
+  reason_type: "Mission"
+  reason_id: 1
+  description: "Recompensa por completar missão semanal"
+  metadata: {}
+  created_at: <%= 1.day.ago %> 

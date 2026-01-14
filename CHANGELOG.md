@@ -1,12 +1,26 @@
 # Changelog - Sistema de Guildas
 
-## Data: 13 de Janeiro de 2026
+## Data: 13-14 de Janeiro de 2026
 
 ### 📝 Resumo das Alterações
 
-Este documento descreve todas as alterações implementadas no sistema de guildas, incluindo 12 modelos principais, relacionamentos complexos, sistema de gamificação completo, eventos e missões.
+Este documento descreve todas as alterações implementadas no sistema de guildas, incluindo 16 modelos principais, relacionamentos complexos, sistema de gamificação completo com conquistas e certificados, eventos, missões e economia interna.
 
-**Total de Testes**: 155 testes (todos passando ✅)
+**Total de Modelos**: 16  
+**Total de Testes**: 198 (todos passando ✅)  
+**Total de Assertions**: 342  
+**Cobertura**: Validações, relacionamentos, callbacks, scopes, enums, polimorfismo
+
+### 🎯 Destaques
+
+- ✅ **Sistema de Gamificação Completo**: Conquistas, certificados, XP e moeda virtual
+- ✅ **Sistema de Eventos**: RSVP, participação e recompensas
+- ✅ **Sistema de Missões**: Semanais com rastreamento ISO 8601
+- ✅ **Sistema de Certificados**: Requisitos para cargos, expiração e revogação
+- ✅ **Economia Interna**: Transações rastreadas com histórico completo
+- ✅ **Auditoria**: Logs completos de todas as ações
+- ✅ **Esquadrões**: Líderes, emblemas e aprovação
+- ✅ **Permissões**: Sistema baseado em cargos com admin
 
 ---
 
@@ -26,6 +40,8 @@ Este documento descreve todas as alterações implementadas no sistema de guilda
 - `has_many :squads` - Esquadrões da guilda (dependent: destroy)
 - `has_many :missions` - Missões (dependent: destroy)
 - `has_many :events` - Eventos (dependent: destroy)
+- `has_many :achievements` - Conquistas (dependent: destroy)
+- `has_many :certificates` - Certificados (dependent: destroy)
 
 #### Validações:
 - Nome deve estar presente
@@ -48,6 +64,8 @@ Este documento descreve todas as alterações implementadas no sistema de guilda
 - `belongs_to :guild`
 - `has_many :user_roles` (dependent: destroy)
 - `has_many :users, through: :user_roles`
+- `has_many :role_certificate_requirements` (dependent: destroy)
+- `has_many :required_certificates, through: :role_certificate_requirements`
 - `has_many :role_certificate_requirements` (dependent: destroy)
 - `has_many :required_certificates, through: :role_certificate_requirements`
 
@@ -357,6 +375,111 @@ Sistema de auditoria para rastrear ações importantes no sistema, incluindo:
 
 ---
 
+### 13. Certificate (Certificado)
+**Arquivo**: `app/models/certificate.rb`  
+**Migração**: `db/migrate/20260114021246_create_certificates.rb`
+
+#### Atributos:
+- `guild_id` (referência, obrigatório)
+- `code` (string, obrigatório) - Código único do certificado
+- `name` (string, obrigatório) - Nome do certificado
+- `description` (text) - Descrição do certificado
+- `category` (string) - Categoria (leadership, combat, etc)
+- `icon_url` (string) - URL do ícone
+- `active` (boolean, padrão: true) - Se o certificado está ativo
+
+#### Relacionamentos:
+- `belongs_to :guild`
+- `has_many :user_certificates` (dependent: destroy)
+- `has_many :users, through: :user_certificates`
+- `has_many :role_certificate_requirements` (dependent: destroy)
+- `has_many :roles, through: :role_certificate_requirements`
+
+#### Validações:
+- `code` deve estar presente
+- `name` deve estar presente
+
+---
+
+### 14. UserCertificate (Certificado do Usuário)
+**Arquivo**: `app/models/user_certificate.rb`  
+**Migração**: `db/migrate/20260114021622_create_user_certificates.rb`
+
+#### Atributos:
+- `user_id` (referência, obrigatório)
+- `certificate_id` (referência, obrigatório)
+- `granted_by_id` (referência, opcional) - Usuário que concedeu
+- `granted_at` (datetime, obrigatório) - Quando foi concedido
+- `expires_at` (datetime, opcional) - Quando expira
+- `status` (enum: granted, revoked)
+
+#### Relacionamentos:
+- `belongs_to :user`
+- `belongs_to :certificate`
+- `belongs_to :granted_by, class_name: "User"` (opcional)
+
+#### Callbacks:
+- `set_default_granted_at` - Define `granted_at` como `Time.current` ao criar se não fornecido
+
+#### Métodos:
+- `expired?` - Retorna true se o certificado está expirado
+
+#### Validações:
+- Combinação de `user_id` e `certificate_id` deve ser única
+
+#### Enums:
+- `status`: `granted` (concedido), `revoked` (revogado)
+
+---
+
+### 15. RoleCertificateRequirement (Requisito de Certificado para Cargo)
+**Arquivo**: `app/models/role_certificate_requirement.rb`  
+**Migração**: `db/migrate/20260114021825_create_role_certificate_requirements.rb`
+
+#### Atributos:
+- `role_id` (referência, obrigatório)
+- `certificate_id` (referência, obrigatório)
+- `required` (boolean) - Se o certificado é obrigatório ou opcional
+
+#### Relacionamentos:
+- `belongs_to :role`
+- `belongs_to :certificate`
+
+#### Validações:
+- Combinação de `role_id` e `certificate_id` deve ser única
+
+---
+
+### 16. CurrencyTransaction (Transação de Moeda)
+**Arquivo**: `app/models/currency_transaction.rb`  
+**Migração**: `db/migrate/20260113223312_create_currency_transactions.rb`
+
+#### Atributos:
+- `user_id` (referência, obrigatório)
+- `amount` (integer, obrigatório, diferente de 0) - Positivo para crédito, negativo para débito
+- `balance_after` (integer, obrigatório) - Saldo após a transação
+- `reason_type` (string, opcional) - Tipo polimórfico da origem
+- `reason_id` (bigint, opcional) - ID polimórfico da origem
+- `description` (string) - Descrição da transação
+- `metadata` (jsonb) - Metadados adicionais
+
+#### Relacionamentos:
+- `belongs_to :user`
+- Associação polimórfica com `reason` (Event, Mission, etc)
+
+#### Métodos:
+- `reason` - Retorna a entidade relacionada (Event, Mission, etc)
+
+#### Validações:
+- `amount` deve estar presente, ser inteiro e diferente de 0
+- `balance_after` deve estar presente e ser inteiro
+
+#### Scopes:
+- `credits` - Apenas transações positivas (ganhos)
+- `debits` - Apenas transações negativas (gastos)
+
+---
+
 ## 🔄 Migrações Adicionais
 
 ### 7. Adição de squad_id ao User
@@ -390,6 +513,24 @@ Adiciona a coluna `squad_id` à tabela `users` para permitir que usuários perte
 - Origem polimórfica (de qual evento/missão veio)
 - Sistema ativo/inativo para conquistas legadas
 - Método helper `grant_achievement` no User
+
+### Sistema de Certificados
+- Certificados configuráveis por guilda
+- Certificados podem ser requisitos para cargos
+- Sistema de concessão e revogação
+- Certificados podem ter data de expiração
+- Rastreamento de quem concedeu o certificado
+- Status de certificado (concedido, revogado)
+- Categorização de certificados (leadership, combat, etc)
+
+### Sistema de Economia
+- Transações de moeda rastreadas individualmente
+- Histórico completo de créditos e débitos
+- Saldo após cada transação registrado
+- Origem polimórfica das transações (Event, Mission, etc)
+- Metadados customizados por transação (JSONB)
+- Descrição de cada transação
+- Scopes para filtrar créditos e débitos
 
 ### Sistema de Eventos
 - Criação e gerenciamento de eventos da guilda
@@ -429,12 +570,15 @@ Guild (Guilda)
 ├── has_many Missions (Missões)
 ├── has_many Events (Eventos)
 ├── has_many Achievements (Conquistas)
+├── has_many Certificates (Certificados)
 └── has_many AuditLogs
 
 Role (Cargo)
 ├── belongs_to Guild
 ├── has_many UserRoles
-└── has_many Users (through UserRoles)
+├── has_many Users (through UserRoles)
+├── has_many RoleCertificateRequirements
+└── has_many RequiredCertificates (through RoleCertificateRequirements)
 
 User (Usuário)
 ├── belongs_to Guild
@@ -448,6 +592,9 @@ User (Usuário)
 ├── has_many Missions (through MissionSubmissions)
 ├── has_many UserAchievements
 ├── has_many Achievements (through UserAchievements)
+├── has_many UserCertificates
+├── has_many Certificates (through UserCertificates)
+├── has_many CurrencyTransactions
 └── has_many AuditLogs
 
 Squad (Esquadrão)
@@ -468,6 +615,26 @@ UserAchievement (Conquista do Usuário)
 ├── belongs_to User
 ├── belongs_to Achievement
 └── belongs_to Source (polimórfico: Event, Mission, etc)
+
+Certificate (Certificado)
+├── belongs_to Guild
+├── has_many UserCertificates
+├── has_many Users (through UserCertificates)
+├── has_many RoleCertificateRequirements
+└── has_many Roles (through RoleCertificateRequirements)
+
+UserCertificate (Certificado do Usuário)
+├── belongs_to User
+├── belongs_to Certificate
+└── belongs_to GrantedBy (User, opcional)
+
+RoleCertificateRequirement (Requisito de Certificado)
+├── belongs_to Role
+└── belongs_to Certificate
+
+CurrencyTransaction (Transação de Moeda)
+├── belongs_to User
+└── belongs_to Reason (polimórfico: Event, Mission, etc)
 
 Event (Evento)
 ├── belongs_to Guild
@@ -551,8 +718,12 @@ Testes unitários foram implementados para todos os modelos em:
 - `test/models/mission_submission_test.rb` (12 testes)
 - `test/models/achievement_test.rb` (11 testes)
 - `test/models/user_achievement_test.rb` (12 testes)
+- `test/models/certificate_test.rb` (11 testes)
+- `test/models/user_certificate_test.rb` (14 testes)
+- `test/models/role_certificate_requirement_test.rb` (8 testes)
+- `test/models/currency_transaction_test.rb` (10 testes)
 
-**Total: 155 testes** (todos passando ✅)
+**Total: 198 testes** (todos passando ✅)
 
 Cada teste cobre:
 - ✅ Validações de presença e formato
