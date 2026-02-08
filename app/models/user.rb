@@ -73,4 +73,89 @@ class User < ApplicationRecord
       )
     end
   end
+
+  # Encontra ou cria usuário a partir dos dados do Discord OAuth
+  # Retorna nil se o usuário não pertencer a nenhuma guild configurada
+  # Define has_guild_access baseado no cargo do Discord
+  def self.find_or_create_from_discord(auth)
+    discord_data = auth.info
+    discord_id = auth.uid
+
+    # Pega as guilds do usuário do Discord
+    guilds_data = auth.extra&.raw_info&.guilds || []
+
+    # Procura por guilds configuradas que o usuário pertence
+    user_guild = nil
+    
+    guilds_data.each do |guild_data|
+      user_guild = Guild.find_by(discord_guild_id: guild_data["id"])
+      break if user_guild
+    end
+
+    # Se o usuário não pertence a nenhuma guild configurada, retorna nil
+    return nil unless user_guild
+
+    user = find_by(discord_id: discord_id)
+
+    if user
+      # Atualiza informações do usuário e guild se necessário
+      user.update(
+        discord_username: discord_data.name,
+        discord_avatar_url: discord_data.image,
+        guild: user_guild
+      )
+    else
+      # Cria novo usuário associado à guild encontrada
+      user = create(
+        discord_id: discord_id,
+        discord_username: discord_data.name,
+        discord_avatar_url: discord_data.image,
+        guild: user_guild,
+        xp_points: 0,
+        currency_balance: 0
+      )
+    end
+
+    user
+  end
+
+  # Método de instância para verificar acesso
+  def check_guild_role_access
+    User.check_guild_role_access(guild, discord_id)
+  end
+  
+  alias_method :has_guild_access?, :check_guild_role_access
+
+  # Verifica se o usuário tem o cargo requerido pela guild
+  def self.check_guild_role_access(guild, discord_user_id)
+    # Se a guild não tem cargo requerido configurado, libera acesso
+    return true unless guild.required_discord_role_id.present?
+
+    # Consulta a API do Discord para obter os cargos do usuário
+    bot_token = Rails.application.credentials.dig(:discord, :bot_token)
+    return true unless bot_token # Se não tem bot token, libera acesso (modo permissivo)
+
+    begin
+      conn = Faraday.new(url: "https://discord.com/api/v10") do |f|
+        f.headers["Authorization"] = "Bot #{bot_token}"
+        f.headers["Content-Type"] = "application/json"
+      end
+
+      response = conn.get("/guilds/#{guild.discord_guild_id}/members/#{discord_user_id}")
+
+      if response.success?
+        member_data = JSON.parse(response.body)
+        user_roles = member_data["roles"] || []
+        
+        # Verifica se o usuário tem o cargo requerido
+        user_roles.include?(guild.required_discord_role_id)
+      else
+        Rails.logger.warn("Erro ao verificar cargos do usuário #{discord_user_id}: #{response.status}")
+        true # Modo permissivo em caso de erro
+      end
+    rescue => e
+      Rails.logger.error("Erro ao verificar cargos do Discord: #{e.message}")
+      true # Modo permissivo em caso de erro
+    end
+  end
 end

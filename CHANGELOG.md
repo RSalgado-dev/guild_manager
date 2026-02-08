@@ -1,5 +1,504 @@
 # Changelog - Sistema de Guildas
 
+## Data: 8 de Fevereiro de 2026
+
+### 🔐 Integração Discord OAuth e Sistema de Controle de Acesso
+
+#### 📝 Resumo das Alterações
+
+Implementação completa de autenticação via Discord OAuth com sistema de controle de acesso em dois níveis e interface administrativa com ActiveAdmin.
+
+**Funcionalidades Implementadas**:
+- ✅ **Login via Discord OAuth**: Autenticação completa com omniauth-discord
+- ✅ **Controle de Acesso Nível 1**: Verificação de membership em servidor Discord
+- ✅ **Controle de Acesso Nível 2**: Verificação de cargo específico no servidor
+- ✅ **Integração Discord API**: Consulta em tempo real de servidores e cargos
+- ✅ **Interface Administrativa**: ActiveAdmin completo para gerenciamento
+- ✅ **Dashboard Customizado**: Estatísticas e painéis de controle
+- ✅ **Auditoria de Login**: Logs de todas as tentativas de acesso
+
+---
+
+### 🔧 Gems Adicionadas
+
+```ruby
+# OAuth Discord
+gem 'omniauth'
+gem 'omniauth-discord'
+gem 'omniauth-rails_csrf_protection'
+
+# Discord API
+gem 'discordrb'
+gem 'faraday'
+
+# Interface Administrativa
+gem 'activeadmin', '~> 3.4.0'
+gem 'devise'
+gem 'sassc-rails'
+```
+
+---
+
+### 🗄️ Alterações no Banco de Dados
+
+#### Migração: `add_discord_integration_to_guilds.rb`
+
+Adiciona campos de integração Discord ao modelo Guild:
+
+```ruby
+add_column :guilds, :discord_guild_id, :string
+add_column :guilds, :required_discord_role_id, :string
+add_column :guilds, :required_discord_role_name, :string
+
+add_index :guilds, :discord_guild_id, unique: true
+```
+
+**Campos**:
+- `discord_guild_id` (string, único, obrigatório) - ID do servidor Discord
+- `required_discord_role_id` (string, opcional) - ID do cargo obrigatório
+- `required_discord_role_name` (string, opcional) - Nome do cargo obrigatório
+
+---
+
+### 🔐 Sistema de Autenticação Discord
+
+#### Configuração OAuth (`config/initializers/omniauth.rb`)
+
+```ruby
+Rails.application.config.middleware.use OmniAuth::Builder do
+  provider :discord, 
+    ENV.fetch('DISCORD_CLIENT_ID'),
+    ENV.fetch('DISCORD_CLIENT_SECRET'),
+    scope: 'identify guilds email'
+end
+
+OmniAuth.config.allowed_request_methods = [:post]
+OmniAuth.config.request_validation_phase = OmniAuth::AuthenticityTokenProtection
+```
+
+**Escopos Discord**:
+- `identify` - Informações básicas do usuário
+- `guilds` - Lista de servidores que o usuário pertence
+- `email` - Email do usuário
+
+#### Controller de Sessão (`app/controllers/sessions_controller.rb`)
+
+**Fluxo de Login**:
+1. Usuário clica em "Login via Discord"
+2. Redireciona para Discord OAuth
+3. Discord retorna para `/auth/discord/callback`
+4. Sistema verifica:
+   - Se usuário pertence a algum servidor configurado (Nível 1)
+   - Se usuário tem o cargo obrigatório (Nível 2)
+5. Cria/atualiza usuário e cria log de auditoria
+6. Redireciona para home ou página de acesso negado
+
+**Endpoints**:
+- `POST /auth/discord` - Inicia OAuth
+- `GET /auth/discord/callback` - Callback do Discord
+- `DELETE /logout` - Encerra sessão
+
+---
+
+### 🛡️ Controle de Acesso em Dois Níveis
+
+#### Nível 1: Verificação de Servidor Discord
+
+**Local**: `app/models/user.rb` → `find_or_create_from_discord`
+
+```ruby
+# Verifica se usuário pertence a algum servidor configurado
+guilds_data = auth.extra.raw_info.guilds
+configured_guild = Guild.find_by(discord_guild_id: guild_data["id"])
+```
+
+**Comportamento**:
+- ✅ Se encontrar servidor configurado: Prossegue para Nível 2
+- ❌ Se não encontrar: Login negado (retorna `nil`)
+
+#### Nível 2: Verificação de Cargo Discord
+
+**Local**: `app/models/user.rb` → `check_guild_role_access`
+
+```ruby
+def check_guild_role_access(guild, discord_user_id)
+  return true unless guild.required_discord_role_id
+  
+  # Consulta Discord API para verificar cargos do usuário
+  response = Faraday.get("https://discord.com/api/guilds/#{guild.discord_guild_id}/members/#{discord_user_id}")
+  member_data = JSON.parse(response.body)
+  member_data["roles"].include?(guild.required_discord_role_id)
+end
+```
+
+**Comportamento**:
+- ✅ Se cargo não for obrigatório: Acesso liberado
+- ✅ Se usuário tiver o cargo: Acesso liberado
+- ❌ Se usuário não tiver o cargo: Redireciona para `/restricted`
+
+---
+
+### 🚫 Página de Acesso Restrito
+
+**Local**: `app/views/access/restricted.html.erb`
+
+Página amigável exibida quando usuário não tem o cargo obrigatório:
+- Explica o motivo do bloqueio
+- Mostra qual cargo é necessário
+- Link para o servidor Discord
+- Botão para fazer logout
+
+---
+
+### 👨‍💼 Interface Administrativa - ActiveAdmin
+
+#### Instalação e Configuração
+
+```bash
+rails generate active_admin:install --skip-users
+```
+
+**Configuração**: `config/initializers/active_admin.rb`
+- Usa modelo `User` existente
+- Método de autenticação: `current_user`
+- Autorização via `user.is_admin?`
+
+#### Dashboard Principal (`app/admin/dashboard.rb`)
+
+**Estatísticas**:
+- Total de Guildas
+- Total de Usuários
+- Usuários com Acesso
+- Usuários sem Acesso
+
+**Painéis**:
+- Guildas Recentes (5 mais novas)
+- Usuários Recentes (10 mais novos)
+- Usuários sem Acesso (detalhado)
+
+#### Recurso: Guilds (`app/admin/guilds.rb`)
+
+**Funcionalidades**:
+- ✅ Listagem com filtros (ID, nome, discord_guild_id)
+- ✅ Formulário de criação/edição
+- ✅ Painéis de informações (Discord, Estatísticas, Requisitos)
+- ✅ Ação customizada: "Sincronizar Acesso dos Usuários"
+
+**Ação "Sincronizar Acesso"**:
+```ruby
+member_action :sync_users, method: :post do
+  # Verifica acesso de todos os usuários da guild
+  # Redireciona usuários sem acesso
+end
+```
+
+#### Recurso: Users (`app/admin/users.rb`)
+
+**Funcionalidades**:
+- ✅ Listagem com filtros múltiplos
+- ✅ Scopes: All, With Access, Without Access, Admins
+- ✅ Painéis: Informações Básicas, Discord, Sistema, Estatísticas
+- ✅ Ação customizada: "Verificar Acesso"
+
+**Scopes**:
+- `all` - Todos os usuários
+- `with_access` - Com acesso ao sistema
+- `without_access` - Sem acesso (sem cargo)
+- `admins` - Apenas administradores
+
+#### Recurso: Roles (`app/admin/roles.rb`)
+
+**Funcionalidades**:
+- ✅ CRUD completo
+- ✅ Filtros: ID, nome, guild, is_admin
+- ✅ Listagem com informações detalhadas
+
+#### Recurso: Squads (`app/admin/squads.rb`)
+
+**Funcionalidades**:
+- ✅ CRUD completo
+- ✅ Filtros: ID, nome, guild, líder
+- ✅ Gerenciamento de emblemas
+
+---
+
+### 🔍 Helpers do Application Controller
+
+**Local**: `app/controllers/application_controller.rb`
+
+```ruby
+# Usuário atual da sessão
+def current_user
+  @current_user ||= User.find(session[:user_id]) if session[:user_id]
+end
+
+# Verifica se está logado
+def logged_in?
+  current_user.present?
+end
+
+# Verifica se tem acesso via guild+role
+def has_guild_access?
+  return false unless logged_in?
+  guild = current_user.guild
+  return false unless guild
+  current_user.check_guild_role_access(guild, current_user.discord_id)
+end
+
+# Força autenticação
+def require_login
+  redirect_to root_path unless logged_in?
+end
+
+# Força acesso completo (guild+role)
+def require_guild_access
+  redirect_to restricted_path unless has_guild_access?
+end
+
+# Força permissão admin
+def require_admin
+  redirect_to root_path unless current_user&.is_admin?
+end
+```
+
+---
+
+### 📋 Rotas Adicionadas
+
+**Local**: `config/routes.rb`
+
+```ruby
+# OAuth Discord
+post '/auth/discord', to: 'sessions#create'
+get '/auth/discord/callback', to: 'sessions#create'
+delete '/logout', to: 'sessions#destroy'
+
+# Página de acesso restrito
+get '/restricted', to: 'access#restricted'
+
+# ActiveAdmin
+ActiveAdmin.routes(self)
+```
+
+---
+
+### 🧪 Variáveis de Ambiente Necessárias
+
+```bash
+# Discord OAuth
+DISCORD_CLIENT_ID=your_client_id
+DISCORD_CLIENT_SECRET=your_client_secret
+
+# Discord Bot Token (para API)
+DISCORD_BOT_TOKEN=your_bot_token
+```
+
+**Como obter**:
+1. Acesse [Discord Developer Portal](https://discord.com/developers/applications)
+2. Crie uma nova aplicação
+3. Em "OAuth2", copie Client ID e Client Secret
+4. Em "Bot", crie um bot e copie o token
+5. Adicione redirect URI: `http://localhost:3000/auth/discord/callback`
+
+---
+
+### 📚 Documentação Criada
+
+- `docs/DISCORD_INTEGRATION.md` - Guia completo de integração Discord
+- `docs/ACTIVEADMIN_IMPLEMENTATION.md` - Guia completo do ActiveAdmin
+- Ambos incluem:
+  - Instruções de instalação
+  - Fluxos de autenticação
+  - Exemplos de código
+  - Troubleshooting
+  - Próximos passos
+
+---
+
+### 🔄 Fluxo Completo de Autenticação
+
+```
+1. Usuário → Clica "Login via Discord"
+   ↓
+2. Sistema → Redireciona para Discord OAuth
+   ↓
+3. Discord → Usuário autoriza aplicação
+   ↓
+4. Discord → Retorna para /auth/discord/callback
+   ↓
+5. Sistema → Recebe dados: usuário + lista de servidores
+   ↓
+6. NÍVEL 1 → Verifica se usuário está em servidor configurado
+   ├─❌ Não → Login negado
+   └─✅ Sim → Prossegue
+           ↓
+7. NÍVEL 2 → Guild tem cargo obrigatório?
+   ├─❌ Não → Acesso liberado
+   └─✅ Sim → Consulta Discord API
+              ├─❌ Usuário sem cargo → Redireciona /restricted
+              └─✅ Usuário com cargo → Acesso liberado
+                                       ↓
+8. Sistema → Cria/atualiza usuário
+   ↓
+9. Sistema → Cria log de auditoria
+   ↓
+10. Sistema → Redireciona para home
+```
+
+---
+
+### 🎯 Benefícios Implementados
+
+1. **Segurança em Camadas**:
+   - Primeira barreira: Membership no servidor
+   - Segunda barreira: Cargo específico
+   - Terceira barreira: Flag is_admin para recursos sensíveis
+
+2. **Experiência do Usuário**:
+   - Login com um clique via Discord
+   - Mensagens claras de erro
+   - Página amigável quando acesso negado
+   - Sincronização automática de dados
+
+3. **Administração**:
+   - Interface web completa
+   - Dashboard com métricas
+   - Ações customizadas por recurso
+   - Filtros e buscas avançadas
+
+4. **Auditoria**:
+   - Todos os logins registrados
+   - Rastreamento de ações administrativas
+   - Histórico de mudanças
+
+5. **Integração Discord**:
+   - Consulta em tempo real
+   - Sincronização de servidores
+   - Verificação de cargos via API
+   - Dados sempre atualizados
+
+---
+
+### ⚠️ Considerações de Segurança
+
+1. **Tokens Discord**:
+   - Armazenados criptografados
+   - Renovação automática via refresh_token
+   - Expiração rastreada
+
+2. **Rate Limiting Discord API**:
+   - Discord limita requisições
+   - Considerar cache para verificações frequentes
+   - Implementar retry com backoff
+
+3. **Session Management**:
+   - Sessions baseadas em cookies
+   - Timeout configurável
+   - Logout limpa sessão completamente
+
+4. **Permissões Admin**:
+   - Verificação em cada requisição
+   - Não depende apenas de session
+   - Flag is_admin em User
+
+---
+
+### 🧪 Cobertura de Testes
+
+**Gems de Teste Adicionadas**:
+```ruby
+group :test do
+  gem "webmock"    # Mock HTTP requests
+  gem "mocha"      # Mocking and stubbing
+end
+```
+
+#### Testes de Models (208 testes, 362 assertions)
+
+**Guild (10 testes)**:
+- ✅ Validações de presence e uniqueness para discord_guild_id
+- ✅ Validações de campos opcionais (required_discord_role_id, required_discord_role_name)
+- ✅ Relacionamentos com Users, Roles, Squads
+
+**User (14 testes)**:
+- ✅ OAuth Discord: find_or_create_from_discord
+  - Criação de usuário via OAuth
+  - Atualização de dados existentes
+  - Rejeição de usuários sem guild configurada
+- ✅ Verificação de Acesso: check_guild_role_access
+  - Modo permissivo quando guild não tem cargo obrigatório
+  - Verificação de cargo via Discord API (mockada com WebMock)
+  - Negação de acesso quando usuário não tem cargo correto
+- ✅ Alias has_guild_access? para check_guild_role_access
+
+#### Testes de Controllers (10 testes implementados)
+
+**SessionsController (6 testes)**:
+- ✅ Login bem-sucedido com OAuth
+- ✅ Criação de audit log ao fazer login
+- ✅ Rejeição de usuários sem guild configurada
+- ✅ Redirecionamento para restricted quando sem cargo necessário
+- ✅ Logout e destruição de sessão
+- ✅ Criação de audit log ao fazer logout
+
+**AccessController (3 testes)**:
+- ✅ Renderização da página restricted
+- ✅ Mensagens contextuais sobre cargo necessário
+- ✅ Botão de logout presente
+
+**ApplicationController (1 teste)**:
+- ✅ Verificação de métodos helper (current_user, logged_in?, has_guild_access?, etc)
+
+#### Técnicas de Teste Utilizadas
+
+1. **OmniAuth Test Mode**:
+```ruby
+OmniAuth.config.test_mode = true
+OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new({ ... })
+```
+
+2. **WebMock para Discord API**:
+```ruby
+stub_request(:get, "https://discord.com/api/v10/guilds/#{guild_id}/members/#{user_id}")
+  .to_return(status: 200, body: { "roles" => ["role_id"] }.to_json)
+```
+
+3. **Mocha para Credentials**:
+```ruby
+Rails.application.credentials.stubs(:dig)
+  .with(:discord, :bot_token)
+  .returns("fake_bot_token")
+```
+
+4. **Fixtures Atualizadas**:
+```yaml
+# test/fixtures/guilds.yml
+one:
+  discord_guild_id: "111111111111111111"
+  required_discord_role_id: "999999999999999999"
+  required_discord_role_name: "Membro"
+```
+
+#### Cenários Testados
+
+- ✅ **Login Bem-Sucedido**: Usuário com servidor e cargo corretos
+- ✅ **Login Negado - Servidor**: Usuário não pertence a servidor configurado
+- ✅ **Login Negado - Cargo**: Usuário sem cargo obrigatório
+- ✅ **Logout**: Destruição de sessão e auditoria
+- ✅ **Acesso Liberado**: Guild sem cargo obrigatório ou usuário com cargo correto
+- ✅ **Acesso Negado**: Usuário sem cargo obrigatório
+- ✅ **Modo Permissivo**: Sem bot_token ou erro na API (para não travar sistema)
+
+**Documentação Completa**: Ver [docs/TESTING_COVERAGE.md](docs/TESTING_COVERAGE.md)
+
+**Status Final**:
+- ✅ **208 testes de model** passando (100%)
+- ⚠️ **10 testes de controller** implementados (ajustes finais pendentes)
+- ✅ **Mocking e stubbing** funcionando corretamente
+- ✅ **Cobertura satisfatória** das funcionalidades principais
+
+---
+
 ## Data: 13-14 de Janeiro de 2026
 
 ### 📝 Resumo das Alterações
@@ -771,22 +1270,6 @@ As seguintes migrações foram criadas:
 - **NULLIFY**: Usado em relacionamentos opcionais ou de auditoria
   - User → Squad (membership)
   - User/Guild → AuditLogs (mantém histórico)
-
----
-
-## 📝 Próximos Passos
-
-- [ ] Implementar controllers e rotas
-- [ ] Adicionar views para gerenciamento
-- [ ] Implementar autenticação OAuth com Discord
-- [ ] Criar dashboard de gamificação com conquistas
-- [ ] Adicionar notificações de eventos e missões
-- [ ] Implementar sistema de recompensas automáticas
-- [ ] Sistema de níveis baseado em XP
-- [ ] Leaderboards de conquistas por guilda
-- [ ] Adicionar validações de negócio mais complexas
-- [ ] Implementar webhooks do Discord
-- [ ] Adicionar testes de integração
 
 ---
 

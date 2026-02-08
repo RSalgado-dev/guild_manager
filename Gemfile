@@ -45,8 +45,14 @@ gem "image_processing", "~> 1.2"
 # Discord integration
 gem "omniauth-discord"
 gem "omniauth"
+gem "omniauth-rails_csrf_protection"
 gem "discordrb"
 gem "faraday"
+
+# Admin interface
+gem "activeadmin"
+gem "devise"
+gem "sassc-rails"
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -71,4 +77,10 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
+  
+  # Mock HTTP requests in tests
+  gem "webmock"
+  
+  # Mocking and stubbing
+  gem "mocha"
 end

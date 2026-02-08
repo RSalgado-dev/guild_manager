@@ -1,4 +1,6 @@
 Rails.application.routes.draw do
+  ActiveAdmin.routes(self)
+  
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -9,6 +11,17 @@ Rails.application.routes.draw do
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
+  # Rotas de autenticação com Discord
+  get "/auth/discord", as: :discord_login
+  get "/auth/discord/callback", to: "sessions#create"
+  post "/auth/discord/callback", to: "sessions#create"
+  get "/auth/failure", to: "sessions#failure"
+  delete "/logout", to: "sessions#destroy", as: :logout
+
+  # Rota de acesso restrito
+  get "/restricted", to: "access#restricted", as: :restricted_access
+  
   # Defines the root path route ("/")
-  # root "posts#index"
+  root "access#index"
 end
+

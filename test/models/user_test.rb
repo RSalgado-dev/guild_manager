@@ -1,4 +1,5 @@
 require "test_helper"
+require "ostruct"
 
 class UserTest < ActiveSupport::TestCase
   # === Validações ===
@@ -102,5 +103,139 @@ class UserTest < ActiveSupport::TestCase
     user.user_roles.update_all(primary: false)
     primary_role = user.primary_role
     assert_not_nil primary_role
+  end
+
+  # === OAuth Discord ===
+
+  test "find_or_create_from_discord deve retornar nil se usuário não pertence a guild configurada" do
+    # Mock de auth sem guilds configuradas
+    auth = OpenStruct.new(
+      uid: "123456789",
+      info: OpenStruct.new(
+        name: "TestUser",
+        image: "http://example.com/avatar.png"
+      ),
+      extra: OpenStruct.new(
+        raw_info: OpenStruct.new(
+          guilds: [
+            { "id" => "999999999999999999", "name" => "Servidor Não Configurado" }
+          ]
+        )
+      )
+    )
+
+    user = User.find_or_create_from_discord(auth)
+    assert_nil user, "Usuário não deveria ser criado sem guild configurada"
+  end
+
+  test "find_or_create_from_discord deve criar usuário se pertence a guild configurada" do
+    guild = guilds(:one)
+    discord_guild_id = guild.discord_guild_id
+
+    auth = OpenStruct.new(
+      uid: "987654321",
+      info: OpenStruct.new(
+        name: "NewUser",
+        image: "http://example.com/avatar.png"
+      ),
+      extra: OpenStruct.new(
+        raw_info: OpenStruct.new(
+          guilds: [
+            { "id" => discord_guild_id, "name" => "Servidor Configurado" }
+          ]
+        )
+      )
+    )
+
+    assert_difference "User.count", 1 do
+      user = User.find_or_create_from_discord(auth)
+      assert_not_nil user
+      assert_equal guild.id, user.guild_id
+      assert_equal "NewUser", user.discord_username
+    end
+  end
+
+  test "find_or_create_from_discord deve atualizar usuário existente" do
+    user = users(:one)
+    guild = guilds(:one)
+
+    auth = OpenStruct.new(
+      uid: user.discord_id,
+      info: OpenStruct.new(
+        name: "UpdatedUsername",
+        image: "http://example.com/new_avatar.png"
+      ),
+      extra: OpenStruct.new(
+        raw_info: OpenStruct.new(
+          guilds: [
+            { "id" => guild.discord_guild_id, "name" => "Servidor" }
+          ]
+        )
+      )
+    )
+
+    assert_no_difference "User.count" do
+      updated_user = User.find_or_create_from_discord(auth)
+      assert_equal user.id, updated_user.id
+      assert_equal "UpdatedUsername", updated_user.discord_username
+    end
+  end
+
+  # === Verificação de Acesso ===
+
+  test "check_guild_role_access deve retornar true se guild não tem role obrigatório" do
+    guild = guilds(:one)
+    guild.update(required_discord_role_id: nil)
+    user = users(:one)
+    
+    assert user.check_guild_role_access
+  end
+
+  test "check_guild_role_access deve verificar role via Discord API quando obrigatório" do
+    guild = guilds(:one)
+    guild.update(
+      required_discord_role_id: "123456789",
+      required_discord_role_name: "Membro"
+    )
+    user = users(:one)
+    
+    # Mock do bot_token
+    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    
+    # Mock da resposta da API Discord (URL sem /api/v10 porque Faraday não mantém base path)
+    response_body = {
+      "user" => {"id" => user.discord_id},
+      "roles" => ["123456789", "987654321"]
+    }.to_json
+    
+    stub_request(:get, "https://discord.com/api/v10/guilds/#{guild.discord_guild_id}/members/#{user.discord_id}")
+      .to_return(status: 200, body: response_body, headers: {'Content-Type' => 'application/json'})
+    
+    result = user.check_guild_role_access
+    assert result, "Usuário deveria ter acesso com role correto"
+  end
+
+  test "check_guild_role_access deve retornar false se usuário não tem role obrigatório" do
+    guild = guilds(:one)
+    guild.update(
+      required_discord_role_id: "123456789",
+      required_discord_role_name: "Membro"
+    )
+    user = users(:one)
+    
+    # Mock do bot_token
+    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    
+    # Mock da resposta da API Discord sem o role necessário
+    response_body = {
+      "user" => {"id" => user.discord_id},
+      "roles" => ["987654321"] # Não inclui 123456789
+    }.to_json
+    
+    stub_request(:get, "https://discord.com/api/v10/guilds/#{guild.discord_guild_id}/members/#{user.discord_id}")
+      .to_return(status: 200, body: response_body, headers: {'Content-Type' => 'application/json'})
+    
+    result = user.check_guild_role_access
+    assert_not result, "Usuário não deveria ter acesso sem role correto"
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_14_021825) do
+ActiveRecord::Schema[8.1].define(version: 2026_01_26_145212) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -27,6 +27,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_021825) do
     t.index ["guild_id", "code"], name: "index_achievements_on_guild_id_and_code", unique: true
     t.index ["guild_id", "name"], name: "index_achievements_on_guild_id_and_name"
     t.index ["guild_id"], name: "index_achievements_on_guild_id"
+  end
+
+  create_table "active_admin_comments", force: :cascade do |t|
+    t.bigint "author_id"
+    t.string "author_type"
+    t.text "body"
+    t.datetime "created_at", null: false
+    t.string "namespace"
+    t.bigint "resource_id"
+    t.string "resource_type"
+    t.datetime "updated_at", null: false
+    t.index ["author_type", "author_id"], name: "index_active_admin_comments_on_author"
+    t.index ["namespace"], name: "index_active_admin_comments_on_namespace"
+    t.index ["resource_type", "resource_id"], name: "index_active_admin_comments_on_resource"
   end
 
   create_table "active_storage_attachments", force: :cascade do |t|
@@ -137,8 +151,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_021825) do
   create_table "guilds", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
+    t.string "discord_guild_id", null: false
+    t.string "discord_icon_url"
+    t.string "discord_name"
     t.string "name", null: false
+    t.string "required_discord_role_id"
+    t.string "required_discord_role_name"
     t.datetime "updated_at", null: false
+    t.index ["discord_guild_id"], name: "index_guilds_on_discord_guild_id", unique: true
     t.index ["name"], name: "index_guilds_on_name"
   end
 
@@ -261,6 +281,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_14_021825) do
     t.datetime "discord_token_expires_at"
     t.string "discord_username"
     t.bigint "guild_id", null: false
+    t.boolean "has_guild_access", default: false, null: false
     t.bigint "squad_id"
     t.datetime "updated_at", null: false
     t.integer "xp_points", default: 0, null: false

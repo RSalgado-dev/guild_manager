@@ -3,7 +3,13 @@
 one:
   name: "Guilda dos Guerreiros"
   description: "Uma guilda focada em combate e estratégia"
+  discord_guild_id: "111111111111111111"
+  discord_name: "Guilda dos Guerreiros"
+  required_discord_role_id: "999999999999999999"
+  required_discord_role_name: "Membro"
 
 two:
   name: "Guilda dos Magos"
   description: "Uma guilda dedicada ao estudo das artes arcanas"
+  discord_guild_id: "222222222222222222"
+  discord_name: "Guilda dos Magos"
