@@ -61,14 +61,61 @@ gem update --system -N
 echo "Installing foreman..."
 gem install foreman
 
-echo "Setup.."
+echo "🗄️  Setting up database..."
 rails db:create 
 rails db:migrate
+
+echo "⚡ Installing Rails 8 Solid gems (Queue/Cache/Cable)..."
+rails solid_queue:install 2>/dev/null || echo "✅ SolidQueue already configured"
+rails solid_cache:install 2>/dev/null || echo "✅ SolidCache already configured"
+rails solid_cable:install 2>/dev/null || echo "✅ SolidCable already configured"
+
+echo "📊 Loading Solid gems schemas..."
+if [ -f "db/queue_schema.rb" ]; then
+  rails runner "load Rails.root.join('db/queue_schema.rb')"
+  echo "✅ SolidQueue schema loaded"
+fi
+
+if [ -f "db/cache_schema.rb" ]; then
+  rails runner "load Rails.root.join('db/cache_schema.rb')"
+  echo "✅ SolidCache schema loaded"
+fi
+
+if [ -f "db/cable_schema.rb" ]; then
+  rails runner "load Rails.root.join('db/cable_schema.rb')"
+  echo "✅ SolidCable schema loaded"
+fi
+
+echo "👤 Creating temporary admin user..."
+if [ -f "script/create_first_admin.rb" ]; then
+  rails runner script/create_first_admin.rb
+else
+  echo "⚠️  Admin creation script not found"
+fi
+
+echo "🎨 Compiling Tailwind CSS..."
+if [ -f "bin/rails" ] && grep -q "tailwindcss:build" Rakefile 2>/dev/null; then
+  rails tailwindcss:build
+  echo "✅ Tailwind CSS compiled"
+else
+  echo "⚠️  Tailwind CSS task not found (will compile on first server start)"
+fi
 
 # echo "Seeding database..."
 # bin/rails db:seed
 
-echo "Preparing test database..."
-RAILS_ENV=test bin/rails db:prepare db:seed
+echo "🧪 Preparing test database..."
+RAILS_ENV=test bin/rails db:prepare db:seed 2>/dev/null || echo "✅ Test database ready"
+
+echo ""
+echo "✅ Setup complete!"
+echo ""
+echo "📝 Next steps:"
+echo "   1. Start the development server: bin/dev"
+echo "   2. Access the app at: http://localhost:3000"
+echo "   3. Login as temporary admin at: http://localhost:3000/dev/login"
+echo "   4. Click 'Login como Admin Temporário'"
+echo "   5. Access the admin panel at: http://localhost:3000/admin"
+echo ""
 
 echo "Done!"

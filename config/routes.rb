@@ -1,6 +1,6 @@
 Rails.application.routes.draw do
   ActiveAdmin.routes(self)
-  
+
   # Define your application routes per the DSL in https://guides.rubyonrails.org/routing.html
 
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
@@ -20,8 +20,14 @@ Rails.application.routes.draw do
 
   # Rota de acesso restrito
   get "/restricted", to: "access#restricted", as: :restricted_access
-  
+
   # Defines the root path route ("/")
   root "access#index"
-end
 
+  # ⚠️ APENAS DESENVOLVIMENTO - Remover em produção!
+  if Rails.env.development?
+    get "/dev/admin_login", to: "dev_sessions#admin_login", as: :dev_admin_login
+    get "/dev/login", to: "dev_sessions#new", as: :dev_login
+    post "/dev/login", to: "dev_sessions#create"
+  end
+end

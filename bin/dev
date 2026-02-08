@@ -1,2 +1,16 @@
 #!/usr/bin/env ruby
-exec "./bin/rails", "server", *ARGV
+
+# Check if foreman is installed
+if system("which foreman > /dev/null 2>&1")
+  exec "foreman", "start", "-f", "Procfile.dev", *ARGV
+else
+  # Fallback: run rails server normally and warn about Tailwind
+  puts "\n⚠️  Foreman not found. Running Rails server only."
+  puts "💡 To enable Tailwind auto-compilation, install foreman:"
+  puts "   gem install foreman"
+  puts "\n   Or manually run in separate terminal:"
+  puts "   bin/rails tailwindcss:watch\n\n"
+  
+  exec "./bin/rails", "server", *ARGV
+end
+

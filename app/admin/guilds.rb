@@ -1,8 +1,11 @@
 ActiveAdmin.register Guild do
   menu priority: 1
 
-  permit_params :name, :description, :discord_guild_id, :discord_name, 
+  permit_params :name, :description, :discord_guild_id, :discord_name,
                 :discord_icon_url, :required_discord_role_id, :required_discord_role_name
+
+  # Configura ordenação padrão
+  config.sort_order = "created_at_desc"
 
   index do
     selectable_column
@@ -13,7 +16,7 @@ ActiveAdmin.register Guild do
       guild.users.count
     end
     column "Acesso Restrito" do |guild|
-      guild.required_discord_role_id.present? ? status_tag("Sim", :warning) : status_tag("Não", :ok)
+      guild.required_discord_role_id.present? ? status_tag("Sim", class: "warning") : status_tag("Não", class: "ok")
     end
     column :created_at
     actions
@@ -30,7 +33,7 @@ ActiveAdmin.register Guild do
     end
 
     f.inputs "Discord" do
-      f.input :discord_guild_id, label: "ID do Servidor Discord", 
+      f.input :discord_guild_id, label: "ID do Servidor Discord",
               hint: "ID do servidor no Discord (obrigatório)"
       f.input :discord_name, label: "Nome no Discord"
       f.input :discord_icon_url, label: "URL do Ícone"
@@ -63,7 +66,7 @@ ActiveAdmin.register Guild do
         if guild.required_discord_role_id.present?
           "#{guild.required_discord_role_name} (#{guild.required_discord_role_id})"
         else
-          status_tag("Acesso Livre", :ok)
+          status_tag("Acesso Livre", class: "ok")
         end
       end
       row :created_at
@@ -100,7 +103,7 @@ ActiveAdmin.register Guild do
           link_to user.discord_username, admin_user_path(user)
         end
         column "Tem Acesso" do |user|
-          user.has_guild_access ? status_tag("Sim", :ok) : status_tag("Não", :error)
+          user.has_guild_access ? status_tag("Sim", class: "ok") : status_tag("Não", class: "error")
         end
         column :xp_points
         column :currency_balance

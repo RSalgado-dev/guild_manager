@@ -3,6 +3,15 @@ ActiveAdmin.register Squad do
 
   permit_params :name, :description, :guild_id, :leader_id, :max_members
 
+  # Configura os includes para otimizar queries
+  config.sort_order = "created_at_desc"
+
+  controller do
+    def scoped_collection
+      super.includes(:guild, :leader)
+    end
+  end
+
   index do
     selectable_column
     id_column
@@ -20,6 +29,9 @@ ActiveAdmin.register Squad do
 
   filter :name
   filter :guild
+  filter :guild_name, as: :string, label: "Nome da Guild"
+  filter :leader, as: :select, collection: -> { User.all.map { |u| [ u.discord_username, u.id ] } }
+  filter :leader_discord_username, as: :string, label: "Username do Líder"
   filter :created_at
 
   form do |f|
@@ -27,7 +39,7 @@ ActiveAdmin.register Squad do
       f.input :guild
       f.input :name
       f.input :description, input_html: { rows: 3 }
-      f.input :leader, as: :select, collection: User.all.map { |u| [u.discord_username, u.id] }
+      f.input :leader, as: :select, collection: User.all.map { |u| [ u.discord_username, u.id ] }
       f.input :max_members, hint: "Deixe vazio para ilimitado"
     end
     f.actions

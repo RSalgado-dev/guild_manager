@@ -33,12 +33,33 @@ class User < ApplicationRecord
            foreign_key: :emblem_reviewed_by_id,
            dependent: :nullify
 
+  # Ransackers para busca no ActiveAdmin
+  ransacker :guild_name, formatter: proc { |v| v.mb_chars.downcase.to_s } do |parent|
+    Arel.sql("LOWER(guilds.name)")
+  end
+
+  ransacker :squad_name, formatter: proc { |v| v.mb_chars.downcase.to_s } do |parent|
+    Arel.sql("LOWER(squads.name)")
+  end
+
+  # Permitir busca por estes atributos no ActiveAdmin
+  def self.ransackable_attributes(auth_object = nil)
+    [ "created_at", "currency_balance", "discord_avatar_url", "discord_id",
+     "discord_username", "guild_id", "has_guild_access", "id", "is_admin",
+     "squad_id", "updated_at", "xp_points", "guild_name", "squad_name" ]
+  end
+
+  def self.ransackable_associations(auth_object = nil)
+    [ "guild", "squad", "roles", "user_roles", "events", "missions",
+     "achievements", "certificates", "currency_transactions" ]
+  end
+
   validates :discord_id, presence: true, uniqueness: true
   validates :xp_points, numericality: { greater_than_or_equal_to: 0 }
   validates :currency_balance, numericality: { greater_than_or_equal_to: 0 }
 
   def admin?
-    roles.where(is_admin: true).exists?
+    is_admin == true
   end
 
   def primary_role
@@ -86,7 +107,7 @@ class User < ApplicationRecord
 
     # Procura por guilds configuradas que o usuário pertence
     user_guild = nil
-    
+
     guilds_data.each do |guild_data|
       user_guild = Guild.find_by(discord_guild_id: guild_data["id"])
       break if user_guild
@@ -123,7 +144,7 @@ class User < ApplicationRecord
   def check_guild_role_access
     User.check_guild_role_access(guild, discord_id)
   end
-  
+
   alias_method :has_guild_access?, :check_guild_role_access
 
   # Verifica se o usuário tem o cargo requerido pela guild
@@ -146,7 +167,7 @@ class User < ApplicationRecord
       if response.success?
         member_data = JSON.parse(response.body)
         user_roles = member_data["roles"] || []
-        
+
         # Verifica se o usuário tem o cargo requerido
         user_roles.include?(guild.required_discord_role_id)
       else

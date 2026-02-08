@@ -53,6 +53,7 @@ gem "faraday"
 gem "activeadmin"
 gem "devise"
 gem "sassc-rails"
+gem "sprockets-rails"  # Required by ActiveAdmin for asset pipeline
 
 group :development, :test do
   # See https://guides.rubyonrails.org/debugging_rails_applications.html#debugging-with-the-debug-gem
@@ -77,10 +78,10 @@ group :test do
   # Use system testing [https://guides.rubyonrails.org/testing.html#system-testing]
   gem "capybara"
   gem "selenium-webdriver"
-  
+
   # Mock HTTP requests in tests
   gem "webmock"
-  
+
   # Mocking and stubbing
   gem "mocha"
 end

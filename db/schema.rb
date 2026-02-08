@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_01_26_145212) do
+ActiveRecord::Schema[8.1].define(version: 2026_02_08_210758) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -282,6 +282,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_01_26_145212) do
     t.string "discord_username"
     t.bigint "guild_id", null: false
     t.boolean "has_guild_access", default: false, null: false
+    t.boolean "is_admin", default: false, null: false
     t.bigint "squad_id"
     t.datetime "updated_at", null: false
     t.integer "xp_points", default: 0, null: false

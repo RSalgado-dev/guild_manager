@@ -29,15 +29,36 @@ EDITOR="code --wait" rails credentials:edit
 cp .env.example .env
 # Edite .env com suas credenciais PostgreSQL
 
-# 4. Setup do banco
+# 4. Setup do banco de dados
 rails db:create db:migrate
 
-# 5. Iniciar servidor
-rails server
-# ou use: bin/dev (com Tailwind watch)
+# 5. Instalar e configurar Rails 8 Solid gems
+rails solid_queue:install
+rails solid_cache:install
+rails solid_cable:install
+
+# 6. Carregar schemas dos Solid gems
+rails runner "load Rails.root.join('db/queue_schema.rb')"
+rails runner "load Rails.root.join('db/cache_schema.rb')"
+rails runner "load Rails.root.join('db/cable_schema.rb')"
+
+# 7. Criar admin temporário (apenas primeira vez)
+rails runner script/create_first_admin.rb
+
+# 8. Compilar Tailwind CSS (opcional, compila automaticamente)
+rails tailwindcss:build
+
+# 9. Iniciar servidor de desenvolvimento
+bin/dev
+# ou separadamente:
+# rails server (Terminal 1)
+# rails tailwindcss:watch (Terminal 2)
 ```
 
-Acesse: http://localhost:3000
+Acesse: 
+- **App**: http://localhost:3000
+- **Dev Login**: http://localhost:3000/dev/login (apenas development)
+- **Admin Panel**: http://localhost:3000/admin (após login como admin)
 
 ---
 

@@ -576,6 +576,7 @@ DEPENDENCIES
   solid_cable
   solid_cache
   solid_queue
+  sprockets-rails
   stimulus-rails
   tailwindcss-rails
   thruster

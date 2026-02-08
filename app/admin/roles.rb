@@ -3,6 +3,15 @@ ActiveAdmin.register Role do
 
   permit_params :name, :description, :color, :icon, :is_admin, :guild_id
 
+  # Configura os includes para otimizar queries
+  config.sort_order = "created_at_desc"
+
+  controller do
+    def scoped_collection
+      super.includes(:guild)
+    end
+  end
+
   index do
     selectable_column
     id_column
@@ -12,7 +21,7 @@ ActiveAdmin.register Role do
       content_tag(:span, role.color, style: "background-color: #{role.color}; padding: 4px 8px; border-radius: 4px; color: white;")
     end
     column "Admin" do |role|
-      role.is_admin ? status_tag("Sim", :warning) : ""
+      role.is_admin ? status_tag("Sim", class: "warning") : ""
     end
     column "Usuários" do |role|
       role.users.count
@@ -23,6 +32,7 @@ ActiveAdmin.register Role do
 
   filter :name
   filter :guild
+  filter :guild_name, as: :string, label: "Nome da Guild"
   filter :is_admin, as: :select
   filter :created_at
 
