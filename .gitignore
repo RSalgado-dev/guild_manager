@@ -71,3 +71,4 @@ yarn-debug.log*
 
 # Ignore bootsnap cache
 /tmp/cache/bootsnap*
+config/credentials.yml.enc
