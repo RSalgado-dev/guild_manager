@@ -12,10 +12,15 @@ Rails.application.routes.draw do
   # get "service-worker" => "rails/pwa#service_worker", as: :pwa_service_worker
 
   # Rotas de autenticação com Discord
-  get "/auth/discord", as: :discord_login
+  # OmniAuth intercepta automaticamente /auth/:provider como middleware
+  # NÃO definir rota GET para /auth/discord pois interfere com OmniAuth
   get "/auth/discord/callback", to: "sessions#create"
   post "/auth/discord/callback", to: "sessions#create"
   get "/auth/failure", to: "sessions#failure"
+
+  # Fallback para /auth se acessado diretamente
+  get "/auth", to: "auth#index"
+  
   delete "/logout", to: "sessions#destroy", as: :logout
 
   # Rota de acesso restrito
