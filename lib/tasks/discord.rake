@@ -73,9 +73,9 @@ namespace :discord do
       guild.errors.full_messages.each { |msg| puts "  - #{msg}" }
     end
   end
-  
+
   desc "Define o cargo requerido para uma guild"
-  task :set_required_role, [:guild_id, :discord_role_id, :role_name] => :environment do |_t, args|
+  task :set_required_role, [ :guild_id, :discord_role_id, :role_name ] => :environment do |_t, args|
     unless args[:guild_id] && args[:discord_role_id]
       puts "Uso: rake discord:set_required_role[GUILD_ID,DISCORD_ROLE_ID,\"Nome do Cargo\"]"
       puts "\nPara obter o ID do cargo:"
@@ -84,14 +84,14 @@ namespace :discord do
       puts "3. Clique com botão direito no cargo > Copiar ID do Cargo"
       exit 1
     end
-    
+
     guild = Guild.find(args[:guild_id])
-    
+
     guild.update(
       required_discord_role_id: args[:discord_role_id],
       required_discord_role_name: args[:role_name] || "Membro"
     )
-    
+
     puts "Cargo requerido configurado com sucesso!"
     puts "  Guild: #{guild.name}"
     puts "  Cargo ID: #{guild.required_discord_role_id}"
@@ -100,40 +100,40 @@ namespace :discord do
   rescue ActiveRecord::RecordNotFound
     puts "Guild não encontrada. Use 'rake discord:list_guilds' para ver as guilds disponíveis."
   end
-  
+
   desc "Remove o cargo requerido de uma guild"
-  task :remove_required_role, [:guild_id] => :environment do |_t, args|
+  task :remove_required_role, [ :guild_id ] => :environment do |_t, args|
     unless args[:guild_id]
       puts "Uso: rake discord:remove_required_role[GUILD_ID]"
       exit 1
     end
-    
+
     guild = Guild.find(args[:guild_id])
-    
+
     guild.update(
       required_discord_role_id: nil,
       required_discord_role_name: nil
     )
-    
+
     puts "Cargo requerido removido com sucesso!"
     puts "  Guild: #{guild.name}"
     puts "\nTodos os membros do servidor terão acesso aos recursos internos."
   rescue ActiveRecord::RecordNotFound
     puts "Guild não encontrada."
   end
-  
+
   desc "Atualiza o acesso de todos os usuários de uma guild"
-  task :update_guild_access, [:guild_id] => :environment do |_t, args|
+  task :update_guild_access, [ :guild_id ] => :environment do |_t, args|
     unless args[:guild_id]
       puts "Uso: rake discord:update_guild_access[GUILD_ID]"
       exit 1
     end
-    
+
     guild = Guild.find(args[:guild_id])
     users = guild.users
-    
+
     puts "Atualizando acesso de #{users.count} usuários..."
-    
+
     updated_count = 0
     users.find_each do |user|
       has_access = User.check_guild_role_access(guild, user.discord_id)
@@ -142,7 +142,7 @@ namespace :discord do
         updated_count += 1
       end
     end
-    
+
     puts "Acesso atualizado para #{updated_count} usuários."
   rescue ActiveRecord::RecordNotFound
     puts "Guild não encontrada."

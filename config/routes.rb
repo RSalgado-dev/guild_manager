@@ -20,7 +20,7 @@ Rails.application.routes.draw do
 
   # Fallback para /auth se acessado diretamente
   get "/auth", to: "auth#index"
-  
+
   delete "/logout", to: "sessions#destroy", as: :logout
 
   # Rota de acesso restrito

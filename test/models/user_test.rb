@@ -187,7 +187,7 @@ class UserTest < ActiveSupport::TestCase
     guild = guilds(:one)
     guild.update(required_discord_role_id: nil)
     user = users(:one)
-    
+
     assert user.check_guild_role_access
   end
 
@@ -198,19 +198,19 @@ class UserTest < ActiveSupport::TestCase
       required_discord_role_name: "Membro"
     )
     user = users(:one)
-    
+
     # Mock do bot_token
     Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
-    
+
     # Mock da resposta da API Discord (URL sem /api/v10 porque Faraday não mantém base path)
     response_body = {
-      "user" => {"id" => user.discord_id},
-      "roles" => ["123456789", "987654321"]
+      "user" => { "id" => user.discord_id },
+      "roles" => [ "123456789", "987654321" ]
     }.to_json
-    
+
     stub_request(:get, "https://discord.com/api/v10/guilds/#{guild.discord_guild_id}/members/#{user.discord_id}")
-      .to_return(status: 200, body: response_body, headers: {'Content-Type' => 'application/json'})
-    
+      .to_return(status: 200, body: response_body, headers: { "Content-Type" => "application/json" })
+
     result = user.check_guild_role_access
     assert result, "Usuário deveria ter acesso com role correto"
   end
@@ -222,19 +222,19 @@ class UserTest < ActiveSupport::TestCase
       required_discord_role_name: "Membro"
     )
     user = users(:one)
-    
+
     # Mock do bot_token
     Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
-    
+
     # Mock da resposta da API Discord sem o role necessário
     response_body = {
-      "user" => {"id" => user.discord_id},
-      "roles" => ["987654321"] # Não inclui 123456789
+      "user" => { "id" => user.discord_id },
+      "roles" => [ "987654321" ] # Não inclui 123456789
     }.to_json
-    
+
     stub_request(:get, "https://discord.com/api/v10/guilds/#{guild.discord_guild_id}/members/#{user.discord_id}")
-      .to_return(status: 200, body: response_body, headers: {'Content-Type' => 'application/json'})
-    
+      .to_return(status: 200, body: response_body, headers: { "Content-Type" => "application/json" })
+
     result = user.check_guild_role_access
     assert_not result, "Usuário não deveria ter acesso sem role correto"
   end
