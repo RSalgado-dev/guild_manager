@@ -23,5 +23,10 @@ module Workspace
     #
     # config.time_zone = "Central Time (US & Canada)"
     # config.eager_load_paths << Rails.root.join("extras")
+
+    # Configure Sprockets for ActiveAdmin (coexists with Propshaft)
+    config.assets.enabled = true
+    config.assets.paths << Rails.root.join("app", "assets", "stylesheets")
+    config.assets.paths << Rails.root.join("app", "assets", "javascripts")
   end
 end

@@ -20,7 +20,7 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
-    
+
     # Limpa mocks do OmniAuth após cada teste
     teardown do
       OmniAuth.config.mock_auth[:discord] = nil

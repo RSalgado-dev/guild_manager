@@ -1,4 +1,5 @@
 # frozen_string_literal: true
+
 ActiveAdmin.register_page "Dashboard" do
   menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
 
@@ -8,20 +9,20 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Estatísticas Gerais" do
           div class: "stats-grid" do
             div class: "stat-card" do
-              h3 Guild.count
               p "Guilds"
+              h3 Guild.count
             end
             div class: "stat-card" do
-              h3 User.count
               p "Usuários"
+              h3 User.count
             end
             div class: "stat-card" do
-              h3 User.where(has_guild_access: true).count
               p "Com Acesso"
+              h3 User.where(has_guild_access: true).count
             end
             div class: "stat-card" do
-              h3 Squad.count
               p "Squads"
+              h3 Squad.count
             end
           end
         end
@@ -39,7 +40,7 @@ ActiveAdmin.register_page "Dashboard" do
               guild.users.count
             end
             column "Acesso Restrito" do |guild|
-              guild.required_discord_role_id.present? ? status_tag("Sim", :warning) : status_tag("Não", :ok)
+              guild.required_discord_role_id.present? ? status_tag("Sim", class: "warning") : status_tag("Não", class: "ok")
             end
             column :created_at
           end
@@ -56,7 +57,7 @@ ActiveAdmin.register_page "Dashboard" do
               user.guild&.name
             end
             column "Acesso" do |user|
-              user.has_guild_access ? status_tag("Sim", :ok) : status_tag("Não", :error)
+              user.has_guild_access ? status_tag("Sim", class: "ok") : status_tag("Não", class: "error")
             end
             column :created_at
           end

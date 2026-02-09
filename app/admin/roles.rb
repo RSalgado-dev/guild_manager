@@ -1,18 +1,25 @@
 ActiveAdmin.register Role do
   menu priority: 3
 
-  permit_params :name, :description, :color, :icon, :is_admin, :guild_id
+  permit_params :name, :description, :discord_role_id, :is_admin, :guild_id
+
+  # Configura os includes para otimizar queries
+  config.sort_order = "created_at_desc"
+
+  controller do
+    def scoped_collection
+      super.includes(:guild)
+    end
+  end
 
   index do
     selectable_column
     id_column
     column :name
     column :guild
-    column :color do |role|
-      content_tag(:span, role.color, style: "background-color: #{role.color}; padding: 4px 8px; border-radius: 4px; color: white;")
-    end
+    column :discord_role_id
     column "Admin" do |role|
-      role.is_admin ? status_tag("Sim", :warning) : ""
+      role.is_admin ? status_tag("Sim", class: "warning") : ""
     end
     column "Usuários" do |role|
       role.users.count
@@ -23,6 +30,7 @@ ActiveAdmin.register Role do
 
   filter :name
   filter :guild
+  filter :guild_name, as: :string, label: "Nome da Guild"
   filter :is_admin, as: :select
   filter :created_at
 
@@ -31,8 +39,7 @@ ActiveAdmin.register Role do
       f.input :guild
       f.input :name
       f.input :description, input_html: { rows: 3 }
-      f.input :color, as: :string, hint: "Formato: #RRGGBB"
-      f.input :icon
+      f.input :discord_role_id, hint: "ID do role no Discord (obtido automaticamente via sincronização)"
       f.input :is_admin, label: "É Admin?"
     end
     f.actions
@@ -44,10 +51,7 @@ ActiveAdmin.register Role do
       row :guild
       row :name
       row :description
-      row :color do |role|
-        content_tag(:span, role.color, style: "background-color: #{role.color}; padding: 8px 16px; border-radius: 4px; color: white;")
-      end
-      row :icon
+      row :discord_role_id
       row :is_admin
       row :created_at
       row :updated_at

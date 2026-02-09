@@ -1,8 +1,17 @@
 ActiveAdmin.register User do
   menu priority: 2
 
-  permit_params :discord_id, :discord_username, :discord_avatar_url, 
+  permit_params :discord_id, :discord_username, :discord_avatar_url,
                 :guild_id, :squad_id, :xp_points, :currency_balance, :has_guild_access
+
+  # Configura os includes para otimizar queries
+  config.sort_order = "created_at_desc"
+
+  controller do
+    def scoped_collection
+      super.includes(:guild, :squad)
+    end
+  end
 
   scope :all, default: true
   scope :with_access do |users|
@@ -28,12 +37,12 @@ ActiveAdmin.register User do
     column :guild
     column :squad
     column "Acesso" do |user|
-      user.has_guild_access ? status_tag("Sim", :ok) : status_tag("Não", :error)
+      user.has_guild_access ? status_tag("Sim", class: "ok") : status_tag("Não", class: "error")
     end
     column :xp_points
     column :currency_balance
     column "Admin" do |user|
-      user.admin? ? status_tag("Sim", :warning) : ""
+      user.admin? ? status_tag("Sim", class: "warning") : ""
     end
     column :created_at
     actions
@@ -42,8 +51,10 @@ ActiveAdmin.register User do
   filter :discord_username
   filter :discord_id
   filter :guild
+  filter :guild_name, as: :string, label: "Nome da Guild"
   filter :squad
-  filter :has_guild_access, as: :select, collection: [["Com Acesso", true], ["Sem Acesso", false]]
+  filter :squad_name, as: :string, label: "Nome do Squad"
+  filter :has_guild_access, as: :select, collection: [ [ "Com Acesso", true ], [ "Sem Acesso", false ] ]
   filter :xp_points
   filter :currency_balance
   filter :created_at
@@ -92,12 +103,12 @@ ActiveAdmin.register User do
         link_to user.squad.name, admin_squad_path(user.squad) if user.squad
       end
       row "Tem Acesso" do |user|
-        user.has_guild_access ? status_tag("Sim", :ok) : status_tag("Não", :error)
+        user.has_guild_access ? status_tag("Sim", class: "ok") : status_tag("Não", class: "error")
       end
       row :xp_points
       row :currency_balance
       row "É Admin" do |user|
-        user.admin? ? status_tag("Sim", :warning) : status_tag("Não")
+        user.admin? ? status_tag("Sim", class: "warning") : status_tag("Não")
       end
       row :created_at
       row :updated_at
@@ -109,7 +120,7 @@ ActiveAdmin.register User do
           link_to ur.role.name, admin_role_path(ur.role)
         end
         column "Primário" do |ur|
-          ur.primary ? status_tag("Sim", :ok) : ""
+          ur.primary ? status_tag("Sim", class: "ok") : ""
         end
       end
     end
@@ -145,7 +156,7 @@ ActiveAdmin.register User do
     user = User.find(params[:id])
     has_access = User.check_guild_role_access(user.guild, user.discord_id)
     user.update(has_guild_access: has_access)
-    
+
     redirect_to admin_user_path(user), notice: "Acesso verificado. Status: #{has_access ? 'Com Acesso' : 'Sem Acesso'}"
   end
 end

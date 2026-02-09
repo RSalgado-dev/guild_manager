@@ -38,8 +38,13 @@ class ApplicationController < ActionController::Base
   end
 
   def require_admin
-    unless logged_in? && current_user.admin?
-      redirect_to root_path, alert: "Acesso negado. Você precisa ser um administrador."
+    unless logged_in?
+      redirect_to root_path, alert: "Você precisa estar logado para acessar esta página."
+      return
+    end
+
+    unless current_user.admin?
+      redirect_to root_path, alert: "❌ Acesso negado. Você não tem permissão para acessar o painel administrativo."
     end
   end
 end
