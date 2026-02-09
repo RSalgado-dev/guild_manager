@@ -12,6 +12,8 @@ one:
   discord_token_expires_at: 2026-02-13 15:15:38
   xp_points: 100
   currency_balance: 500
+  is_admin: true
+  has_guild_access: true
 
 two:
   guild: one
@@ -25,6 +27,7 @@ two:
   discord_token_expires_at: 2026-02-13 15:15:38
   xp_points: 50
   currency_balance: 200
+  has_guild_access: true
 
 three:
   guild: two
@@ -38,3 +41,4 @@ three:
   discord_token_expires_at: 2026-02-13 15:15:38
   xp_points: 200
   currency_balance: 1000
+  has_guild_access: true

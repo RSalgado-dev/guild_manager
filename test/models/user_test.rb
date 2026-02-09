@@ -115,6 +115,9 @@ class UserTest < ActiveSupport::TestCase
         name: "TestUser",
         image: "http://example.com/avatar.png"
       ),
+      credentials: OpenStruct.new(
+        token: "fake_access_token"
+      ),
       extra: OpenStruct.new(
         raw_info: OpenStruct.new(
           guilds: [
@@ -122,6 +125,12 @@ class UserTest < ActiveSupport::TestCase
           ]
         )
       )
+    )
+
+    # Stub da API Discord
+    stub_discord_user_guilds(
+      access_token: "fake_access_token",
+      guilds: [ { "id" => "999999999999999999", "name" => "Servidor Não Configurado" } ]
     )
 
     user = User.find_or_create_from_discord(auth)
@@ -138,6 +147,9 @@ class UserTest < ActiveSupport::TestCase
         name: "NewUser",
         image: "http://example.com/avatar.png"
       ),
+      credentials: OpenStruct.new(
+        token: "fake_access_token"
+      ),
       extra: OpenStruct.new(
         raw_info: OpenStruct.new(
           guilds: [
@@ -145,6 +157,23 @@ class UserTest < ActiveSupport::TestCase
           ]
         )
       )
+    )
+
+    # Stub da API Discord
+    stub_discord_user_guilds(
+      access_token: "fake_access_token",
+      guilds: [ { "id" => discord_guild_id, "name" => "Servidor Configurado" } ]
+    )
+
+    # Stub para sync_discord_roles
+    stub_discord_guild_member(
+      guild_id: discord_guild_id,
+      user_id: "987654321",
+      roles: []
+    )
+    stub_discord_guild_roles(
+      guild_id: discord_guild_id,
+      roles: []
     )
 
     assert_difference "User.count", 1 do
@@ -165,6 +194,9 @@ class UserTest < ActiveSupport::TestCase
         name: "UpdatedUsername",
         image: "http://example.com/new_avatar.png"
       ),
+      credentials: OpenStruct.new(
+        token: "fake_access_token"
+      ),
       extra: OpenStruct.new(
         raw_info: OpenStruct.new(
           guilds: [
@@ -172,6 +204,23 @@ class UserTest < ActiveSupport::TestCase
           ]
         )
       )
+    )
+
+    # Stub da API Discord
+    stub_discord_user_guilds(
+      access_token: "fake_access_token",
+      guilds: [ { "id" => guild.discord_guild_id, "name" => "Servidor" } ]
+    )
+
+    # Stub para sync_discord_roles
+    stub_discord_guild_member(
+      guild_id: guild.discord_guild_id,
+      user_id: user.discord_id,
+      roles: []
+    )
+    stub_discord_guild_roles(
+      guild_id: guild.discord_guild_id,
+      roles: []
     )
 
     assert_no_difference "User.count" do
@@ -199,17 +248,17 @@ class UserTest < ActiveSupport::TestCase
     )
     user = users(:one)
 
-    # Mock do bot_token
-    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    # Cria o role no banco com o id correto para que o usuário tenha acesso
+    role = Role.where(guild: guild, discord_role_id: "123456789").first_or_create! do |r|
+      r.name = "Membro Verificado #{Time.now.to_i}"
+      r.description = "Membro verificado"
+      r.is_admin = false
+    end
 
-    # Mock da resposta da API Discord (URL sem /api/v10 porque Faraday não mantém base path)
-    response_body = {
-      "user" => { "id" => user.discord_id },
-      "roles" => [ "123456789", "987654321" ]
-    }.to_json
-
-    stub_request(:get, "https://discord.com/api/v10/guilds/#{guild.discord_guild_id}/members/#{user.discord_id}")
-      .to_return(status: 200, body: response_body, headers: { "Content-Type" => "application/json" })
+    # Atribui o role ao usuário
+    UserRole.where(user: user, role: role).first_or_create! do |ur|
+      ur.primary = false
+    end
 
     result = user.check_guild_role_access
     assert result, "Usuário deveria ter acesso com role correto"
