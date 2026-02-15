@@ -33,6 +33,8 @@ class User < ApplicationRecord
            foreign_key: :emblem_reviewed_by_id,
            dependent: :nullify
 
+  has_one :game_character, dependent: :destroy
+
   # Ransackers para busca no ActiveAdmin
   ransacker :guild_name, formatter: proc { |v| v.mb_chars.downcase.to_s } do |parent|
     Arel.sql("LOWER(guilds.name)")
@@ -45,7 +47,7 @@ class User < ApplicationRecord
   # Permitir busca por estes atributos no ActiveAdmin
   def self.ransackable_attributes(auth_object = nil)
     [ "created_at", "currency_balance", "discord_avatar_url", "discord_id",
-     "discord_username", "guild_id", "has_guild_access", "id", "is_admin",
+     "discord_username", "email", "guild_id", "has_guild_access", "id", "is_admin",
      "squad_id", "updated_at", "xp_points", "guild_name", "squad_name" ]
   end
 
@@ -60,6 +62,34 @@ class User < ApplicationRecord
 
   def admin?
     is_admin == true
+  end
+
+  def level
+    # Calcula o nível baseado nos XP points
+    # Nível 1: 0-99 XP
+    # Nível 2: 100-299 XP
+    # Nível 3: 300-599 XP
+    # Fórmula: sqrt(xp / 100) + 1
+    return 1 if xp_points.zero?
+
+    (Math.sqrt(xp_points / 100.0).floor + 1)
+  end
+
+  def xp_for_next_level
+    # XP necessário para o próximo nível
+    next_level = level + 1
+    ((next_level - 1) ** 2) * 100
+  end
+
+  def xp_progress_percentage
+    # Percentual de progresso para o próximo nível
+    current_level_xp = ((level - 1) ** 2) * 100
+    next_level_xp = xp_for_next_level
+
+    return 0 if next_level_xp == current_level_xp
+
+    progress = ((xp_points - current_level_xp).to_f / (next_level_xp - current_level_xp) * 100).round(1)
+    [ progress, 100 ].min
   end
 
   def primary_role
@@ -133,6 +163,7 @@ class User < ApplicationRecord
       user.update(
         discord_username: discord_data.name,
         discord_avatar_url: discord_data.image,
+        email: discord_data.email,
         guild: user_guild
       )
       Rails.logger.info "Usuário atualizado: #{user.discord_username} (ID: #{user.id})"
@@ -142,6 +173,7 @@ class User < ApplicationRecord
         discord_id: discord_id,
         discord_username: discord_data.name,
         discord_avatar_url: discord_data.image,
+        email: discord_data.email,
         guild: user_guild,
         xp_points: 0,
         currency_balance: 0

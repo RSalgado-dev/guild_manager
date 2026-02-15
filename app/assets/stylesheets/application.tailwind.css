@@ -1,7 +1,256 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+/* Tailwind CSS v4 Theme Configuration */
+/* Note: @import "tailwindcss" is handled by Tailwind CLI, not needed for Sprockets */
 
-/*
-  Custom utilities and components can be added here
-*/
+@theme {
+  --color-neon-cyan: #00ffff;
+  --color-neon-magenta: #ff00ff;
+  --color-neon-purple: #b026ff;
+  --color-neon-green: #39ff14;
+  --color-neon-pink: #ff10f0;
+  --color-neon-blue: #04d9ff;
+  --color-dark-bg: #0a0a0f;
+  --color-dark-surface: #15151f;
+  --color-dark-card: #1a1a2e;
+  --shadow-neon-cyan: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3);
+  --shadow-neon-magenta: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3);
+  --shadow-neon-purple: 0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3);
+  --shadow-neon-green: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3);
+  --shadow-neon-blue: 0 0 20px rgba(4, 217, 255, 0.5), 0 0 40px rgba(4, 217, 255, 0.3);
+  --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  --animate-glow: glow 2s ease-in-out infinite alternate;
+}
+
+@layer base {
+  html {
+    background-color: #0a0a0f;
+  }
+
+  body {
+    background-color: #0a0a0f;
+    color: #f3f4f6;
+  }
+}
+
+@layer components {
+  .btn-neon {
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    transition: all 0.3s;
+  }
+
+  .btn-neon:hover {
+    transform: scale(1.05);
+  }
+
+  .card-neon {
+    background-color: #1a1a2e;
+    border-radius: 0.5rem;
+    padding: 1.5rem;
+    transition: all 0.3s;
+  }
+
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+
+  .text-glow-magenta {
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 10px rgba(176, 38, 255, 0.5), 0 0 20px rgba(176, 38, 255, 0.3);
+  }
+}
+
+@layer utilities {
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes glow {
+    0% {
+      filter: brightness(1) drop-shadow(0 0 10px currentColor);
+    }
+
+    100% {
+      filter: brightness(1.2) drop-shadow(0 0 20px currentColor);
+    }
+  }
+
+  @keyframes pulse {
+
+    0%,
+    100% {
+      opacity: 1;
+    }
+
+    50% {
+      opacity: 0.5;
+    }
+  }
+
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(26, 26, 46, 0.7);
+  }
+
+  .border-animate {
+    background: linear-gradient(90deg, rgba(0, 255, 255, 0) 0%, rgba(0, 255, 255, 1) 50%, rgba(0, 255, 255, 0) 100%);
+    background-size: 200% 100%;
+    animation: borderShift 3s linear infinite;
+  }
+
+  @keyframes borderShift {
+    0% {
+      background-position: 0% 0%;
+    }
+
+    100% {
+      background-position: 200% 0%;
+    }
+  }
+}
+
+/* Direct CSS rules for dark theme to override defaults */
+html,
+body {
+  background-color: #0a0a0f !important;
+  color: #f3f4f6 !important;
+}
+
+.bg-dark-bg {
+  background-color: #0a0a0f !important;
+}
+
+.bg-dark-surface {
+  background-color: #15151f !important;
+}
+
+.bg-dark-card {
+  background-color: #1a1a2e !important;
+}
+
+.text-neon-cyan {
+  color: #00ffff !important;
+}
+
+.text-neon-magenta {
+  color: #ff00ff !important;
+}
+
+.text-neon-purple {
+  color: #b026ff !important;
+}
+
+.text-neon-green {
+  color: #39ff14 !important;
+}
+
+.text-neon-blue {
+  color: #04d9ff !important;
+}
+
+.border-neon-cyan {
+  border-color: #00ffff !important;
+}
+
+.border-neon-cyan\/20 {
+  border-color: rgba(0, 255, 255, 0.2) !important;
+}
+
+.border-neon-cyan\/30 {
+  border-color: rgba(0, 255, 255, 0.3) !important;
+}
+
+.border-neon-purple {
+  border-color: #b026ff !important;
+}
+
+.border-neon-purple\/20 {
+  border-color: rgba(176, 38, 255, 0.2) !important;
+}
+
+.border-neon-purple\/30 {
+  border-color: rgba(176, 38, 255, 0.3) !important;
+}
+
+.border-neon-magenta {
+  border-color: #ff00ff !important;
+}
+
+.border-neon-magenta\/20 {
+  border-color: rgba(255, 0, 255, 0.2) !important;
+}
+
+.border-neon-magenta\/30 {
+  border-color: rgba(255, 0, 255, 0.3) !important;
+}
+
+.border-neon-green {
+  border-color: #39ff14 !important;
+}
+
+.border-neon-green\/20 {
+  border-color: rgba(57, 255, 20, 0.2) !important;
+}
+
+.border-neon-blue\/30 {
+  border-color: rgba(4, 217, 255, 0.3) !important;
+}
+
+.shadow-neon-cyan {
+  box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3) !important;
+}
+
+.shadow-neon-magenta {
+  box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3) !important;
+}
+
+.shadow-neon-purple {
+  box-shadow: 0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3) !important;
+}
+
+.shadow-neon-green {
+  box-shadow: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3) !important;
+}
+
+.from-neon-cyan {
+  --tw-gradient-from: #00ffff !important;
+}
+
+.from-neon-purple {
+  --tw-gradient-from: #b026ff !important;
+}
+
+.to-neon-blue {
+  --tw-gradient-to: #04d9ff !important;
+}
+
+.to-neon-magenta {
+  --tw-gradient-to: #ff00ff !important;
+}
+
+.via-neon-purple {
+  --tw-gradient-via: #b026ff !important;
+}
+
+.animate-pulse-slow {
+  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}

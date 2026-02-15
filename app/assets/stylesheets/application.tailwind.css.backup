@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+  Custom utilities and components for neon theme
+*/
+
+@layer base {
+  body {
+    @apply bg-dark-bg text-gray-100;
+  }
+}
+
+@layer components {
+  /* Neon button component */
+  .btn-neon {
+    @apply relative overflow-hidden rounded-lg transition-all duration-300 transform hover:scale-105;
+  }
+
+  /* Neon card component */
+  .card-neon {
+    @apply bg-dark-card border rounded-lg p-6 transition-all duration-300;
+  }
+
+  /* Neon text glow */
+  .text-glow-cyan {
+    text-shadow: 0 0 10px rgba(0, 255, 255, 0.5), 0 0 20px rgba(0, 255, 255, 0.3);
+  }
+
+  .text-glow-magenta {
+    text-shadow: 0 0 10px rgba(255, 0, 255, 0.5), 0 0 20px rgba(255, 0, 255, 0.3);
+  }
+
+  .text-glow-purple {
+    text-shadow: 0 0 10px rgba(176, 38, 255, 0.5), 0 0 20px rgba(176, 38, 255, 0.3);
+  }
+}
+
+@layer utilities {
+  /* Animation utilities */
+  .animate-slide-in {
+    animation: slideIn 0.3s ease-out;
+  }
+
+  @keyframes slideIn {
+    from {
+      transform: translateX(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateX(0);
+      opacity: 1;
+    }
+  }
+
+  /* Glass morphism effect */
+  .glass-effect {
+    backdrop-filter: blur(10px);
+    background: rgba(26, 26, 46, 0.7);
+  }
+
+  /* Neon border animation */
+  .border-animate {
+    background: linear-gradient(90deg, 
+      rgba(0, 255, 255, 0) 0%,
+      rgba(0, 255, 255, 1) 50%,
+      rgba(0, 255, 255, 0) 100%
+    );
+    background-size: 200% 100%;
+    animation: borderShift 3s linear infinite;
+  }
+
+  @keyframes borderShift {
+    0% {
+      background-position: 0% 0%;
+    }
+    100% {
+      background-position: 200% 0%;
+    }
+  }
+}
+

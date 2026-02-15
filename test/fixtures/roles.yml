@@ -12,7 +12,7 @@ two:
   name: "Membro"
   description: "Membro regular da guilda"
   is_admin: false
-  discord_role_id: "234567890123456789"
+  discord_role_id: "999999999999999999"  # Role requerido pela guild one
 
 three:
   guild: two

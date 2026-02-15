@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html>
+<html class="bg-dark-bg">
   <head>
-    <title><%= content_for(:title) || "Workspace" %></title>
+    <title><%= content_for(:title) || "Guild System" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Workspace">
+    <meta name="application-name" content="Guild System">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -18,29 +18,138 @@
     <link rel="icon" href="/icon.svg" type="image/svg+xml">
     <link rel="apple-touch-icon" href="/icon.png">
 
-    <%# Tailwind CSS (compiled by tailwindcss-rails) %>
-    <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
-    
-    <%# Other application styles %>
-    <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <% unless Rails.env.test? %>
+      <%# Tailwind CSS (compiled by tailwindcss-rails) %>
+      <%= stylesheet_link_tag "tailwind", "data-turbo-track": "reload" %>
+      
+      <%# Neon theme customizations %>
+      <%= stylesheet_link_tag "neon_theme", "data-turbo-track": "reload" %>
+      
+      <%# Other application styles %>
+      <%= stylesheet_link_tag "application", "data-turbo-track": "reload" %>
+    <% end %>
+
+    <% unless Rails.env.test? %>
+    <style>
+      /* Custom scrollbar para tema escuro */
+      ::-webkit-scrollbar {
+        width: 12px;
+      }
+      
+      ::-webkit-scrollbar-track {
+        background: #0a0a0f;
+      }
+      
+      ::-webkit-scrollbar-thumb {
+        background: #1a1a2e;
+        border-radius: 6px;
+        border: 2px solid #0a0a0f;
+      }
+      
+      ::-webkit-scrollbar-thumb:hover {
+        background: rgba(0, 255, 255, 0.3);
+      }
+
+      /* Animação de pulso suave */
+      @keyframes pulse-glow {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .animate-pulse-glow {
+        animation: pulse-glow 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
+      
+      /* Neon Theme Custom Classes */
+      html, body {
+        background-color: #0a0a0f !important;
+        color: #f3f4f6 !important;
+      }
+      
+      .bg-dark-bg { background-color: #0a0a0f !important; }
+      .bg-dark-surface { background-color: #15151f !important; }
+      .bg-dark-card { background-color: #1a1a2e !important; }
+      
+      .text-neon-cyan { color: #00ffff !important; }
+      .text-neon-magenta { color: #ff00ff !important; }
+      .text-neon-purple { color: #b026ff !important; }
+      .text-neon-green { color: #39ff14 !important; }
+      .text-neon-blue { color: #04d9ff !important; }
+      .text-neon-cyan\/70 { color: rgba(0, 255, 255, 0.7) !important; }
+      .text-neon-purple\/70 { color: rgba(176, 38, 255, 0.7) !important; }
+      .text-neon-magenta\/70 { color: rgba(255, 0, 255, 0.7) !important; }
+      .text-neon-cyan\/50 { color: rgba(0, 255, 255, 0.5) !important; }
+      
+      .border-neon-cyan { border-color: #00ffff !important; }
+      .border-neon-cyan\/20 { border-color: rgba(0, 255, 255, 0.2) !important; }
+      .border-neon-cyan\/30 { border-color: rgba(0, 255, 255, 0.3) !important; }
+      .border-neon-purple { border-color: #b026ff !important; }
+      .border-neon-purple\/20 { border-color: rgba(176, 38, 255, 0.2) !important; }
+      .border-neon-purple\/30 { border-color: rgba(176, 38, 255, 0.3) !important; }
+      .border-neon-magenta { border-color: #ff00ff !important; }
+      .border-neon-magenta\/20 { border-color: rgba(255, 0, 255, 0.2) !important; }
+      .border-neon-magenta\/30 { border-color: rgba(255, 0, 255, 0.3) !important; }
+      .border-neon-green { border-color: #39ff14 !important; }
+      .border-neon-green\/20 { border-color: rgba(57, 255, 20, 0.2) !important; }
+      .border-neon-blue\/30 { border-color: rgba(4, 217, 255, 0.3) !important; }
+      
+      .shadow-neon-cyan { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3) !important; }
+      .shadow-neon-magenta { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3) !important; }
+      .shadow-neon-purple { box-shadow: 0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3) !important; }
+      .shadow-neon-green { box-shadow: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3) !important; }
+      
+      .from-neon-cyan { --tw-gradient-from: #00ffff !important; }
+      .from-neon-purple { --tw-gradient-from: #b026ff !important; }
+      .to-neon-blue { --tw-gradient-to: #04d9ff !important; }
+      .to-neon-magenta { --tw-gradient-to: #ff00ff !important; }
+      .via-neon-purple { --tw-gradient-via: #b026ff !important; }
+      
+      .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite !important; }
+      .animate-glow { animation: glow 2s ease-in-out infinite alternate !important; }
+      
+      @keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50% { opacity: 0.5; }
+      }
+      
+      @keyframes glow {
+        0% { filter: brightness(1) drop-shadow(0 0 10px currentColor); }
+        100% { filter: brightness(1.2) drop-shadow(0 0 20px currentColor); }
+      }
+      
+      .hover\:border-neon-cyan:hover { border-color: #00ffff !important; }
+      .hover\:border-neon-purple:hover { border-color: #b026ff !important; }
+      .hover\:border-neon-magenta:hover { border-color: #ff00ff !important; }
+      .hover\:border-neon-green:hover { border-color: #39ff14 !important; }
+      .hover\:shadow-neon-cyan:hover { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3) !important; }
+      .hover\:shadow-neon-purple:hover { box-shadow: 0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3) !important; }
+      .hover\:shadow-neon-magenta:hover { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3) !important; }
+      .hover\:shadow-neon-green:hover { box-shadow: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3) !important; }
+      
+      .group:hover .group-hover\:animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important; }
+    </style>
+    <% end %>
   </head>
 
-  <body>
+  <body class="bg-dark-bg text-white antialiased">
     <% if flash.any? %>
       <div class="fixed top-4 right-4 z-50 space-y-2" data-turbo-temporary>
         <% flash.each do |type, message| %>
           <% 
-            bg_color = case type.to_sym
-            when :notice then "bg-green-500"
-            when :alert then "bg-red-500"
-            when :error then "bg-red-600"
-            else "bg-blue-500"
+            colors = case type.to_sym
+            when :notice then { bg: "bg-neon-green/20", border: "border-neon-green", text: "text-neon-green" }
+            when :alert, :error then { bg: "bg-neon-magenta/20", border: "border-neon-magenta", text: "text-neon-magenta" }
+            else { bg: "bg-neon-cyan/20", border: "border-neon-cyan", text: "text-neon-cyan" }
             end
           %>
-          <div class="<%= bg_color %> text-white px-6 py-4 rounded-lg shadow-lg max-w-md">
-            <div class="flex items-center justify-between gap-4">
-              <p class="text-sm font-medium"><%= message %></p>
-              <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-gray-200 transition-colors">
+          <div class="<%= colors[:bg] %> <%= colors[:border] %> border backdrop-blur-sm rounded-lg shadow-lg max-w-md overflow-hidden animate-slide-in">
+            <div class="p-4 flex items-center justify-between gap-4">
+              <p class="<%= colors[:text] %> text-sm font-mono flex-1"><%= message %></p>
+              <button onclick="this.parentElement.parentElement.remove()" class="<%= colors[:text] %> hover:opacity-70 transition-opacity">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                 </svg>

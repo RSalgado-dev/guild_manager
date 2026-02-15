@@ -1,7 +1,7 @@
 ActiveAdmin.register User do
   menu priority: 2
 
-  permit_params :discord_id, :discord_username, :discord_avatar_url,
+  permit_params :discord_id, :discord_username, :discord_avatar_url, :email,
                 :guild_id, :squad_id, :xp_points, :currency_balance, :has_guild_access
 
   # Configura os includes para otimizar queries
@@ -34,6 +34,7 @@ ActiveAdmin.register User do
         user.discord_username
       end
     end
+    column :email
     column :guild
     column :squad
     column "Acesso" do |user|
@@ -50,6 +51,7 @@ ActiveAdmin.register User do
 
   filter :discord_username
   filter :discord_id
+  filter :email
   filter :guild
   filter :guild_name, as: :string, label: "Nome da Guild"
   filter :squad
@@ -64,6 +66,7 @@ ActiveAdmin.register User do
       f.input :discord_id, label: "Discord ID"
       f.input :discord_username, label: "Discord Username"
       f.input :discord_avatar_url, label: "Avatar URL"
+      f.input :email, label: "Email"
     end
 
     f.inputs "Guild e Squad" do
@@ -96,6 +99,7 @@ ActiveAdmin.register User do
       end
       row :discord_username
       row :discord_id
+      row :email
       row :guild do |user|
         link_to user.guild.name, admin_guild_path(user.guild) if user.guild
       end

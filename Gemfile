@@ -84,4 +84,7 @@ group :test do
 
   # Mocking and stubbing
   gem "mocha"
+
+  # Controller testing helpers (assigns, assert_template)
+  gem "rails-controller-testing"
 end

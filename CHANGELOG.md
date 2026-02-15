@@ -1,5 +1,357 @@
 # Changelog - Sistema de Guildas
 
+## Data: 15 de Fevereiro de 2026
+
+### 🎨 Interface Neon, Sistema de Perfil e Personagens do Jogo
+
+#### 📝 Resumo das Alterações
+
+Implementação completa de nova identidade visual com tema dark neon, sistema de perfil de usuário editável, gerenciamento de personagens do jogo com upload de imagens, e refatoração da arquitetura de controllers seguindo princípios de responsabilidade única.
+
+**Funcionalidades Implementadas**:
+- ✅ **Tema Dark Neon**: Interface completa com cores neon (cyan, magenta, purple, green) e animações
+- ✅ **Sistema de Perfil**: Visualização e edição de dados do usuário
+- ✅ **Campo Email**: Adicionado campo email sincronizado com Discord OAuth
+- ✅ **Sistema de Níveis**: Cálculo automático de nível baseado em XP com fórmula progressiva
+- ✅ **Personagens do Jogo**: CRUD completo para personagens com nickname, nível, poder e screenshot
+- ✅ **Upload de Imagens**: ActiveStorage para screenshots da tela de status do personagem
+- ✅ **Refatoração de Controllers**: Separação de responsabilidades com namespace Access
+
+---
+
+### 🎨 Interface e Estilização
+
+#### Tema Dark Neon
+- **Tailwind CSS v4**: Configuração customizada com tema dark
+- **Paleta de Cores Neon**:
+  - `neon-cyan`: #00ffff
+  - `neon-magenta`: #ff00ff
+  - `neon-purple`: #b026ff
+  - `neon-green`: #39ff14
+  - `neon-blue`: #04d9ff
+- **Backgrounds**: dark-bg (#0a0a0f), dark-surface (#15151f), dark-card (#1a1a2e)
+- **Animações**: pulse-slow, glow, shadow effects neon
+- **Componentes**: Cards com bordas neon, botões com gradiente, efeitos hover
+
+#### Páginas Redesenhadas
+- Landing page (/) com tema neon
+- Dashboard (/dashboard) com cards de estatísticas
+- Página de perfil (/profile) completa
+- Página de acesso restrito (/restricted)
+- Formulários de edição com tema consistente
+
+---
+
+### 🗄️ Alterações no Banco de Dados
+
+#### Migração: `AddEmailToUsers` (20260215001130)
+
+Adiciona campo de email ao modelo User:
+
+```ruby
+add_column :users, :email, :string
+```
+
+#### Migração: `CreateGameCharacters` (20260215014546)
+
+Cria tabela para personagens do jogo:
+
+```ruby
+create_table :game_characters do |t|
+  t.references :user, null: false, foreign_key: true, index: { unique: true }
+  t.string :nickname, null: false
+  t.integer :level, null: false
+  t.integer :power, null: false
+  t.timestamps
+end
+```
+
+**Características**:
+- Relacionamento 1:1 com User (um personagem por usuário)
+- ActiveStorage para screenshot da tela de status
+- Validações de formato de imagem (JPEG, PNG, WEBP, máx 5MB)
+
+---
+
+### 🔧 Modelos e Validações
+
+#### `User` (Extensões)
+
+**Novos Campos**:
+- `email`: String para email do usuário
+
+**Novos Métodos**:
+```ruby
+def level
+  # Calcula nível baseado em XP: sqrt(xp / 100) + 1
+  (Math.sqrt(xp_points / 100.0).floor + 1)
+end
+
+def xp_for_next_level
+  # XP necessário para próximo nível
+  ((level + 1 - 1) ** 2) * 100
+end
+
+def xp_progress_percentage
+  # Percentual de progresso para próximo nível (0-100)
+end
+```
+
+**Integração Discord**:
+- Email capturado automaticamente do Discord OAuth
+- Atualizado escopo OAuth: "identify guilds email"
+
+#### `GameCharacter` (Novo)
+
+**Validações**:
+- `nickname`: presença, 2-50 caracteres
+- `level`: presença, integer, 1-999
+- `power`: presença, integer, ≥0
+- `user_id`: uniqueness (um personagem por usuário)
+- `status_screenshot`: formato (JPEG/PNG/WEBP), tamanho (máx 5MB)
+
+**Relacionamentos**:
+- `belongs_to :user`
+- `has_one_attached :status_screenshot`
+
+---
+
+### 🏗️ Refatoração de Controllers
+
+#### Arquitetura Anterior
+- **Problema**: Único `AccessController` com todas as responsabilidades
+- **Issues**: Violação do princípio de responsabilidade única, difícil manutenção
+
+#### Nova Arquitetura (Namespace `Access`)
+
+**1. `AccessController` (Base)**
+- Controller pai para área autenticada
+- `before_action :require_login`
+- Helper: `load_user_context` (carrega @user e @guild)
+
+**2. `Access::DashboardController`**
+- Responsabilidade: Páginas principais e dashboard
+- Actions:
+  - `index` - Página inicial (/)
+  - `show` - Dashboard principal (/dashboard)
+  - `restricted` - Acesso restrito (/restricted)
+
+**3. `Access::ProfilesController`**
+- Responsabilidade: Gerenciamento de perfil do usuário
+- Actions:
+  - `show` - Visualizar perfil (/profile)
+  - `edit` - Formulário de edição (/profile/edit)
+  - `update` - Atualizar perfil (PATCH /profile)
+- Strong Parameters: `email`, `discord_nickname`
+
+**4. `Access::CharactersController`**
+- Responsabilidade: CRUD de personagens do jogo
+- Actions:
+  - `new` - Formulário novo personagem
+  - `create` - Criar personagem
+  - `edit` - Formulário editar
+  - `update` - Atualizar personagem
+  - `destroy` - Remover personagem
+- Strong Parameters: `nickname`, `level`, `power`, `status_screenshot`
+- Validações: Previne personagens duplicados
+
+---
+
+### 🛣️ Rotas Atualizadas
+
+```ruby
+# Landing e Dashboard
+root "access/dashboard#index"
+get "/dashboard", to: "access/dashboard#show"
+get "/restricted", to: "access/dashboard#restricted"
+
+# Perfil
+get "/profile", to: "access/profiles#show"
+get "/profile/edit", to: "access/profiles#edit"
+patch "/profile", to: "access/profiles#update"
+
+# Personagens
+get "/character/new", to: "access/characters#new"
+post "/character", to: "access/characters#create"
+get "/character/edit", to: "access/characters#edit"
+patch "/character", to: "access/characters#update"
+delete "/character", to: "access/characters#destroy"
+```
+
+---
+
+### 📁 Estrutura de Views
+
+```
+app/views/access/
+├── dashboard/
+│   ├── index.html.erb       # Landing page
+│   ├── show.html.erb        # Dashboard principal
+│   └── restricted.html.erb  # Acesso restrito
+├── profiles/
+│   ├── show.html.erb        # Visualizar perfil
+│   └── edit.html.erb        # Editar perfil
+└── characters/
+    ├── new.html.erb         # Novo personagem
+    └── edit.html.erb        # Editar personagem
+```
+
+**Organização**:
+- Views separadas por responsabilidade
+- Tema neon consistente em todas as páginas
+- JavaScript inline para preview de imagens
+- Formulários com validação HTML5
+
+---
+
+### ✨ Funcionalidades por Página
+
+#### Dashboard (/dashboard)
+- Cards de estatísticas: Guild, XP, Moeda, Nível
+- Grid de módulos: Eventos, Missões, Conquistas, Certificados, Perfil, Admin
+- Botões de ação rápida
+- **Requisito**: Login + acesso à guild
+
+#### Perfil (/profile)
+- Header com avatar, nome, badges
+- Card de personagem do jogo (se cadastrado)
+- Estatísticas: XP, moeda, nível, conquistas
+- Roles da guild com badges coloridos
+- Grid de conquistas (achievements)
+- Lista de certificados com níveis
+- Timeline de eventos recentes
+- Botões: Editar Perfil, Editar Personagem
+
+#### Editar Perfil (/profile/edit)
+- **Campos Editáveis**:
+  - Email (obrigatório)
+  - Apelido customizado (opcional)
+- **Campos Read-Only**:
+  - Username Discord
+  - Discord ID
+  - XP, Moeda, Nível (gerenciados pelo sistema)
+- Avisos sobre sincronização Discord
+- Última atualização timestamp
+
+#### Personagem do Jogo
+
+**Novo Personagem** (/character/new):
+- Instruções passo a passo
+- Formulário: nickname, nível (1-999), poder
+- Upload de screenshot com preview
+- Validações frontend e backend
+
+**Editar Personagem** (/character/edit):
+- Exibe dados atuais do personagem
+- Permite atualizar todos os campos
+- Screenshot opcional (mantém atual se não enviar)
+- Botão de remover com confirmação
+- Preview da nova imagem antes do upload
+
+---
+
+### 🔒 Segurança e Validações
+
+#### Autenticação e Autorização
+- Todos os controllers herdam `AccessController` com `require_login`
+- Dashboard requer `require_guild_access`
+- Usuário só acessa seus próprios dados (profile, character)
+
+#### Validações de Upload
+- Formatos aceitos: JPEG, JPG, PNG, WEBP
+- Tamanho máximo: 5MB
+- Validação no modelo e formulário HTML5
+
+#### Strong Parameters
+- Apenas campos permitidos são atualizados
+- `user`: email, discord_nickname
+- `game_character`: nickname, level, power, status_screenshot
+
+---
+
+### 🎯 Melhorias de UX
+
+- **Progress Bar**: Barra de progresso de XP para próximo nível
+- **Badges**: Visual claro para admin, guild, roles
+- **Preview de Imagens**: JavaScript para preview antes do upload
+- **Botão Limpar**: Remove imagem selecionada no upload
+- **Confirmações**: Confirmação antes de deletar personagem
+- **Mensagens Flash**: Feedback visual com tema neon (sucesso/erro)
+- **Timestamps**: "X dias atrás", "atualizado há X minutos"
+- **Formatação**: Números com delimitadores (12,500 poder)
+- **Click to Expand**: Screenshots abrem em nova aba
+
+---
+
+### 📊 Sistema de Níveis
+
+**Fórmula**: `level = sqrt(xp_points / 100) + 1`
+
+**Progressão**:
+- Nível 1: 0-99 XP
+- Nível 2: 100-399 XP
+- Nível 3: 400-899 XP
+- Nível 4: 900-1599 XP
+- Progressão quadrática contínua
+
+**Métodos**:
+- `user.level` - Nível atual
+- `user.xp_for_next_level` - XP necessário para próximo nível
+- `user.xp_progress_percentage` - Percentual de progresso (0-100%)
+
+---
+
+### 🧪 Arquivos de Teste (A Implementar)
+
+```
+test/models/
+  game_character_test.rb
+
+test/controllers/access/
+  dashboard_controller_test.rb
+  profiles_controller_test.rb
+  characters_controller_test.rb
+
+test/fixtures/
+  game_characters.yml
+```
+
+---
+
+### 📚 Documentação Adicional
+
+- **ActiveAdmin**: Email field adicionado ao painel de usuários
+- **Ransack**: Email incluído em `ransackable_attributes`
+- **Discord Sync**: Email sincronizado automaticamente no login
+- **ActiveStorage**: Configurado para screenshots de personagens
+
+---
+
+### 🔄 Breaking Changes
+
+- ⚠️ **Rotas**: Mudança de `access#action` para `access/controller#action`
+- ⚠️ **Views**: Estrutura movida de `app/views/access/` para `app/views/access/[controller]/`
+- ⚠️ **Controllers**: `AccessController` agora é classe base, não tem actions
+
+**Migração Necessária**:
+- Views antigas movidas automaticamente
+- Rotas atualizadas para novo namespace
+- Nenhuma ação necessária do usuário final
+
+---
+
+### ✅ Benefícios da Refatoração
+
+1. **Responsabilidade Única**: Cada controller gerencia uma entidade
+2. **Código Limpo**: Métodos menores e focados
+3. **Fácil Manutenção**: Mudanças isoladas por funcionalidade
+4. **RESTful**: Segue convenções Rails
+5. **Escalável**: Fácil adicionar novos controllers no namespace
+6. **Herança Clara**: AccessController provê base de autenticação
+7. **Testabilidade**: Controllers menores são mais fáceis de testar
+
+---
+
 ## Data: 8 de Fevereiro de 2026
 
 ### 🔐 Integração Discord OAuth e Sistema de Controle de Acesso

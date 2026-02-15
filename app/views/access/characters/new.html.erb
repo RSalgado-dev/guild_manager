@@ -1,0 +1,214 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta bg-clip-text text-transparent">
+          🎮 Cadastrar Personagem
+        </h1>
+        <%= link_to profile_path, class: "px-4 py-2 bg-dark-surface border border-neon-cyan/30 rounded-lg text-neon-cyan hover:bg-neon-cyan/10 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300" do %>
+          ← Voltar ao Perfil
+        <% end %>
+      </div>
+      <p class="text-gray-400">Cadastre seu personagem do jogo com um print da tela de status</p>
+    </div>
+
+    <% if flash[:notice] %>
+      <div class="mb-6 p-4 bg-neon-green/10 border border-neon-green/30 rounded-lg">
+        <p class="text-neon-green"><%= flash[:notice] %></p>
+      </div>
+    <% end %>
+
+    <% if flash[:alert] %>
+      <div class="mb-6 p-4 bg-neon-magenta/10 border border-neon-magenta/30 rounded-lg">
+        <p class="text-neon-magenta"><%= flash[:alert] %></p>
+      </div>
+    <% end %>
+
+    <!-- Instruções -->
+    <div class="card-neon mb-6 p-6">
+      <div class="flex items-start space-x-3">
+        <span class="text-2xl">📋</span>
+        <div class="flex-1">
+          <h3 class="text-lg font-semibold text-neon-cyan mb-3">Instruções</h3>
+          <ul class="space-y-2 text-gray-300 text-sm">
+            <li class="flex items-start space-x-2">
+              <span class="text-neon-purple mt-1">1.</span>
+              <span>Abra o jogo e vá até a tela de <strong class="text-white">status do personagem</strong></span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-neon-purple mt-1">2.</span>
+              <span>Tire um <strong class="text-white">print/screenshot</strong> da tela completa mostrando as informações</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-neon-purple mt-1">3.</span>
+              <span>Preencha os campos abaixo com <strong class="text-white">nickname, nível e poder</strong> exatamente como aparecem no jogo</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-neon-purple mt-1">4.</span>
+              <span>Envie o <strong class="text-white">print da tela de status</strong> para validação</span>
+            </li>
+          </ul>
+          
+          <div class="mt-4 pt-4 border-t border-gray-700">
+            <p class="text-xs text-gray-500">
+              <span class="text-neon-green">✓</span> Formatos aceitos: JPG, PNG ou WEBP (máx. 5MB)
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card-neon p-8">
+      <%= form_with model: @character, url: create_character_path, method: :post, local: true, class: "space-y-8" do |f| %>
+        
+        <!-- Informações do Personagem -->
+        <div>
+          <h3 class="text-xl font-semibold text-neon-purple mb-6 flex items-center space-x-2">
+            <span>⚔️</span>
+            <span>Dados do Personagem</span>
+          </h3>
+          
+          <div class="space-y-6">
+            <!-- Nickname -->
+            <div>
+              <label for="game_character_nickname" class="block text-sm font-medium text-gray-300 mb-2">
+                🏷️ Nickname do Personagem
+                <span class="text-neon-cyan">*</span>
+              </label>
+              <%= f.text_field :nickname, 
+                  required: true,
+                  placeholder: "Ex: ShadowKnight99",
+                  maxlength: 50,
+                  class: "w-full px-4 py-3 bg-dark-bg border border-neon-cyan/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:shadow-neon-cyan transition-all duration-300" %>
+              <p class="text-xs text-gray-500 mt-1">
+                Digite o nome do seu personagem exatamente como aparece no jogo
+              </p>
+            </div>
+
+            <!-- Grid: Level e Power -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <!-- Level -->
+              <div>
+                <label for="game_character_level" class="block text-sm font-medium text-gray-300 mb-2">
+                  📊 Nível
+                  <span class="text-neon-cyan">*</span>
+                </label>
+                <%= f.number_field :level, 
+                    required: true,
+                    min: 1,
+                    max: 999,
+                    placeholder: "Ex: 85",
+                    class: "w-full px-4 py-3 bg-dark-bg border border-neon-purple/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-purple focus:shadow-neon-purple transition-all duration-300" %>
+                <p class="text-xs text-gray-500 mt-1">
+                  Nível atual do personagem (1-999)
+                </p>
+              </div>
+
+              <!-- Power -->
+              <div>
+                <label for="game_character_power" class="block text-sm font-medium text-gray-300 mb-2">
+                  ⚡ Poder
+                  <span class="text-neon-cyan">*</span>
+                </label>
+                <%= f.number_field :power, 
+                    required: true,
+                    min: 0,
+                    placeholder: "Ex: 12500",
+                    class: "w-full px-4 py-3 bg-dark-bg border border-neon-magenta/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-magenta focus:shadow-neon-magenta transition-all duration-300" %>
+                <p class="text-xs text-gray-500 mt-1">
+                  Poder total do personagem
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Upload da Imagem -->
+        <div class="pt-6 border-t border-gray-700">
+          <h3 class="text-xl font-semibold text-neon-cyan mb-6 flex items-center space-x-2">
+            <span>📸</span>
+            <span>Print da Tela de Status</span>
+          </h3>
+          
+          <div class="space-y-4">
+            <div class="relative">
+              <%= f.file_field :status_screenshot,
+                  accept: "image/jpeg,image/jpg,image/png,image/webp",
+                  required: true,
+                  class: "hidden",
+                  id: "file-upload" %>
+              
+              <label for="file-upload" class="flex flex-col items-center justify-center w-full h-64 border-2 border-dashed border-neon-cyan/30 rounded-lg cursor-pointer hover:border-neon-cyan hover:bg-neon-cyan/5 transition-all duration-300">
+                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                  <span class="text-6xl mb-4">🖼️</span>
+                  <p class="mb-2 text-sm text-gray-400">
+                    <span class="font-semibold text-neon-cyan">Clique para fazer upload</span> ou arraste o arquivo
+                  </p>
+                  <p class="text-xs text-gray-500">PNG, JPG, WEBP (máx. 5MB)</p>
+                </div>
+              </label>
+            </div>
+            
+            <div id="preview-container" class="hidden">
+              <p class="text-sm text-gray-400 mb-2">Preview:</p>
+              <div class="relative inline-block">
+                <img id="image-preview" src="" alt="Preview" class="max-w-full h-64 rounded-lg border border-neon-cyan/30">
+                <button type="button" onclick="clearImage()" class="absolute top-2 right-2 bg-neon-magenta/80 hover:bg-neon-magenta text-white rounded-full w-8 h-8 flex items-center justify-center transition-all">
+                  ✕
+                </button>
+              </div>
+            </div>
+
+            <div class="p-4 bg-dark-bg/50 border border-gray-800 rounded-lg">
+              <p class="text-xs text-gray-600 flex items-start space-x-2">
+                <span class="text-yellow-400">⚠️</span>
+                <span>
+                  <strong class="text-gray-500">Importante:</strong>
+                  A imagem deve mostrar claramente a tela de status do personagem do jogo. 
+                  Imagens inadequadas podem resultar em rejeição do cadastro.
+                </span>
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-700">
+          <div class="flex space-x-4">
+            <%= f.submit "💾 Cadastrar Personagem", 
+                class: "px-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold hover:shadow-neon-cyan transition-all duration-300 cursor-pointer animate-pulse-slow" %>
+            
+            <%= link_to profile_path, class: "px-6 py-3 bg-dark-surface border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-all duration-300" do %>
+              ❌ Cancelar
+            <% end %>
+          </div>
+        </div>
+
+      <% end %>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  document.getElementById('file-upload').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        document.getElementById('image-preview').src = e.target.result;
+        document.getElementById('preview-container').classList.remove('hidden');
+      }
+      reader.readAsDataURL(file);
+    }
+  });
+
+  function clearImage() {
+    document.getElementById('file-upload').value = '';
+    document.getElementById('preview-container').classList.add('hidden');
+    document.getElementById('image-preview').src = '';
+  }
+</script>

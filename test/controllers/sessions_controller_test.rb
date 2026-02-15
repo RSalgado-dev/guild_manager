@@ -31,6 +31,10 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     # Mock da verificação de role (sem role obrigatório)
     @guild.update(required_discord_role_id: nil)
+    # Stub do bot token
+    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    # Stub do bot token
+    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
 
     # Stub da API Discord
     stub_discord_user_guilds(
@@ -61,6 +65,9 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "deve criar audit log ao fazer login" do
+    # Stub do bot token
+    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+
     OmniAuth.config.test_mode = true
     OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new({
       provider: "discord",
@@ -155,6 +162,9 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
       required_discord_role_name: "Membro Verificado"
     )
 
+    # Stub do bot token
+    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+
     OmniAuth.config.test_mode = true
     OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new({
       provider: "discord",
@@ -194,15 +204,6 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
         { "id" => "987654321", "name" => "Outro Role" }
       ]
     )
-
-    # Mock da API Discord retornando sem o role necessário
-    response_body = {
-      "user" => { "id" => "222222222" },
-      "roles" => [ "987654321" ]
-    }.to_json
-
-    stub_request(:get, "https://discord.com/api/v10/guilds/#{@guild.discord_guild_id}/members/222222222")
-      .to_return(status: 200, body: response_body, headers: { "Content-Type" => "application/json" })
 
     get "/auth/discord/callback"
 

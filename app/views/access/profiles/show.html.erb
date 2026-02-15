@@ -1,0 +1,393 @@
+<!-- Background com gradiente escuro e pattern -->
+<div class="min-h-screen bg-dark-bg relative overflow-hidden">
+  <!-- Animated background elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 w-96 h-96 bg-neon-cyan opacity-10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 bg-neon-magenta opacity-10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-neon-purple opacity-5 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen">
+    <!-- Header / Navbar -->
+    <header class="border-b border-gray-800 backdrop-blur-sm bg-dark-surface/50">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <%= link_to dashboard_path, class: "flex items-center gap-3 hover:opacity-80 transition-opacity" do %>
+              <span class="text-3xl">🏰</span>
+              <div>
+                <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
+                  GUILD SYSTEM
+                </h1>
+                <p class="text-neon-cyan/70 font-mono text-xs">[ PROFILE_VIEW ]</p>
+              </div>
+            <% end %>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <%= link_to edit_profile_path, class: "px-4 py-2 bg-dark-card border border-neon-purple/30 hover:border-neon-purple text-neon-purple rounded-lg transition-all duration-300 font-mono text-sm hover:shadow-neon-purple" do %>
+              ⚙️ Editar Perfil
+            <% end %>
+            <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-neon-cyan/30 hover:border-neon-cyan text-neon-cyan rounded-lg transition-all duration-300 font-mono text-sm" do %>
+              ← Dashboard
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Profile Header -->
+      <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-8 mb-8">
+        <div class="flex flex-col md:flex-row items-center md:items-start gap-8">
+          <!-- Avatar -->
+          <div class="flex-shrink-0">
+            <div class="relative">
+              <% if @user.discord_avatar_url.present? %>
+                <%= image_tag @user.discord_avatar_url, class: "w-40 h-40 rounded-full border-4 border-neon-purple shadow-neon-purple" %>
+              <% else %>
+                <div class="w-40 h-40 rounded-full border-4 border-neon-purple shadow-neon-purple bg-dark-bg flex items-center justify-center">
+                  <span class="text-8xl">👤</span>
+                </div>
+              <% end %>
+              <div class="absolute -bottom-2 -right-2 bg-neon-green rounded-full px-4 py-2 border-2 border-dark-bg shadow-neon-green">
+                <span class="text-sm font-bold text-dark-bg">LVL <%= @user.level %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- User Info -->
+          <div class="flex-1 text-center md:text-left">
+            <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta mb-2 animate-glow">
+              <%= @user.discord_username %>
+            </h2>
+            <p class="text-neon-cyan font-mono text-lg mb-4">
+              <% if @user.email.present? %>
+                <%= @user.email %>
+              <% else %>
+                <span class="text-gray-500">Discord ID: <%= @user.discord_id %></span>
+              <% end %>
+            </p>
+            
+            <div class="flex flex-wrap gap-2 justify-center md:justify-start mb-6">
+              <span class="px-3 py-1 bg-neon-purple/20 border border-neon-purple rounded-full text-neon-purple text-sm font-mono">
+                🏰 <%= @guild.name %>
+              </span>
+              <% if @user.admin? %>
+                <span class="px-3 py-1 bg-neon-magenta/20 border border-neon-magenta rounded-full text-neon-magenta text-sm font-mono">
+                  ⚙️ ADMIN
+                </span>
+              <% end %>
+              <span class="px-3 py-1 bg-neon-cyan/20 border border-neon-cyan rounded-full text-neon-cyan text-sm font-mono">
+                🎮 ID: <%= @user.id %>
+              </span>
+            </div>
+
+            <!-- XP Progress Bar -->
+            <div class="mb-4">
+              <div class="flex justify-between text-sm mb-2">
+                <span class="text-gray-400 font-mono">XP Progress</span>
+                <span class="text-neon-purple font-bold font-mono"><%= @user.xp_points % 100 %> / 100</span>
+              </div>
+              <div class="w-full h-3 bg-dark-bg rounded-full overflow-hidden border border-neon-purple/30">
+                <div class="h-full bg-gradient-to-r from-neon-purple to-neon-magenta shadow-neon-purple transition-all duration-500" 
+                     style="width: <%= (@user.xp_points % 100) %>%"></div>
+              </div>
+            </div>
+
+            <p class="text-gray-400 leading-relaxed">
+              Membro desde <%= @user.created_at.strftime("%d/%m/%Y") %> • 
+              <%= ((Time.now - @user.created_at) / 1.day).to_i %> dias na guild
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Left Column - Stats & Game Character -->
+        <div class="lg:col-span-1 space-y-6">
+          <!-- Game Character Card -->
+          <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-6">
+            <h3 class="text-neon-purple font-bold text-xl uppercase mb-6 flex items-center gap-2">
+              <span>🎮</span> Personagem do Jogo
+            </h3>
+            
+            <% if @user.game_character.present? %>
+              <% character = @user.game_character %>
+              
+              <!-- Character Screenshot -->
+              <div class="mb-4">
+                <% if character.status_screenshot.attached? %>
+                  <%= image_tag character.status_screenshot, 
+                      class: "w-full h-48 object-cover rounded-lg border-2 border-neon-purple/50 shadow-neon-purple hover:scale-105 transition-transform duration-300 cursor-pointer",
+                      alt: "Status do personagem #{character.nickname}",
+                      onclick: "window.open(this.src, '_blank')" %>
+                <% else %>
+                  <div class="w-full h-48 bg-dark-bg rounded-lg border-2 border-gray-700 flex items-center justify-center">
+                    <span class="text-6xl">⚔️</span>
+                  </div>
+                <% end %>
+              </div>
+              
+              <!-- Character Info -->
+              <div class="space-y-3">
+                <div class="p-3 bg-dark-bg rounded-lg border border-neon-cyan/20">
+                  <p class="text-xs text-gray-500 mb-1">Nickname</p>
+                  <p class="text-neon-cyan font-bold text-lg"><%= character.nickname %></p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                  <div class="p-3 bg-dark-bg rounded-lg border border-neon-purple/20">
+                    <p class="text-xs text-gray-500 mb-1">Nível</p>
+                    <p class="text-neon-purple font-bold text-xl"><%= character.level %></p>
+                  </div>
+                  
+                  <div class="p-3 bg-dark-bg rounded-lg border border-neon-magenta/20">
+                    <p class="text-xs text-gray-500 mb-1">Poder</p>
+                    <p class="text-neon-magenta font-bold text-xl"><%= number_with_delimiter(character.power) %></p>
+                  </div>
+                </div>
+                
+                <p class="text-xs text-gray-600 text-center mt-3">
+                  Atualizado <%= time_ago_in_words(character.updated_at) %> atrás
+                </p>
+              </div>
+              
+              <!-- Edit Button -->
+              <%= link_to edit_character_path, 
+                  class: "mt-4 w-full px-4 py-3 bg-gradient-to-r from-neon-purple to-neon-magenta rounded-lg text-white font-semibold hover:shadow-neon-purple transition-all duration-300 flex items-center justify-center gap-2" do %>
+                <span>⚙️</span>
+                <span>Editar Personagem</span>
+              <% end %>
+              
+            <% else %>
+              <!-- No Character -->
+              <div class="text-center py-8">
+                <span class="text-6xl mb-4 block">🎮</span>
+                <p class="text-gray-400 mb-6">Você ainda não cadastrou seu personagem do jogo</p>
+                
+                <%= link_to new_character_path, 
+                    class: "inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold hover:shadow-neon-cyan transition-all duration-300 animate-pulse-slow" do %>
+                  <span>➕</span>
+                  <span>Cadastrar Personagem</span>
+                <% end %>
+              </div>
+            <% end %>
+          </div>
+          
+          <!-- Stats Card -->
+          <div class="bg-dark-card border border-neon-cyan/30 rounded-lg p-6">
+            <h3 class="text-neon-cyan font-bold text-xl uppercase mb-6 flex items-center gap-2">
+              <span>📊</span> Estatísticas
+            </h3>
+            
+            <div class="space-y-4">
+              <div class="flex justify-between items-center p-3 bg-dark-bg rounded-lg border border-neon-purple/20">
+                <span class="text-gray-400 font-mono text-sm">Experience Points</span>
+                <span class="text-neon-purple font-bold text-xl"><%= @user.xp_points %></span>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 bg-dark-bg rounded-lg border border-neon-magenta/20">
+                <span class="text-gray-400 font-mono text-sm">Currency Balance</span>
+                <span class="text-neon-magenta font-bold text-xl"><%= @user.currency_balance %></span>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 bg-dark-bg rounded-lg border border-neon-green/20">
+                <span class="text-gray-400 font-mono text-sm">Current Level</span>
+                <span class="text-neon-green font-bold text-xl"><%= @user.level %></span>
+              </div>
+              
+              <div class="flex justify-between items-center p-3 bg-dark-bg rounded-lg border border-yellow-400/20">
+                <span class="text-gray-400 font-mono text-sm">Achievements</span>
+                <span class="text-yellow-400 font-bold text-xl"><%= @achievements.count %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Roles Card -->
+          <div class="bg-dark-card border border-neon-magenta/30 rounded-lg p-6">
+            <h3 class="text-neon-magenta font-bold text-xl uppercase mb-6 flex items-center gap-2">
+              <span>👑</span> Roles da Guild
+            </h3>
+            
+            <% if @user_roles.any? %>
+              <div class="space-y-3">
+                <% @user_roles.each do |user_role| %>
+                  <div class="p-3 bg-dark-bg rounded-lg border border-neon-magenta/20 hover:border-neon-magenta transition-all duration-300">
+                    <div class="flex items-center justify-between mb-1">
+                      <span class="text-white font-bold"><%= user_role.role.name %></span>
+                      <span class="text-neon-green text-xs font-mono">ATIVO</span>
+                    </div>
+                    <% if user_role.role.description.present? %>
+                      <p class="text-gray-400 text-sm"><%= user_role.role.description %></p>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="text-center py-6">
+                <p class="text-gray-500 font-mono text-sm">Nenhuma role atribuída</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+
+        <!-- Right Column - Activities -->
+        <div class="lg:col-span-2 space-y-6">
+          <!-- Achievements Section -->
+          <div class="bg-dark-card border border-yellow-400/30 rounded-lg p-6">
+            <h3 class="text-yellow-400 font-bold text-xl uppercase mb-6 flex items-center gap-2">
+              <span>🏆</span> Conquistas Desbloqueadas
+            </h3>
+            
+            <% if @achievements.any? %>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <% @achievements.each do |user_achievement| %>
+                  <div class="p-4 bg-dark-bg rounded-lg border border-yellow-400/20 hover:border-yellow-400 hover:shadow-lg transition-all duration-300">
+                    <div class="flex items-center gap-3 mb-2">
+                      <span class="text-3xl"><%= user_achievement.achievement.icon_url || "🏆" %></span>
+                      <div class="flex-1">
+                        <h4 class="text-white font-bold"><%= user_achievement.achievement.name %></h4>
+                        <p class="text-gray-400 text-xs font-mono">
+                          <%= user_achievement.earned_at.strftime("%d/%m/%Y") %>
+                        </p>
+                      </div>
+                    </div>
+                    <% if user_achievement.achievement.description.present? %>
+                      <p class="text-gray-400 text-sm"><%= user_achievement.achievement.description %></p>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="text-center py-12 border-2 border-dashed border-gray-700 rounded-lg">
+                <span class="text-6xl mb-4 block opacity-30">🏆</span>
+                <p class="text-gray-500 font-mono">Nenhuma conquista desbloqueada ainda</p>
+                <p class="text-gray-600 text-sm mt-2">Complete missões e eventos para desbloquear!</p>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Certificates Section -->
+          <div class="bg-dark-card border border-neon-blue/30 rounded-lg p-6">
+            <h3 class="text-neon-blue font-bold text-xl uppercase mb-6 flex items-center gap-2">
+              <span>📜</span> Certificados Obtidos
+            </h3>
+            
+            <% if @certificates.any? %>
+              <div class="space-y-3">
+                <% @certificates.each do |user_certificate| %>
+                  <div class="p-4 bg-dark-bg rounded-lg border border-neon-blue/20 hover:border-neon-blue transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-3">
+                        <span class="text-3xl">📜</span>
+                        <div>
+                          <h4 class="text-white font-bold"><%= user_certificate.certificate.name %></h4>
+                          <p class="text-gray-400 text-xs font-mono">
+                            Emitido em: <%= user_certificate.granted_at.strftime("%d/%m/%Y") %>
+                          </p>
+                        </div>
+                      </div>
+                      <% if user_certificate.certificate.category.present? %>
+                        <span class="px-3 py-1 bg-neon-blue/20 border border-neon-blue rounded-full text-neon-blue text-sm font-mono">
+                          <%= user_certificate.certificate.category %>
+                        </span>
+                      <% end %>
+                    </div>
+                    <% if user_certificate.certificate.description.present? %>
+                      <p class="text-gray-400 text-sm pl-12"><%= user_certificate.certificate.description %></p>
+                    <% end %>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="text-center py-12 border-2 border-dashed border-gray-700 rounded-lg">
+                <span class="text-6xl mb-4 block opacity-30">📜</span>
+                <p class="text-gray-500 font-mono">Nenhum certificado obtido ainda</p>
+                <p class="text-gray-600 text-sm mt-2">Participe de eventos e complete requisitos!</p>
+              </div>
+            <% end %>
+          </div>
+
+          <!-- Recent Events -->
+          <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-6">
+            <h3 class="text-neon-purple font-bold text-xl uppercase mb-6 flex items-center gap-2">
+              <span>🎯</span> Eventos Recentes
+            </h3>
+            
+            <% if @recent_events.any? %>
+              <div class="space-y-3">
+                <% @recent_events.each do |participation| %>
+                  <div class="p-4 bg-dark-bg rounded-lg border border-neon-purple/20 hover:border-neon-purple transition-all duration-300">
+                    <div class="flex items-center justify-between mb-2">
+                      <div class="flex items-center gap-3">
+                        <span class="text-2xl">🎯</span>
+                        <div>
+                          <h4 class="text-white font-bold"><%= participation.event.title %></h4>
+                          <p class="text-gray-400 text-xs font-mono">
+                            <%= participation.created_at.strftime("%d/%m/%Y às %H:%M") %>
+                          </p>
+                        </div>
+                      </div>
+                      <% if participation.event.reward_xp.present? && participation.event.reward_xp > 0 && participation.attended %>
+                        <span class="px-3 py-1 bg-neon-green/20 border border-neon-green rounded-full text-neon-green text-sm font-mono">
+                          +<%= participation.event.reward_xp %> XP
+                        </span>
+                      <% end %>
+                    </div>
+                  </div>
+                <% end %>
+              </div>
+            <% else %>
+              <div class="text-center py-12 border-2 border-dashed border-gray-700 rounded-lg">
+                <span class="text-6xl mb-4 block opacity-30">🎯</span>
+                <p class="text-gray-500 font-mono">Nenhum evento participado ainda</p>
+                <p class="text-gray-600 text-sm mt-2">Participe de eventos para ganhar XP e moedas!</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
+        <%= link_to dashboard_path, class: "group relative overflow-hidden bg-gradient-to-r from-neon-cyan to-neon-blue p-[2px] rounded-lg hover:shadow-neon-cyan transition-all duration-300" do %>
+          <div class="bg-dark-bg rounded-lg p-4 flex items-center justify-center gap-3">
+            <span class="text-3xl group-hover:animate-pulse">🏠</span>
+            <span class="text-neon-cyan font-bold uppercase tracking-wide">Voltar ao Dashboard</span>
+          </div>
+        <% end %>
+
+        <% if @guild.discord_guild_id.present? %>
+          <a href="https://discord.com/channels/<%= @guild.discord_guild_id %>" 
+             target="_blank"
+             class="group relative overflow-hidden bg-gradient-to-r from-neon-purple to-neon-magenta p-[2px] rounded-lg hover:shadow-neon-purple transition-all duration-300">
+            <div class="bg-dark-bg rounded-lg p-4 flex items-center justify-center gap-3">
+              <span class="text-3xl group-hover:animate-pulse">💬</span>
+              <span class="text-neon-purple font-bold uppercase tracking-wide">Servidor Discord</span>
+            </div>
+          </a>
+        <% end %>
+
+        <%= button_to logout_path, method: :delete, class: "group relative overflow-hidden bg-gradient-to-r from-gray-600 to-gray-700 p-[2px] rounded-lg hover:shadow-lg transition-all duration-300", data: { turbo: false } do %>
+          <div class="bg-dark-bg rounded-lg p-4 flex items-center justify-center gap-3">
+            <span class="text-3xl group-hover:animate-pulse">🚪</span>
+            <span class="text-gray-300 font-bold uppercase tracking-wide">Logout</span>
+          </div>
+        <% end %>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-12">
+      <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="text-center">
+          <p class="text-gray-500 font-mono text-sm">
+            [ USER_PROFILE_SYSTEM ] - Última atualização: <%= Time.now.strftime("%d/%m/%Y %H:%M") %>
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

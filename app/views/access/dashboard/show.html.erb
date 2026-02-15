@@ -1,0 +1,272 @@
+<!-- Background com gradiente escuro e pattern -->
+<div class="min-h-screen bg-dark-bg relative overflow-hidden">
+  <!-- Animated background elements -->
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-20 left-10 w-96 h-96 bg-neon-cyan opacity-10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 bg-neon-magenta opacity-10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+    <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-neon-purple opacity-5 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen">
+    <!-- Header / Navbar -->
+    <header class="border-b border-gray-800 backdrop-blur-sm bg-dark-surface/50">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex items-center justify-between">
+          <div class="flex items-center gap-4">
+            <span class="text-4xl">🏰</span>
+            <div>
+              <h1 class="text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
+                GUILD SYSTEM
+              </h1>
+              <p class="text-neon-cyan/70 font-mono text-xs">[ DASHBOARD_V1.0 ]</p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-4">
+            <%= link_to profile_path, class: "flex items-center gap-4 hover:opacity-80 transition-opacity" do %>
+              <% if @user.discord_avatar_url.present? %>
+                <%= image_tag @user.discord_avatar_url, class: "w-10 h-10 rounded-full border-2 border-neon-cyan shadow-neon-cyan" %>
+              <% end %>
+              <div class="text-right hidden md:block">
+                <p class="text-white font-bold text-sm"><%= @user.discord_username %></p>
+                <p class="text-gray-400 text-xs font-mono"><%= @guild.name %></p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8">
+      <!-- Welcome Section -->
+      <div class="mb-8">
+        <h2 class="text-4xl md:text-5xl font-black text-white mb-2">
+          Bem-vindo, <span class="text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple"><%= @user.discord_username.split('#').first %></span>! 
+        </h2>
+        <p class="text-gray-400 font-mono text-lg">
+          [ SISTEMA_OPERACIONAL: <span class="text-neon-green">ONLINE</span> ]
+        </p>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <!-- Guild -->
+        <div class="bg-dark-card border border-neon-cyan/30 rounded-lg p-6 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-neon-cyan/70 text-sm font-mono uppercase">Guild</span>
+            <span class="text-3xl">🏰</span>
+          </div>
+          <p class="text-white text-xl font-bold truncate mb-1"><%= @guild.name %></p>
+          <p class="text-gray-500 text-xs font-mono">ID: <%= @guild.id %></p>
+        </div>
+
+        <!-- XP -->
+        <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-6 hover:border-neon-purple hover:shadow-neon-purple transition-all duration-300">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-neon-purple/70 text-sm font-mono uppercase">Experience</span>
+            <span class="text-3xl">⚡</span>
+          </div>
+          <p class="text-white text-2xl font-bold"><%= @user.xp_points %></p>
+          <p class="text-gray-500 text-xs font-mono">PONTOS XP</p>
+        </div>
+
+        <!-- Currency -->
+        <div class="bg-dark-card border border-neon-magenta/30 rounded-lg p-6 hover:border-neon-magenta hover:shadow-neon-magenta transition-all duration-300">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-neon-magenta/70 text-sm font-mono uppercase">Currency</span>
+            <span class="text-3xl">💎</span>
+          </div>
+          <p class="text-white text-2xl font-bold"><%= @user.currency_balance %></p>
+          <p class="text-gray-500 text-xs font-mono">MOEDAS</p>
+        </div>
+
+        <!-- Level -->
+        <div class="bg-dark-card border border-neon-green/30 rounded-lg p-6 hover:border-neon-green hover:shadow-neon-green transition-all duration-300">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-neon-green/70 text-sm font-mono uppercase">Level</span>
+            <span class="text-3xl">🎖️</span>
+          </div>
+          <p class="text-white text-2xl font-bold"><%= @user.level %></p>
+          <p class="text-gray-500 text-xs font-mono">NÍVEL ATUAL</p>
+        </div>
+      </div>
+
+      <!-- Modules Grid -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <span class="text-neon-cyan">▶</span> MÓDULOS DO SISTEMA
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <!-- Events Module -->
+          <div class="group bg-dark-card border border-neon-cyan/20 rounded-lg p-6 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-5xl group-hover:animate-pulse">🎯</span>
+                <div>
+                  <h4 class="text-neon-cyan font-bold text-lg uppercase">Eventos</h4>
+                  <p class="text-gray-400 text-sm font-mono">Event Manager</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">
+              Gerencie e participe de eventos da guild. Acompanhe sua participação e pontuação.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-mono">Status:</span>
+              <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
+            </div>
+          </div>
+
+          <!-- Missions Module -->
+          <div class="group bg-dark-card border border-neon-purple/20 rounded-lg p-6 hover:border-neon-purple hover:shadow-neon-purple transition-all duration-300 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-5xl group-hover:animate-pulse">📋</span>
+                <div>
+                  <h4 class="text-neon-purple font-bold text-lg uppercase">Missões</h4>
+                  <p class="text-gray-400 text-sm font-mono">Quest System</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">
+              Complete missões para ganhar XP e moedas. Acompanhe seu progresso em tempo real.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-mono">Status:</span>
+              <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
+            </div>
+          </div>
+
+          <!-- Achievements Module -->
+          <div class="group bg-dark-card border border-neon-magenta/20 rounded-lg p-6 hover:border-neon-magenta hover:shadow-neon-magenta transition-all duration-300 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-5xl group-hover:animate-pulse">🏆</span>
+                <div>
+                  <h4 class="text-neon-magenta font-bold text-lg uppercase">Conquistas</h4>
+                  <p class="text-gray-400 text-sm font-mono">Achievements</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">
+              Desbloqueie conquistas especiais e mostre suas habilidades para a guild.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-mono">Status:</span>
+              <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
+            </div>
+          </div>
+
+          <!-- Certificates Module -->
+          <div class="group bg-dark-card border border-yellow-400/20 rounded-lg p-6 hover:border-yellow-400 hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-5xl group-hover:animate-pulse">📜</span>
+                <div>
+                  <h4 class="text-yellow-400 font-bold text-lg uppercase">Certificados</h4>
+                  <p class="text-gray-400 text-sm font-mono">Certifications</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">
+              Obtenha certificados oficiais da guild e valide suas competências.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-mono">Status:</span>
+              <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
+            </div>
+          </div>
+
+          <!-- Profile Module -->
+          <%= link_to profile_path, class: "group bg-dark-card border border-neon-blue/20 rounded-lg p-6 hover:border-neon-blue hover:shadow-lg transition-all duration-300 block" do %>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-5xl group-hover:animate-pulse">👤</span>
+                <div>
+                  <h4 class="text-neon-blue font-bold text-lg uppercase">Perfil</h4>
+                  <p class="text-gray-400 text-sm font-mono">User Profile</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">
+              Visualize e edite suas informações de perfil, roles e estatísticas pessoais.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-mono">Status:</span>
+              <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
+            </div>
+          <% end %>
+
+          <!-- Admin Panel (if admin) -->
+          <% if @user.admin? %>
+            <%= link_to admin_root_path, class: "group bg-dark-card border border-neon-pink/20 rounded-lg p-6 hover:border-neon-pink hover:shadow-lg transition-all duration-300 block" do %>
+              <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center gap-3">
+                  <span class="text-5xl group-hover:animate-pulse">⚙️</span>
+                  <div>
+                    <h4 class="text-neon-pink font-bold text-lg uppercase">Admin</h4>
+                    <p class="text-gray-400 text-sm font-mono">Control Panel</p>
+                  </div>
+                </div>
+              </div>
+              <p class="text-gray-400 text-sm mb-4">
+                Acesse o painel administrativo para gerenciar todo o sistema da guild.
+              </p>
+              <div class="flex items-center justify-between text-xs">
+                <span class="text-gray-500 font-mono">Status:</span>
+                <span class="text-neon-green font-bold font-mono">ADMIN_ACCESS</span>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Quick Actions -->
+      <div class="mb-8">
+        <h3 class="text-2xl font-bold text-white mb-6 flex items-center gap-3">
+          <span class="text-neon-magenta">▶</span> AÇÕES RÁPIDAS
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <%= button_to logout_path, method: :delete, class: "group relative overflow-hidden bg-gradient-to-r from-gray-600 to-gray-700 p-[2px] rounded-lg hover:shadow-lg transition-all duration-300", data: { turbo: false } do %>
+            <div class="bg-dark-bg rounded-lg p-4 flex items-center justify-center gap-3">
+              <span class="text-3xl group-hover:animate-pulse">🚪</span>
+              <span class="text-gray-300 font-bold uppercase tracking-wide">Logout</span>
+            </div>
+          <% end %>
+
+          <% if @guild.discord_guild_id.present? %>
+            <a href="https://discord.com/channels/<%= @guild.discord_guild_id %>" 
+               target="_blank"
+               class="group relative overflow-hidden bg-gradient-to-r from-neon-cyan to-neon-blue p-[2px] rounded-lg hover:shadow-neon-cyan transition-all duration-300">
+              <div class="bg-dark-bg rounded-lg p-4 flex items-center justify-center gap-3">
+                <span class="text-3xl group-hover:animate-pulse">💬</span>
+                <span class="text-neon-cyan font-bold uppercase tracking-wide">Discord</span>
+              </div>
+            </a>
+          <% end %>
+
+          <%= link_to root_path, class: "group relative overflow-hidden bg-gradient-to-r from-neon-purple to-neon-magenta p-[2px] rounded-lg hover:shadow-neon-purple transition-all duration-300" do %>
+            <div class="bg-dark-bg rounded-lg p-4 flex items-center justify-center gap-3">
+              <span class="text-3xl group-hover:animate-pulse">🏠</span>
+              <span class="text-neon-purple font-bold uppercase tracking-wide">Início</span>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-800 mt-12">
+      <div class="max-w-7xl mx-auto px-4 py-6">
+        <div class="text-center">
+          <p class="text-gray-500 font-mono text-sm">
+            [ GUILD_SYSTEM_V1.0 ] - © 2026 - All systems operational
+          </p>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>

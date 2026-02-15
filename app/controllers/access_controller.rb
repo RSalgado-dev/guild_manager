@@ -1,11 +1,12 @@
+# Controller base para área de acesso (usuários logados)
+# Todos os controllers dentro do namespace Access herdam deste controller
 class AccessController < ApplicationController
-  before_action :require_login, except: [ :index ]
+  before_action :require_login
 
-  def index
-    # Página initial - mostra opções de login ou dashboard
-  end
+  private
 
-  def restricted
+  def load_user_context
+    @user = current_user
     @guild = current_user.guild
   end
 end

@@ -1,0 +1,200 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="max-w-4xl mx-auto">
+    
+    <!-- Header -->
+    <div class="mb-8">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-4xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta bg-clip-text text-transparent">
+          ⚙️ Editar Perfil
+        </h1>
+        <%= link_to profile_path, class: "px-4 py-2 bg-dark-surface border border-neon-cyan/30 rounded-lg text-neon-cyan hover:bg-neon-cyan/10 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300" do %>
+          ← Voltar ao Perfil
+        <% end %>
+      </div>
+      <p class="text-gray-400">Atualize suas informações pessoais abaixo</p>
+    </div>
+
+    <% if flash[:notice] %>
+      <div class="mb-6 p-4 bg-neon-green/10 border border-neon-green/30 rounded-lg">
+        <p class="text-neon-green"><%= flash[:notice] %></p>
+      </div>
+    <% end %>
+
+    <% if flash[:alert] %>
+      <div class="mb-6 p-4 bg-neon-magenta/10 border border-neon-magenta/30 rounded-lg">
+        <p class="text-neon-magenta"><%= flash[:alert] %></p>
+      </div>
+    <% end %>
+
+    <!-- Card de Informação -->
+    <div class="card-neon mb-6 p-6">
+      <div class="flex items-start space-x-3 mb-4">
+        <span class="text-2xl">ℹ️</span>
+        <div>
+          <h3 class="text-lg font-semibold text-neon-cyan mb-2">O que você pode editar?</h3>
+          <ul class="space-y-2 text-gray-300 text-sm">
+            <li class="flex items-center space-x-2">
+              <span class="text-neon-green">✓</span>
+              <span><strong class="text-white">Email:</strong> Seu endereço de e-mail para contato e notificações</span>
+            </li>
+            <li class="flex items-center space-x-2">
+              <span class="text-neon-green">✓</span>
+              <span><strong class="text-white">Apelido:</strong> Nome customizado para exibição (diferente do username do Discord)</span>
+            </li>
+          </ul>
+          
+          <div class="mt-4 pt-4 border-t border-gray-700">
+            <p class="text-xs text-gray-500">
+              <span class="text-neon-magenta">⚠️ Dados sincronizados com Discord:</span>
+              Seu username, avatar e outras informações do Discord são atualizadas automaticamente quando você faz login.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Formulário de Edição -->
+    <div class="card-neon p-8">
+      <%= form_with model: @user, url: update_profile_path, method: :patch, local: true, class: "space-y-6" do |f| %>
+        
+        <!-- Informações do Discord (READ-ONLY) -->
+        <div class="pb-6 border-b border-gray-700">
+          <h3 class="text-xl font-semibold text-neon-purple mb-4 flex items-center space-x-2">
+            <span>🎮</span>
+            <span>Informações do Discord</span>
+            <span class="text-xs text-gray-500 font-normal">(Somente leitura)</span>
+          </h3>
+          
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Username do Discord</label>
+              <div class="px-4 py-3 bg-dark-bg/50 border border-gray-700 rounded-lg text-gray-500">
+                <%= @user.discord_username %>
+              </div>
+              <p class="text-xs text-gray-600 mt-1">Sincronizado automaticamente</p>
+            </div>
+            
+            <div>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Discord ID</label>
+              <div class="px-4 py-3 bg-dark-bg/50 border border-gray-700 rounded-lg text-gray-500 font-mono text-sm">
+                <%= @user.discord_id %>
+              </div>
+              <p class="text-xs text-gray-600 mt-1">Identificador único do Discord</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Campos Editáveis -->
+        <div>
+          <h3 class="text-xl font-semibold text-neon-cyan mb-4 flex items-center space-x-2">
+            <span>✏️</span>
+            <span>Informações Editáveis</span>
+          </h3>
+          
+          <div class="space-y-6">
+            <!-- Email -->
+            <div>
+              <label for="user_email" class="block text-sm font-medium text-gray-300 mb-2">
+                📧 Email
+                <span class="text-neon-cyan">*</span>
+              </label>
+              <%= f.email_field :email, 
+                  required: true,
+                  placeholder: "seu.email@exemplo.com",
+                  class: "w-full px-4 py-3 bg-dark-bg border border-neon-cyan/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-cyan focus:shadow-neon-cyan transition-all duration-300" %>
+              <p class="text-xs text-gray-500 mt-1">
+                Usado para notificações e comunicação importante
+              </p>
+            </div>
+
+            <!-- Discord Nickname -->
+            <div>
+              <label for="user_discord_nickname" class="block text-sm font-medium text-gray-300 mb-2">
+                🏷️ Apelido Customizado
+                <span class="text-gray-500 text-xs font-normal">(opcional)</span>
+              </label>
+              <%= f.text_field :discord_nickname, 
+                  placeholder: "Como você quer ser chamado?",
+                  maxlength: 50,
+                  class: "w-full px-4 py-3 bg-dark-bg border border-neon-purple/30 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:border-neon-purple focus:shadow-neon-purple transition-all duration-300" %>
+              <p class="text-xs text-gray-500 mt-1">
+                Se deixado em branco, seu username do Discord será usado. Máximo de 50 caracteres.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Estatísticas (READ-ONLY) -->
+        <div class="pt-6 border-t border-gray-700">
+          <h3 class="text-xl font-semibold text-neon-magenta mb-4 flex items-center space-x-2">
+            <span>📊</span>
+            <span>Estatísticas</span>
+            <span class="text-xs text-gray-500 font-normal">(Gerenciadas pelo sistema)</span>
+          </h3>
+          
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
+              <div class="text-2xl font-bold text-neon-cyan"><%= @user.xp_points %></div>
+              <div class="text-xs text-gray-500 mt-1">XP Total</div>
+            </div>
+            
+            <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
+              <div class="text-2xl font-bold text-neon-green"><%= @user.currency_balance %></div>
+              <div class="text-xs text-gray-500 mt-1">Moeda</div>
+            </div>
+            
+            <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
+              <div class="text-2xl font-bold text-neon-purple"><%= @user.level %></div>
+              <div class="text-xs text-gray-500 mt-1">Nível</div>
+            </div>
+            
+            <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
+              <div class="text-2xl font-bold text-neon-magenta">
+                <% if @user.guild %>
+                  <%= @user.guild.name.first %>
+                <% else %>
+                  ?
+                <% end %>
+              </div>
+              <div class="text-xs text-gray-500 mt-1">Guild</div>
+            </div>
+          </div>
+          
+          <p class="text-xs text-gray-600 mt-4">
+            💡 XP, moeda e nível são conquistados através de participação em eventos, missões e atividades da guilda.
+          </p>
+        </div>
+
+        <!-- Botões de Ação -->
+        <div class="flex items-center justify-between pt-6 border-t border-gray-700">
+          <div class="flex space-x-4">
+            <%= f.submit "💾 Salvar Alterações", 
+                class: "px-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold hover:shadow-neon-cyan transition-all duration-300 cursor-pointer animate-pulse-slow" %>
+            
+            <%= link_to profile_path, class: "px-6 py-3 bg-dark-surface border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-all duration-300" do %>
+              ❌ Cancelar
+            <% end %>
+          </div>
+          
+          <div class="text-xs text-gray-600">
+            Última atualização: <%= @user.updated_at.strftime("%d/%m/%Y às %H:%M") %>
+          </div>
+        </div>
+
+        <!-- Aviso de Privacidade -->
+        <div class="p-4 bg-dark-bg/30 border border-gray-800 rounded-lg">
+          <p class="text-xs text-gray-600 flex items-start space-x-2">
+            <span class="text-neon-cyan">🔒</span>
+            <span>
+              <strong class="text-gray-500">Privacidade:</strong>
+              Suas informações são privadas e usadas apenas para melhorar sua experiência na plataforma. 
+              Não compartilhamos seus dados com terceiros.
+            </span>
+          </p>
+        </div>
+        
+      <% end %>
+    </div>
+
+  </div>
+</div>

@@ -14,6 +14,7 @@ one:
   currency_balance: 500
   is_admin: true
   has_guild_access: true
+  has_guild_access: true
 
 two:
   guild: one
@@ -42,3 +43,18 @@ three:
   xp_points: 200
   currency_balance: 1000
   has_guild_access: true
+
+four:
+  guild: one
+  squad: one
+  discord_id: "444444444444444444"
+  discord_username: "warrior_four"
+  discord_nickname: "Guerreiro Gamma"
+  discord_avatar_url: "https://cdn.discordapp.com/avatars/444444444444444444/avatar.png"
+  discord_access_token: "access_token_4"
+  discord_refresh_token: "refresh_token_4"
+  discord_token_expires_at: 2026-02-13 15:15:38
+  xp_points: 25
+  currency_balance: 100
+  has_guild_access: true
+
