@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_02_15_014546) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_12_114500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -149,16 +149,20 @@ ActiveRecord::Schema[8.1].define(version: 2026_02_15_014546) do
   end
 
   create_table "game_characters", force: :cascade do |t|
+    t.jsonb "character_data", default: {}, null: false
     t.datetime "created_at", null: false
+    t.boolean "is_primary", default: false, null: false
     t.integer "level", null: false
     t.string "nickname", null: false
     t.integer "power", null: false
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
-    t.index ["user_id"], name: "index_game_characters_on_user_id", unique: true
+    t.index ["user_id"], name: "index_game_characters_on_user_id"
+    t.index ["user_id"], name: "index_game_characters_on_user_id_primary_unique", unique: true, where: "(is_primary = true)"
   end
 
   create_table "guilds", force: :cascade do |t|
+    t.jsonb "character_template", default: [], null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.string "discord_guild_id", null: false

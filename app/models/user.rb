@@ -33,7 +33,11 @@ class User < ApplicationRecord
            foreign_key: :emblem_reviewed_by_id,
            dependent: :nullify
 
-  has_one :game_character, dependent: :destroy
+  has_many :game_characters, dependent: :destroy
+
+  def game_character
+    game_characters.order(is_primary: :desc, created_at: :asc).first
+  end
 
   # Ransackers para busca no ActiveAdmin
   ransacker :guild_name, formatter: proc { |v| v.mb_chars.downcase.to_s } do |parent|

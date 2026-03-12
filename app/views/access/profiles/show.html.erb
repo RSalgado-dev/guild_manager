@@ -113,54 +113,32 @@
               <span>🎮</span> Personagem do Jogo
             </h3>
             
-            <% if @user.game_character.present? %>
-              <% character = @user.game_character %>
-              
-              <!-- Character Screenshot -->
-              <div class="mb-4">
-                <% if character.status_screenshot.attached? %>
-                  <%= image_tag character.status_screenshot, 
-                      class: "w-full h-48 object-cover rounded-lg border-2 border-neon-purple/50 shadow-neon-purple hover:scale-105 transition-transform duration-300 cursor-pointer",
-                      alt: "Status do personagem #{character.nickname}",
-                      onclick: "window.open(this.src, '_blank')" %>
-                <% else %>
-                  <div class="w-full h-48 bg-dark-bg rounded-lg border-2 border-gray-700 flex items-center justify-center">
-                    <span class="text-6xl">⚔️</span>
+            <% if @user.game_characters.any? %>
+              <p class="text-sm text-gray-400 mb-4">Total de personagens: <span class="text-neon-cyan font-bold"><%= @user.game_characters.count %></span></p>
+              <div class="space-y-3 mb-4">
+                <% @user.game_characters.order(updated_at: :desc).limit(3).each do |character| %>
+                  <div class="p-3 bg-dark-bg rounded-lg border border-neon-cyan/20">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <p class="text-neon-cyan font-bold">
+                          <%= character.nickname %>
+                          <% if character.is_primary? %>
+                            <span class="ml-2 px-2 py-0.5 text-xs bg-neon-green/20 border border-neon-green rounded text-neon-green">Principal</span>
+                          <% end %>
+                        </p>
+                        <p class="text-xs text-gray-500">Nível <%= character.level %> • Poder <%= number_with_delimiter(character.power) %></p>
+                      </div>
+                      <%= link_to "Editar", edit_character_path(character), class: "px-3 py-1 bg-neon-purple/20 border border-neon-purple/30 rounded text-neon-purple text-sm" %>
+                    </div>
                   </div>
                 <% end %>
               </div>
-              
-              <!-- Character Info -->
-              <div class="space-y-3">
-                <div class="p-3 bg-dark-bg rounded-lg border border-neon-cyan/20">
-                  <p class="text-xs text-gray-500 mb-1">Nickname</p>
-                  <p class="text-neon-cyan font-bold text-lg"><%= character.nickname %></p>
-                </div>
-                
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="p-3 bg-dark-bg rounded-lg border border-neon-purple/20">
-                    <p class="text-xs text-gray-500 mb-1">Nível</p>
-                    <p class="text-neon-purple font-bold text-xl"><%= character.level %></p>
-                  </div>
-                  
-                  <div class="p-3 bg-dark-bg rounded-lg border border-neon-magenta/20">
-                    <p class="text-xs text-gray-500 mb-1">Poder</p>
-                    <p class="text-neon-magenta font-bold text-xl"><%= number_with_delimiter(character.power) %></p>
-                  </div>
-                </div>
-                
-                <p class="text-xs text-gray-600 text-center mt-3">
-                  Atualizado <%= time_ago_in_words(character.updated_at) %> atrás
-                </p>
-              </div>
-              
-              <!-- Edit Button -->
-              <%= link_to edit_character_path, 
-                  class: "mt-4 w-full px-4 py-3 bg-gradient-to-r from-neon-purple to-neon-magenta rounded-lg text-white font-semibold hover:shadow-neon-purple transition-all duration-300 flex items-center justify-center gap-2" do %>
-                <span>⚙️</span>
-                <span>Editar Personagem</span>
+
+              <%= link_to new_character_path,
+                  class: "w-full px-4 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold hover:shadow-neon-cyan transition-all duration-300 flex items-center justify-center gap-2" do %>
+                <span>➕</span>
+                <span>Adicionar Personagem</span>
               <% end %>
-              
             <% else %>
               <!-- No Character -->
               <div class="text-center py-8">

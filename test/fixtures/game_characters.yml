@@ -5,9 +5,11 @@ one:
   nickname: DragonSlayer
   level: 75
   power: 15000
+  is_primary: true
 
 two:
   user: two
   nickname: ShadowMage
   level: 60
   power: 12000
+  is_primary: true

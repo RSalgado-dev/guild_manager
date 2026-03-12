@@ -2,7 +2,8 @@ ActiveAdmin.register Guild do
   menu priority: 1
 
   permit_params :name, :description, :discord_guild_id, :discord_name,
-                :discord_icon_url, :required_discord_role_id, :required_discord_role_name
+                :discord_icon_url, :required_discord_role_id, :required_discord_role_name,
+                :character_template
 
   # Configura ordenação padrão
   config.sort_order = "created_at_desc"
@@ -45,6 +46,11 @@ ActiveAdmin.register Guild do
       f.input :required_discord_role_name, label: "Nome do Cargo"
     end
 
+    f.inputs "Modelo de Personagem" do
+      f.input :character_template, as: :text, input_html: { rows: 12 },
+              hint: "JSON array com campos: key, label, field_type(string|integer|decimal|boolean), required, placeholder, help_text."
+    end
+
     f.actions
   end
 
@@ -68,6 +74,9 @@ ActiveAdmin.register Guild do
         else
           status_tag("Acesso Livre", class: "ok")
         end
+      end
+      row :character_template do |guild|
+        pre JSON.pretty_generate(guild.character_template_fields)
       end
       row :created_at
       row :updated_at

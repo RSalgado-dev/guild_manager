@@ -2,17 +2,17 @@ module Access
   # Controller para gerenciar personagens do jogo
   class CharactersController < AccessController
     before_action :load_user_context
+    before_action :load_template_fields
     before_action :load_character, only: [ :edit, :update, :destroy ]
-    before_action :prevent_duplicate_character, only: [ :new, :create ]
+    before_action :ensure_character!, only: [ :edit, :update, :destroy ]
 
     def new
-      # Formulário para criar personagem do jogo
-      @character = current_user.build_game_character
+      @character = current_user.game_characters.build
     end
 
     def create
-      # Cria personagem do jogo
-      @character = current_user.build_game_character(character_params)
+      @character = current_user.game_characters.build(character_params)
+      @character.character_data = sanitized_character_data
 
       if @character.save
         redirect_to profile_path, notice: "✅ Personagem cadastrado com sucesso!"
@@ -23,18 +23,13 @@ module Access
     end
 
     def edit
-      # Formulário para editar personagem do jogo
-      redirect_to new_character_path, alert: "⚠️ Você ainda não possui um personagem. Crie um primeiro." unless @character
     end
 
     def update
-      # Atualiza personagem do jogo
-      unless @character
-        redirect_to new_character_path, alert: "⚠️ Você precisa criar um personagem primeiro."
-        return
-      end
+      @character.assign_attributes(character_params)
+      @character.character_data = sanitized_character_data(default: @character.character_data || {})
 
-      if @character.update(character_params)
+      if @character.save
         redirect_to profile_path, notice: "✅ Personagem atualizado com sucesso!"
       else
         flash.now[:alert] = "❌ Erro ao atualizar personagem: #{@character.errors.full_messages.join(', ')}"
@@ -43,12 +38,6 @@ module Access
     end
 
     def destroy
-      # Deleta personagem do jogo
-      unless @character
-        redirect_to profile_path, alert: "⚠️ Você não possui um personagem para remover."
-        return
-      end
-
       if @character.destroy
         redirect_to profile_path, notice: "🗑️ Personagem removido com sucesso."
       else
@@ -59,18 +48,31 @@ module Access
     private
 
     def character_params
-      # Permite apenas campos do personagem
-      params.require(:game_character).permit(:nickname, :level, :power, :status_screenshot)
+      params.require(:game_character).permit(:nickname, :level, :power, :is_primary, :status_screenshot)
     end
 
     def load_character
-      @character = current_user.game_character
+      @character = current_user.game_characters.find_by(id: params[:id])
     end
 
-    def prevent_duplicate_character
-      if current_user.game_character.present?
-        redirect_to edit_character_path, alert: "⚠️ Você já possui um personagem. Use a edição para atualizar."
-      end
+    def load_template_fields
+      @template_fields = @guild.character_template_fields
+    end
+
+    def ensure_character!
+      return if @character.present?
+
+      redirect_to profile_path, alert: "⚠️ Personagem não encontrado."
+    end
+
+    def sanitized_character_data(default: {})
+      raw_values = params.dig(:game_character, :character_data)
+      return default unless raw_values.is_a?(ActionController::Parameters) || raw_values.is_a?(Hash)
+
+      allowed_keys = @template_fields.reject { |field| field["system"] }.map { |field| field["key"] }
+      raw_hash = raw_values.respond_to?(:to_unsafe_h) ? raw_values.to_unsafe_h : raw_values.to_h
+
+      raw_hash.slice(*allowed_keys).transform_values { |value| value.is_a?(String) ? value.strip : value }
     end
   end
 end

@@ -26,6 +26,11 @@ class GameCharacterTest < ActiveSupport::TestCase
     assert @character.valid?
   end
 
+  test "first character should become primary automatically" do
+    @character.save!
+    assert @character.reload.is_primary?
+  end
+
   test "should require nickname" do
     @character.nickname = nil
     assert_not @character.valid?
@@ -98,19 +103,60 @@ class GameCharacterTest < ActiveSupport::TestCase
     assert_respond_to @character, :status_screenshot
   end
 
-  # Unicidade
-  test "should allow only one character per user" do
+  # Múltiplos personagens por usuário
+  test "should allow more than one character per user" do
     @character.save!
 
-    duplicate = GameCharacter.new(
+    second_character = GameCharacter.new(
       user: @user,
       nickname: "AnotherCharacter",
       level: 30,
       power: 500
     )
 
-    assert_not duplicate.valid?
-    assert_includes duplicate.errors[:user_id], "has already been taken"
+    assert second_character.valid?
+  end
+
+  test "user cannot end up without a primary character" do
+    @character.save!
+
+    second_character = GameCharacter.new(
+      user: @user,
+      nickname: "SecondOne",
+      level: 35,
+      power: 700
+    )
+
+    assert_not @character.update(is_primary: false)
+    assert_includes @character.errors[:is_primary], "deve ter um personagem principal"
+    assert second_character.valid?
+  end
+
+  test "promoting one character should demote previous primary" do
+    @character.save!
+    second_character = GameCharacter.create!(
+      user: @user,
+      nickname: "SecondOne",
+      level: 35,
+      power: 700
+    )
+
+    second_character.update!(is_primary: true)
+    assert second_character.reload.is_primary?
+    assert_not @character.reload.is_primary?
+  end
+
+  test "destroying primary should promote another character" do
+    @character.save!
+    second_character = GameCharacter.create!(
+      user: @user,
+      nickname: "SecondOne",
+      level: 35,
+      power: 700
+    )
+
+    @character.destroy!
+    assert second_character.reload.is_primary?
   end
 
   test "should allow characters for different users" do
@@ -140,6 +186,8 @@ class GameCharacterTest < ActiveSupport::TestCase
     assert_includes GameCharacter.ransackable_attributes, "nickname"
     assert_includes GameCharacter.ransackable_attributes, "level"
     assert_includes GameCharacter.ransackable_attributes, "power"
+    assert_includes GameCharacter.ransackable_attributes, "character_data"
+    assert_includes GameCharacter.ransackable_attributes, "is_primary"
   end
 
   test "should define ransackable_associations" do
@@ -174,5 +222,34 @@ class GameCharacterTest < ActiveSupport::TestCase
       @character.nickname = name
       assert @character.valid?, "#{name} should be valid"
     end
+  end
+
+  test "should require template custom field when marked as required" do
+    @guild.update!(
+      character_template: [
+        { key: "nickname", label: "Nickname", field_type: "string", required: true },
+        { key: "level", label: "Nível", field_type: "integer", required: true },
+        { key: "power", label: "Poder", field_type: "integer", required: true },
+        { key: "classe", label: "Classe", field_type: "string", required: true }
+      ]
+    )
+
+    @character.character_data = {}
+    assert_not @character.valid?
+    assert_includes @character.errors.full_messages.join, "Classe é obrigatório"
+  end
+
+  test "should accept template custom field with valid value" do
+    @guild.update!(
+      character_template: [
+        { key: "nickname", label: "Nickname", field_type: "string", required: true },
+        { key: "level", label: "Nível", field_type: "integer", required: true },
+        { key: "power", label: "Poder", field_type: "integer", required: true },
+        { key: "classe", label: "Classe", field_type: "string", required: true }
+      ]
+    )
+
+    @character.character_data = { "classe" => "Arqueiro" }
+    assert @character.valid?
   end
 end

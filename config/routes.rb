@@ -34,12 +34,10 @@ Rails.application.routes.draw do
   get "/profile/edit", to: "access/profiles#edit", as: :edit_profile
   patch "/profile", to: "access/profiles#update", as: :update_profile
 
-  # Personagem do jogo
-  get "/character/new", to: "access/characters#new", as: :new_character
-  post "/character", to: "access/characters#create", as: :create_character
-  get "/character/edit", to: "access/characters#edit", as: :edit_character
-  patch "/character", to: "access/characters#update", as: :update_character
-  delete "/character", to: "access/characters#destroy", as: :destroy_character
+  # Personagens do jogo
+  resources :characters,
+            only: [ :new, :create, :edit, :update, :destroy ],
+            controller: "access/characters"
 
   # Defines the root path route ("/")
   root "access/dashboard#index"
