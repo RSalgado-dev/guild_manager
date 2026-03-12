@@ -110,8 +110,13 @@ class User < ApplicationRecord
   def has_permission?(permission_key)
     key = permission_key.to_s
     return true if admin?
+    return false if role_ids.empty?
 
-    permission_groups.any? { |group| group.permission_enabled?(key) }
+    guild.permission_groups
+         .joins(:roles)
+         .where(roles: { id: role_ids })
+         .where("permission_groups.all_access = TRUE OR permission_groups.permissions ? :permission_key", permission_key: key)
+         .exists?
   end
 
   def can_manage_members?

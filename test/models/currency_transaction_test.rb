@@ -88,6 +88,9 @@ class CurrencyTransactionTest < ActiveSupport::TestCase
     if transaction.reason_type.present? && transaction.reason_id.present?
       reason = transaction.reason
       assert_not_nil reason if Event.exists?(transaction.reason_id)
+      assert reason.nil? unless Event.exists?(transaction.reason_id)
+    else
+      assert_nil transaction.reason
     end
   end
 
