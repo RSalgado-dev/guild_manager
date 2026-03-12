@@ -1,4 +1,7 @@
 class User < ApplicationRecord
+  DISCORD_ROLE_SYNC_MAX_AGE = 2.minutes
+  PERMISSION_CHECK_SYNC_MAX_AGE = 30.seconds
+
   belongs_to :guild
   belongs_to :squad, optional: true
 
@@ -100,6 +103,33 @@ class User < ApplicationRecord
     user_roles.primary.includes(:role).first&.role || roles.first
   end
 
+  def permission_groups
+    guild.permission_groups.joins(:roles).where(roles: { id: role_ids }).distinct
+  end
+
+  def has_permission?(permission_key)
+    key = permission_key.to_s
+    return true if admin?
+
+    permission_groups.any? { |group| group.permission_enabled?(key) }
+  end
+
+  def can_manage_members?
+    has_permission?(:manage_members)
+  end
+
+  def can_manage_store?
+    has_permission?(:manage_store)
+  end
+
+  def can_manage_events?
+    has_permission?(:manage_events)
+  end
+
+  def can_manage_certificates?
+    has_permission?(:manage_certificates)
+  end
+
   def grant_achievement(achievement, source: nil)
     UserAchievement.create!(
       user: self,
@@ -168,7 +198,10 @@ class User < ApplicationRecord
         discord_username: discord_data.name,
         discord_avatar_url: discord_data.image,
         email: discord_data.email,
-        guild: user_guild
+        guild: user_guild,
+        discord_access_token: auth.credentials.token,
+        discord_refresh_token: auth.credentials.refresh_token,
+        discord_token_expires_at: auth.credentials.expires_at ? Time.zone.at(auth.credentials.expires_at) : nil
       )
       Rails.logger.info "Usuário atualizado: #{user.discord_username} (ID: #{user.id})"
     else
@@ -178,6 +211,9 @@ class User < ApplicationRecord
         discord_username: discord_data.name,
         discord_avatar_url: discord_data.image,
         email: discord_data.email,
+        discord_access_token: auth.credentials.token,
+        discord_refresh_token: auth.credentials.refresh_token,
+        discord_token_expires_at: auth.credentials.expires_at ? Time.zone.at(auth.credentials.expires_at) : nil,
         guild: user_guild,
         xp_points: 0,
         currency_balance: 0
@@ -257,7 +293,7 @@ class User < ApplicationRecord
     bot_token = Rails.application.credentials.dig(:discord, :bot_token)
     unless bot_token
       Rails.logger.warn "⚠️  Bot token não configurado, não é possível sincronizar roles"
-      return
+      return false
     end
 
     begin
@@ -277,7 +313,7 @@ class User < ApplicationRecord
 
       unless response.code == "200"
         Rails.logger.error "❌ Erro ao buscar membro do Discord: #{response.code}"
-        return
+        return false
       end
 
       member_data = JSON.parse(response.body)
@@ -297,7 +333,7 @@ class User < ApplicationRecord
 
       unless response.code == "200"
         Rails.logger.error "❌ Erro ao buscar roles do servidor: #{response.code}"
-        return
+        return false
       end
 
       guild_roles = JSON.parse(response.body)
@@ -342,12 +378,27 @@ class User < ApplicationRecord
         old_roles.destroy_all
       end
 
+      has_access = User.check_guild_role_access(user_guild, discord_id)
+      update_columns(
+        has_guild_access: has_access,
+        discord_roles_synced_at: Time.current
+      )
+
       Rails.logger.info "✅ Sincronização de roles concluída!"
+      true
 
     rescue => e
       Rails.logger.error "❌ Erro ao sincronizar roles: #{e.class} - #{e.message}"
       Rails.logger.error e.backtrace.first(3).join("\n")
+      false
     end
+  end
+
+  def sync_discord_roles_if_stale!(max_age: DISCORD_ROLE_SYNC_MAX_AGE, force: false)
+    return false unless persisted? && guild.present?
+    return false if !force && discord_roles_synced_at.present? && discord_roles_synced_at >= max_age.ago
+
+    sync_discord_roles(discord_access_token, guild)
   end
 
   # Verifica se o usuário tem o cargo requerido pela guild

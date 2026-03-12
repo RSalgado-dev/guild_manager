@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_12_114500) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_12_131500) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -202,6 +202,28 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_114500) do
     t.datetime "updated_at", null: false
     t.index ["guild_id", "active"], name: "index_missions_on_guild_id_and_active"
     t.index ["guild_id"], name: "index_missions_on_guild_id"
+  end
+
+  create_table "permission_group_roles", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.bigint "permission_group_id", null: false
+    t.bigint "role_id", null: false
+    t.datetime "updated_at", null: false
+    t.index ["permission_group_id", "role_id"], name: "idx_permission_group_roles_unique", unique: true
+    t.index ["permission_group_id"], name: "index_permission_group_roles_on_permission_group_id"
+    t.index ["role_id"], name: "index_permission_group_roles_on_role_id"
+  end
+
+  create_table "permission_groups", force: :cascade do |t|
+    t.boolean "all_access", default: false, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.bigint "guild_id", null: false
+    t.string "name", null: false
+    t.jsonb "permissions", default: [], null: false
+    t.datetime "updated_at", null: false
+    t.index ["guild_id", "name"], name: "index_permission_groups_on_guild_id_and_name", unique: true
+    t.index ["guild_id"], name: "index_permission_groups_on_guild_id"
   end
 
   create_table "role_certificate_requirements", force: :cascade do |t|
@@ -434,6 +456,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_114500) do
     t.string "discord_id", null: false
     t.string "discord_nickname"
     t.string "discord_refresh_token"
+    t.datetime "discord_roles_synced_at"
     t.datetime "discord_token_expires_at"
     t.string "discord_username"
     t.string "email"
@@ -444,6 +467,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_114500) do
     t.datetime "updated_at", null: false
     t.integer "xp_points", default: 0, null: false
     t.index ["discord_id"], name: "index_users_on_discord_id", unique: true
+    t.index ["discord_roles_synced_at"], name: "index_users_on_discord_roles_synced_at"
     t.index ["guild_id"], name: "index_users_on_guild_id"
     t.index ["squad_id"], name: "index_users_on_squad_id"
   end
@@ -463,6 +487,9 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_114500) do
   add_foreign_key "mission_submissions", "missions", on_delete: :cascade
   add_foreign_key "mission_submissions", "users", on_delete: :cascade
   add_foreign_key "missions", "guilds", on_delete: :cascade
+  add_foreign_key "permission_group_roles", "permission_groups"
+  add_foreign_key "permission_group_roles", "roles"
+  add_foreign_key "permission_groups", "guilds"
   add_foreign_key "role_certificate_requirements", "certificates", on_delete: :cascade
   add_foreign_key "role_certificate_requirements", "roles", on_delete: :cascade
   add_foreign_key "roles", "guilds", on_delete: :cascade

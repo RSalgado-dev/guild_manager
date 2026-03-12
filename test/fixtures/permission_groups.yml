@@ -1,0 +1,15 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one_admin:
+  guild: one
+  name: "Administração"
+  description: "Grupo com acesso total"
+  all_access: true
+  permissions: ["manage_members", "manage_store", "manage_events", "manage_certificates"]
+
+one_events:
+  guild: one
+  name: "Eventos"
+  description: "Grupo com acesso de eventos"
+  all_access: false
+  permissions: ["manage_events"]

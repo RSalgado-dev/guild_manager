@@ -14,9 +14,11 @@ class Guild < ApplicationRecord
   has_many :events,         dependent: :destroy
   has_many :achievements,   dependent: :destroy
   has_many :certificates,   dependent: :destroy
+  has_many :permission_groups, dependent: :destroy
 
   before_validation :parse_character_template_json
   before_validation :ensure_default_character_template
+  after_create :ensure_default_permission_group!
 
   validate :validate_character_template
 
@@ -34,7 +36,7 @@ class Guild < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [ "users", "roles", "squads", "missions", "events", "achievements", "certificates" ]
+    [ "users", "roles", "squads", "missions", "events", "achievements", "certificates", "permission_groups" ]
   end
 
   validates :name,
@@ -89,6 +91,14 @@ class Guild < ApplicationRecord
 
   def ensure_default_character_template
     self.character_template = self.class.default_character_template if character_template.blank?
+  end
+
+  def ensure_default_permission_group!
+    permission_groups.find_or_create_by!(name: "Administração") do |group|
+      group.description = "Grupo padrão com acesso total ao sistema."
+      group.all_access = true
+      group.permissions = PermissionGroup::AVAILABLE_PERMISSIONS
+    end
   end
 
   def validate_character_template

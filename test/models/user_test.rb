@@ -287,4 +287,42 @@ class UserTest < ActiveSupport::TestCase
     result = user.check_guild_role_access
     assert_not result, "Usuário não deveria ter acesso sem role correto"
   end
+
+  test "has_permission? deve retornar true quando usuário pertence a grupo com acesso total" do
+    user = users(:one) # possui role admin vinculada ao grupo one_admin
+    assert user.has_permission?(:manage_members)
+    assert user.has_permission?(:manage_store)
+    assert user.has_permission?(:manage_events)
+    assert user.has_permission?(:manage_certificates)
+  end
+
+  test "has_permission? deve retornar true para permissão específica do grupo" do
+    user = users(:two) # possui role two vinculada ao grupo one_events
+    assert user.has_permission?(:manage_events)
+    assert_not user.has_permission?(:manage_store)
+  end
+
+  test "sync_discord_roles_if_stale! deve sincronizar quando estiver stale" do
+    user = users(:one)
+    user.update!(discord_roles_synced_at: 10.minutes.ago)
+
+    user.expects(:sync_discord_roles).with(user.discord_access_token, user.guild).returns(true)
+    assert user.sync_discord_roles_if_stale!(max_age: 2.minutes)
+  end
+
+  test "sync_discord_roles_if_stale! não deve sincronizar quando recente" do
+    user = users(:one)
+    user.update!(discord_roles_synced_at: Time.current)
+
+    user.expects(:sync_discord_roles).never
+    assert_not user.sync_discord_roles_if_stale!(max_age: 2.minutes)
+  end
+
+  test "sync_discord_roles_if_stale! deve sincronizar com force" do
+    user = users(:one)
+    user.update!(discord_roles_synced_at: Time.current)
+
+    user.expects(:sync_discord_roles).with(user.discord_access_token, user.guild).returns(true)
+    assert user.sync_discord_roles_if_stale!(max_age: 2.minutes, force: true)
+  end
 end

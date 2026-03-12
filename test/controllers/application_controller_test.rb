@@ -11,8 +11,10 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
     assert ApplicationController.private_method_defined?(:current_user) || ApplicationController.method_defined?(:current_user)
     assert ApplicationController.private_method_defined?(:logged_in?) || ApplicationController.method_defined?(:logged_in?)
     assert ApplicationController.private_method_defined?(:has_guild_access?) || ApplicationController.method_defined?(:has_guild_access?)
+    assert ApplicationController.private_method_defined?(:has_permission?) || ApplicationController.method_defined?(:has_permission?)
     assert ApplicationController.private_method_defined?(:require_login) || ApplicationController.method_defined?(:require_login)
     assert ApplicationController.private_method_defined?(:require_guild_access) || ApplicationController.method_defined?(:require_guild_access)
     assert ApplicationController.private_method_defined?(:require_admin) || ApplicationController.method_defined?(:require_admin)
+    assert ApplicationController.private_method_defined?(:require_permission) || ApplicationController.method_defined?(:require_permission)
   end
 end

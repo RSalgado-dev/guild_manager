@@ -3,6 +3,8 @@ class Role < ApplicationRecord
 
   has_many :user_roles, dependent: :destroy
   has_many :users, through: :user_roles
+  has_many :permission_group_roles, dependent: :destroy
+  has_many :permission_groups, through: :permission_group_roles
 
   has_many :role_certificate_requirements, dependent: :destroy
   has_many :required_certificates,
@@ -21,7 +23,8 @@ class Role < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [ "guild", "users", "user_roles", "required_certificates", "role_certificate_requirements" ]
+    [ "guild", "users", "user_roles", "required_certificates", "role_certificate_requirements",
+      "permission_groups", "permission_group_roles" ]
   end
 
   validates :name,

@@ -65,6 +65,14 @@ module Access
       assert_not_nil assigns(:guild)
     end
 
+    test "deve tentar sincronizar cargos ao acessar área interna" do
+      sign_in @user
+      User.any_instance.expects(:sync_discord_roles_if_stale!).at_least_once.returns(false)
+
+      get dashboard_path
+      assert_response :success
+    end
+
     # Restricted Action
     test "should get restricted page when logged in without access" do
       @user.update!(has_guild_access: false)

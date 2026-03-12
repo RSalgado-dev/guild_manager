@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  helper_method :current_user, :logged_in?, :has_guild_access?
+  helper_method :current_user, :logged_in?, :has_guild_access?, :has_permission?
 
   private
 
@@ -19,6 +19,10 @@ class ApplicationController < ActionController::Base
 
   def has_guild_access?
     logged_in? && current_user.has_guild_access?
+  end
+
+  def has_permission?(permission_key)
+    logged_in? && current_user.has_permission?(permission_key)
   end
 
   def require_login
@@ -46,5 +50,20 @@ class ApplicationController < ActionController::Base
     unless current_user.admin?
       redirect_to root_path, alert: "❌ Acesso negado. Você não tem permissão para acessar o painel administrativo."
     end
+  end
+
+  def require_permission(permission_key)
+    refresh_discord_roles_for_permission_check!
+    return if has_permission?(permission_key)
+
+    redirect_to root_path, alert: "❌ Acesso negado. Você não possui a permissão necessária."
+  end
+
+  def refresh_discord_roles_for_permission_check!
+    return unless logged_in?
+    return if @discord_roles_refreshed_for_permission
+
+    current_user.sync_discord_roles_if_stale!(max_age: User::PERMISSION_CHECK_SYNC_MAX_AGE)
+    @discord_roles_refreshed_for_permission = true
   end
 end

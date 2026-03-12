@@ -80,6 +80,18 @@ class GuildTest < ActiveSupport::TestCase
     assert_respond_to guild, :squads
   end
 
+  test "deve criar grupo de permissões padrão de administração ao criar guilda" do
+    guild = Guild.create!(
+      name: "Guilda Nova",
+      discord_guild_id: "999111222333444555"
+    )
+
+    admin_group = guild.permission_groups.find_by(name: "Administração")
+    assert_not_nil admin_group
+    assert admin_group.all_access?
+    assert_equal PermissionGroup::AVAILABLE_PERMISSIONS.sort, admin_group.permissions.sort
+  end
+
   test "deve destruir dependências ao ser destruída" do
     guild = guilds(:one)
     role_count = guild.roles.count

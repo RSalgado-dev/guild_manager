@@ -24,6 +24,9 @@ ActiveAdmin.register Role do
     column "Usuários" do |role|
       role.users.count
     end
+    column "Grupos de Permissão" do |role|
+      role.permission_groups.count
+    end
     column :created_at
     actions
   end
@@ -64,6 +67,18 @@ ActiveAdmin.register Role do
         end
         column :xp_points
         column :guild
+      end
+    end
+
+    panel "Grupos de Permissão vinculados" do
+      table_for role.permission_groups do
+        column :name do |group|
+          link_to group.name, admin_permission_group_path(group)
+        end
+        column :guild
+        column "Acesso Total" do |group|
+          group.all_access ? status_tag("Sim", class: "warning") : status_tag("Não")
+        end
       end
     end
 
