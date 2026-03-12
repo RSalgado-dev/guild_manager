@@ -60,7 +60,7 @@
           <!-- User Info -->
           <div class="flex-1 text-center md:text-left">
             <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta mb-2 animate-glow">
-              <%= @user.discord_username %>
+              <%= @user.display_name_with_squad_tag %>
             </h2>
             <p class="text-neon-cyan font-mono text-lg mb-4">
               <% if @user.email.present? %>

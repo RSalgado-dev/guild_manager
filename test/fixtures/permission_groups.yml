@@ -13,3 +13,10 @@ one_events:
   description: "Grupo com acesso de eventos"
   all_access: false
   permissions: ["manage_events"]
+
+one_members:
+  guild: one
+  name: "Membros"
+  description: "Grupo com gestão de membros"
+  all_access: false
+  permissions: ["manage_members"]

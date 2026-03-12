@@ -1,0 +1,52 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Squads da Guilda</h1>
+        <p class="text-gray-400">Gerencie squads, convites e revisões</p>
+      </div>
+      <div class="flex gap-3">
+        <% if has_permission?(:manage_members) %>
+          <%= link_to "Novo Squad", new_squad_path, class: "px-4 py-2 bg-neon-cyan/20 border border-neon-cyan/40 rounded text-neon-cyan" %>
+          <%= link_to "Revisões Pendentes", pending_reviews_squads_path, class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded text-neon-purple" %>
+        <% end %>
+        <%= link_to "Dashboard", dashboard_path, class: "px-4 py-2 bg-dark-surface border border-gray-700 rounded text-gray-300" %>
+      </div>
+    </div>
+
+    <% if @pending_invitations.any? %>
+      <div class="card-neon p-4">
+        <h2 class="text-lg font-semibold text-neon-green mb-3">Convites Recebidos</h2>
+        <div class="space-y-3">
+          <% @pending_invitations.each do |invitation| %>
+            <div class="p-3 rounded border border-gray-700 flex items-center justify-between">
+              <div>
+                <p class="text-white">Squad: <strong><%= invitation.squad.name %></strong> [<%= invitation.squad.tag %>]</p>
+                <p class="text-xs text-gray-500">Convidado por <%= invitation.inviter.discord_username %></p>
+              </div>
+              <div class="flex gap-2">
+                <%= button_to "Aceitar", accept_squad_invitation_path(invitation), method: :post, class: "px-3 py-1 bg-neon-green/20 border border-neon-green/40 rounded text-neon-green text-sm" %>
+                <%= button_to "Recusar", decline_squad_invitation_path(invitation), method: :post, class: "px-3 py-1 bg-neon-magenta/20 border border-neon-magenta/40 rounded text-neon-magenta text-sm" %>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    <% end %>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <% @squads.each do |squad| %>
+        <div class="card-neon p-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xl text-white font-bold"><%= squad.name %> <span class="text-neon-cyan">[<%= squad.tag %>]</span></h3>
+              <p class="text-sm text-gray-400">Líder: <%= squad.leader.discord_username %></p>
+              <p class="text-sm text-gray-500">Membros: <%= squad.members.count %></p>
+            </div>
+            <%= link_to "Ver Perfil", squad_path(squad), class: "px-3 py-1 bg-dark-surface border border-gray-700 rounded text-gray-200 text-sm" %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

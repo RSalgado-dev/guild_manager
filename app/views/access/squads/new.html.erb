@@ -1,0 +1,33 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="max-w-3xl mx-auto card-neon p-6">
+    <h1 class="text-3xl font-bold text-white mb-2">Criar Squad</h1>
+    <p class="text-gray-400 mb-6">Disponível para usuários com permissão de gerenciar membros.</p>
+
+    <%= form_with model: @squad, url: squads_path, method: :post, local: true, class: "space-y-4" do |f| %>
+      <div>
+        <%= f.label :name, "Nome", class: "block text-sm text-gray-300 mb-1" %>
+        <%= f.text_field :name, required: true, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white" %>
+      </div>
+
+      <div>
+        <%= f.label :tag, "TAG", class: "block text-sm text-gray-300 mb-1" %>
+        <%= f.text_field :tag, required: true, maxlength: 8, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white uppercase" %>
+      </div>
+
+      <div>
+        <%= f.label :description, "Descrição", class: "block text-sm text-gray-300 mb-1" %>
+        <%= f.text_area :description, rows: 4, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white" %>
+      </div>
+
+      <div>
+        <%= f.label :leader_id, "Líder do Squad", class: "block text-sm text-gray-300 mb-1" %>
+        <%= f.select :leader_id, @leader_candidates.map { |u| ["#{u.discord_username} (ID: #{u.id})", u.id] }, { prompt: "Selecione o líder" }, { required: true, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white" } %>
+      </div>
+
+      <div class="flex gap-3 pt-2">
+        <%= f.submit "Criar Squad", class: "px-4 py-2 bg-neon-cyan/20 border border-neon-cyan/40 rounded text-neon-cyan cursor-pointer" %>
+        <%= link_to "Cancelar", squads_path, class: "px-4 py-2 bg-dark-surface border border-gray-700 rounded text-gray-300" %>
+      </div>
+    <% end %>
+  </div>
+</div>

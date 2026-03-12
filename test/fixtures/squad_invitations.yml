@@ -1,0 +1,9 @@
+# Read about fixtures at https://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one_pending:
+  squad: one
+  inviter: one
+  invitee: five
+  status: pending
+  expires_at: <%= 2.days.from_now %>
+  note: "Junte-se ao Alpha"

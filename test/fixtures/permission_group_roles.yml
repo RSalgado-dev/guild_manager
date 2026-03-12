@@ -7,3 +7,7 @@ one_admin_role:
 one_events_role:
   permission_group: one_events
   role: two
+
+one_members_role:
+  permission_group: one_members
+  role: two

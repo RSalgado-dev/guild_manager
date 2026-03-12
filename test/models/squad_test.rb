@@ -8,6 +8,7 @@ class SquadTest < ActiveSupport::TestCase
       guild: guilds(:one),
       leader: users(:one),
       name: "Esquadrão de Teste",
+      tag: "TESTE",
       description: "Um esquadrão para testes",
       emblem_status: :no_emblem
     )
@@ -18,6 +19,7 @@ class SquadTest < ActiveSupport::TestCase
     squad = Squad.new(
       guild: guilds(:one),
       leader: users(:one),
+      tag: "NOMELESS",
       emblem_status: :none
     )
     assert_not squad.valid?
@@ -28,6 +30,7 @@ class SquadTest < ActiveSupport::TestCase
     squad = Squad.new(
       leader: users(:one),
       name: "Esquadrão sem guilda",
+      tag: "SEMGLD",
       emblem_status: :no_emblem
     )
     assert_not squad.valid?
@@ -37,6 +40,7 @@ class SquadTest < ActiveSupport::TestCase
     squad = Squad.new(
       guild: guilds(:one),
       name: "Esquadrão sem líder",
+      tag: "SEMLDR",
       emblem_status: :no_emblem
     )
     assert_not squad.valid?
@@ -88,7 +92,8 @@ class SquadTest < ActiveSupport::TestCase
     squad = Squad.new(
       guild: guilds(:one),
       leader: users(:one),
-      name: "Novo Esquadrão"
+      name: "Novo Esquadrão",
+      tag: "NOVO"
     )
     # O enum será setado após validação
     assert squad.valid?
@@ -103,5 +108,57 @@ class SquadTest < ActiveSupport::TestCase
 
     squad_pending = squads(:two)
     assert_equal "pending", squad_pending.emblem_status
+  end
+
+  test "deve normalizar tag em maiúsculo" do
+    squad = Squad.new(guild: guilds(:one), leader: users(:one), name: "Teste", tag: "abc1")
+    squad.valid?
+    assert_equal "ABC1", squad.tag
+  end
+
+  test "líder pode solicitar alteração de perfil para revisão" do
+    squad = squads(:one)
+    squad.request_profile_change!(
+      actor: squad.leader,
+      attributes: { name: "Esquadrão Alpha 2", tag: "ALP2", description: "Nova descrição" }
+    )
+
+    assert squad.reload.profile_change_pending?
+    assert_equal "Esquadrão Alpha 2", squad.pending_profile_changes["name"]
+    assert_equal "ALP2", squad.pending_profile_changes["tag"]
+  end
+
+  test "aprovando alteração aplica novos dados e limpa pendência" do
+    squad = squads(:one)
+    reviewer = users(:two)
+    squad.request_profile_change!(
+      actor: squad.leader,
+      attributes: { name: "Esquadrão Alpha 2", tag: "ALP2", description: "Nova descrição" }
+    )
+
+    squad.approve_profile_change!(reviewer: reviewer)
+    squad.reload
+
+    assert_equal "Esquadrão Alpha 2", squad.name
+    assert_equal "ALP2", squad.tag
+    assert_equal "profile_approved", squad.profile_change_status
+    assert_equal({}, squad.pending_profile_changes)
+  end
+
+  test "rejeitando alteração mantém dados atuais e registra motivo" do
+    squad = squads(:one)
+    reviewer = users(:two)
+    original_name = squad.name
+    squad.request_profile_change!(
+      actor: squad.leader,
+      attributes: { name: "Nome Rejeitado", tag: "RJT1" }
+    )
+
+    squad.reject_profile_change!(reviewer: reviewer, reason: "Fora do padrão")
+    squad.reload
+
+    assert_equal original_name, squad.name
+    assert_equal "profile_rejected", squad.profile_change_status
+    assert_equal "Fora do padrão", squad.profile_change_rejection_reason
   end
 end

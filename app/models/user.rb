@@ -36,6 +36,21 @@ class User < ApplicationRecord
            foreign_key: :emblem_reviewed_by_id,
            dependent: :nullify
 
+  has_many :reviewed_squad_profile_changes,
+           class_name: "Squad",
+           foreign_key: :profile_change_reviewed_by_id,
+           dependent: :nullify
+
+  has_many :sent_squad_invitations,
+           class_name: "SquadInvitation",
+           foreign_key: :inviter_id,
+           dependent: :destroy
+
+  has_many :received_squad_invitations,
+           class_name: "SquadInvitation",
+           foreign_key: :invitee_id,
+           dependent: :destroy
+
   has_many :game_characters, dependent: :destroy
 
   def game_character
@@ -133,6 +148,12 @@ class User < ApplicationRecord
 
   def can_manage_certificates?
     has_permission?(:manage_certificates)
+  end
+
+  def display_name_with_squad_tag
+    return discord_username if squad.blank? || squad.tag.blank?
+
+    "[#{squad.tag}] #{discord_username}"
   end
 
   def grant_achievement(achievement, source: nil)

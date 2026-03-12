@@ -10,6 +10,7 @@ class Guild < ApplicationRecord
   has_many :users,          dependent: :destroy
   has_many :roles,          dependent: :destroy
   has_many :squads,         dependent: :destroy
+  has_many :squad_invitations, through: :squads
   has_many :missions,       dependent: :destroy
   has_many :events,         dependent: :destroy
   has_many :achievements,   dependent: :destroy

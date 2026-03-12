@@ -4,6 +4,7 @@ one:
   guild: one
   leader: one
   name: "Esquadrão Alpha"
+  tag: "ALPHA"
   description: "Primeiro esquadrão de elite"
   emblem_status: approved
   emblem_uploaded_by: one
@@ -15,6 +16,7 @@ two:
   guild: two
   leader: three
   name: "Esquadrão Arcano"
+  tag: "ARCANO"
   description: "Especialistas em magia"
   emblem_status: pending
   emblem_uploaded_by: three
@@ -26,6 +28,7 @@ three:
   guild: one
   leader: two
   name: "Esquadrão Beta"
+  tag: "BETA"
   description: "Segundo esquadrão tático"
   emblem_status: no_emblem
   emblem_uploaded_by:

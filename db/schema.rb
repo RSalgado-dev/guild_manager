@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_12_131500) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_12_143000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -391,6 +391,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_131500) do
     t.index ["key"], name: "index_solid_queue_semaphores_on_key", unique: true
   end
 
+  create_table "squad_invitations", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "expires_at", null: false
+    t.bigint "invitee_id", null: false
+    t.bigint "inviter_id", null: false
+    t.text "note"
+    t.datetime "responded_at"
+    t.bigint "squad_id", null: false
+    t.string "status", default: "pending", null: false
+    t.datetime "updated_at", null: false
+    t.index ["invitee_id", "status"], name: "index_squad_invitations_on_invitee_id_and_status"
+    t.index ["invitee_id"], name: "index_squad_invitations_on_invitee_id"
+    t.index ["inviter_id"], name: "index_squad_invitations_on_inviter_id"
+    t.index ["squad_id", "invitee_id", "status"], name: "idx_squad_invites_unique_pending", unique: true, where: "((status)::text = 'pending'::text)"
+    t.index ["squad_id"], name: "index_squad_invitations_on_squad_id"
+  end
+
   create_table "squads", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.text "description"
@@ -400,13 +417,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_131500) do
     t.string "emblem_status", default: "none", null: false
     t.integer "emblem_uploaded_by_id"
     t.bigint "guild_id", null: false
+    t.datetime "last_profile_change_approved_at"
     t.integer "leader_id", null: false
     t.string "name"
+    t.jsonb "pending_profile_changes", default: {}, null: false
+    t.text "profile_change_rejection_reason"
+    t.datetime "profile_change_requested_at"
+    t.datetime "profile_change_reviewed_at"
+    t.integer "profile_change_reviewed_by_id"
+    t.string "profile_change_status", default: "none", null: false
+    t.string "tag"
     t.datetime "updated_at", null: false
     t.index ["emblem_status"], name: "index_squads_on_emblem_status"
     t.index ["guild_id", "name"], name: "index_squads_on_guild_id_and_name", unique: true
+    t.index ["guild_id", "tag"], name: "index_squads_on_guild_id_and_tag", unique: true
     t.index ["guild_id"], name: "index_squads_on_guild_id"
     t.index ["leader_id"], name: "index_squads_on_leader_id"
+    t.index ["profile_change_status"], name: "index_squads_on_profile_change_status"
   end
 
   create_table "user_achievements", force: :cascade do |t|
@@ -499,10 +526,14 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_131500) do
   add_foreign_key "solid_queue_ready_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_recurring_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
   add_foreign_key "solid_queue_scheduled_executions", "solid_queue_jobs", column: "job_id", on_delete: :cascade
+  add_foreign_key "squad_invitations", "squads"
+  add_foreign_key "squad_invitations", "users", column: "invitee_id"
+  add_foreign_key "squad_invitations", "users", column: "inviter_id"
   add_foreign_key "squads", "guilds", on_delete: :cascade
   add_foreign_key "squads", "users", column: "emblem_reviewed_by_id"
   add_foreign_key "squads", "users", column: "emblem_uploaded_by_id"
   add_foreign_key "squads", "users", column: "leader_id", on_delete: :cascade
+  add_foreign_key "squads", "users", column: "profile_change_reviewed_by_id"
   add_foreign_key "user_achievements", "achievements", on_delete: :cascade
   add_foreign_key "user_achievements", "users", on_delete: :cascade
   add_foreign_key "user_certificates", "certificates", on_delete: :cascade

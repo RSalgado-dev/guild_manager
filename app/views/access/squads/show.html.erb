@@ -1,0 +1,92 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="max-w-6xl mx-auto space-y-6">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-3xl font-bold text-white"><%= @squad.name %> <span class="text-neon-cyan">[<%= @squad.tag %>]</span></h1>
+        <p class="text-gray-400"><%= @squad.description %></p>
+      </div>
+      <%= link_to "Voltar aos Squads", squads_path, class: "px-4 py-2 bg-dark-surface border border-gray-700 rounded text-gray-300" %>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div class="card-neon p-5">
+        <h2 class="text-lg text-neon-cyan font-semibold mb-3">Membros</h2>
+        <div class="space-y-2">
+          <% @members.each do |member| %>
+            <div class="p-2 border border-gray-700 rounded text-gray-200">
+              <%= member.display_name_with_squad_tag %>
+              <% if member.id == @squad.leader_id %>
+                <span class="text-xs text-neon-green ml-2">Líder</span>
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <% if @squad.leader_id == current_user.id %>
+        <div class="card-neon p-5">
+          <h2 class="text-lg text-neon-purple font-semibold mb-3">Solicitar Alteração de Perfil do Squad</h2>
+          <% if @squad.profile_change_pending? %>
+            <p class="text-yellow-400 text-sm mb-3">Há uma alteração pendente de revisão.</p>
+            <pre class="text-xs text-gray-400 bg-dark-bg p-3 rounded border border-gray-700"><%= JSON.pretty_generate(@squad.pending_profile_changes) %></pre>
+          <% elsif !@squad.can_request_profile_change? %>
+            <p class="text-yellow-400 text-sm">Cooldown ativo. Próxima alteração disponível em <%= l(@squad.next_profile_change_available_at, format: :short) %>.</p>
+          <% else %>
+            <%= form_with model: @squad, url: request_profile_change_squad_path(@squad), method: :patch, local: true, class: "space-y-3" do |f| %>
+              <div>
+                <%= f.label :name, "Novo Nome", class: "block text-sm text-gray-300 mb-1" %>
+                <%= f.text_field :name, value: @squad.name, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white" %>
+              </div>
+              <div>
+                <%= f.label :tag, "Nova TAG", class: "block text-sm text-gray-300 mb-1" %>
+                <%= f.text_field :tag, value: @squad.tag, maxlength: 8, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white uppercase" %>
+              </div>
+              <div>
+                <%= f.label :description, "Nova Descrição", class: "block text-sm text-gray-300 mb-1" %>
+                <%= f.text_area :description, value: @squad.description, rows: 3, class: "w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white" %>
+              </div>
+              <div>
+                <%= f.label :emblem_pending, "Nova Imagem do Squad", class: "block text-sm text-gray-300 mb-1" %>
+                <%= f.file_field :emblem_pending, accept: "image/png,image/jpeg,image/webp", class: "w-full text-sm text-gray-300" %>
+              </div>
+              <%= f.submit "Enviar para revisão", class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded text-neon-purple cursor-pointer" %>
+            <% end %>
+          <% end %>
+        </div>
+      <% end %>
+    </div>
+
+    <% if @squad.leader_id == current_user.id %>
+      <div class="card-neon p-5">
+        <h2 class="text-lg text-neon-green font-semibold mb-3">Convidar membro sem squad</h2>
+        <%= form_with url: create_invitation_squad_path(@squad), method: :post, local: true, class: "grid grid-cols-1 md:grid-cols-3 gap-3 items-end" do |f| %>
+          <div class="md:col-span-2">
+            <label class="block text-sm text-gray-300 mb-1">Usuário</label>
+            <select name="invitee_id" required class="w-full px-3 py-2 bg-dark-bg border border-gray-700 rounded text-white">
+              <option value="">Selecione</option>
+              <% @eligible_members_for_invite.each do |user| %>
+                <option value="<%= user.id %>"><%= user.discord_username %></option>
+              <% end %>
+            </select>
+          </div>
+          <div>
+            <%= f.submit "Enviar convite", class: "w-full px-4 py-2 bg-neon-green/20 border border-neon-green/40 rounded text-neon-green cursor-pointer" %>
+          </div>
+        <% end %>
+
+        <% if @pending_invitations&.any? %>
+          <div class="mt-4">
+            <h3 class="text-sm text-gray-300 mb-2">Convites pendentes</h3>
+            <div class="space-y-2">
+              <% @pending_invitations.each do |invitation| %>
+                <div class="p-2 border border-gray-700 rounded text-sm text-gray-200">
+                  <%= invitation.invitee.discord_username %> (expira em <%= l(invitation.expires_at, format: :short) %>)
+                </div>
+              <% end %>
+            </div>
+          </div>
+        <% end %>
+      </div>
+    <% end %>
+  </div>
+</div>

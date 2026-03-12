@@ -59,6 +59,27 @@ Arquivos principais:
 - `app/models/user.rb`
 - `app/admin/permission_groups.rb`
 
+### 5. Gestão de Squads no site (não-ActiveAdmin)
+- Usuário com permissão `manage_members` pode criar squad e definir líder na criação.
+- Squad possui `name`, `tag` e `description`.
+- Líder pode solicitar alterações de perfil (nome, TAG, descrição e emblema) sem aplicar imediatamente.
+- Alterações vão para fila de revisão (`profile_change_status = pending`).
+- Usuário com `manage_members` pode aprovar ou rejeitar alterações.
+- Existe proteção antiabuso para alterações de perfil:
+  - Apenas uma alteração pendente por vez.
+  - Cooldown entre aprovações (`7 dias`).
+- Líder pode convidar usuários sem squad.
+- Usuário convidado pode aceitar/recusar convite.
+- Ao aceitar, passa a integrar o squad e exibe a TAG junto ao nome (`display_name_with_squad_tag`).
+
+Arquivos principais:
+- `app/models/squad.rb`
+- `app/models/squad_invitation.rb`
+- `app/controllers/access/squads_controller.rb`
+- `app/controllers/access/squad_invitations_controller.rb`
+- `app/views/access/squads/*`
+- `db/migrate/20260312143000_add_squad_profile_review_and_invitations.rb`
+
 ## Estratégia de Sincronização de Roles Discord
 Para reduzir janela de inconsistência entre Discord e sistema interno:
 
@@ -98,6 +119,7 @@ Com formulários e listagens funcionais para gerenciamento operacional.
   - Personagem principal
   - Grupos de permissão
   - Timestamp de sincronização de roles
+  - Fluxo operacional de squads com revisão e convites
 
 ## Decisões Técnicas Relevantes
 - Migração de permission groups isolada de modelos da aplicação (evita acoplamento temporal de migrations).

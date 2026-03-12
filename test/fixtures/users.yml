@@ -58,3 +58,30 @@ four:
   currency_balance: 100
   has_guild_access: true
 
+five:
+  guild: one
+  squad:
+  discord_id: "555555555555555555"
+  discord_username: "warrior_five"
+  discord_nickname: "Guerreiro Delta"
+  discord_avatar_url: "https://cdn.discordapp.com/avatars/555555555555555555/avatar.png"
+  discord_access_token: "access_token_5"
+  discord_refresh_token: "refresh_token_5"
+  discord_token_expires_at: 2026-02-13 15:15:38
+  xp_points: 10
+  currency_balance: 50
+  has_guild_access: true
+
+six:
+  guild: one
+  squad:
+  discord_id: "666666666666666666"
+  discord_username: "warrior_six"
+  discord_nickname: "Guerreiro Epsilon"
+  discord_avatar_url: "https://cdn.discordapp.com/avatars/666666666666666666/avatar.png"
+  discord_access_token: "access_token_6"
+  discord_refresh_token: "refresh_token_6"
+  discord_token_expires_at: 2026-02-13 15:15:38
+  xp_points: 12
+  currency_balance: 75
+  has_guild_access: true

@@ -1,7 +1,7 @@
 ActiveAdmin.register Squad do
   menu priority: 4
 
-  permit_params :name, :description, :guild_id, :leader_id, :max_members
+  permit_params :name, :tag, :description, :guild_id, :leader_id
 
   # Configura os includes para otimizar queries
   config.sort_order = "created_at_desc"
@@ -21,7 +21,7 @@ ActiveAdmin.register Squad do
       link_to squad.leader.discord_username, admin_user_path(squad.leader) if squad.leader
     end
     column "Membros" do |squad|
-      "#{squad.members.count}/#{squad.max_members || '∞'}"
+      squad.members.count
     end
     column :created_at
     actions
@@ -38,9 +38,9 @@ ActiveAdmin.register Squad do
     f.inputs do
       f.input :guild
       f.input :name
+      f.input :tag, hint: "TAG do squad (2-8 chars, letras e números)"
       f.input :description, input_html: { rows: 3 }
       f.input :leader, as: :select, collection: User.all.map { |u| [ u.discord_username, u.id ] }
-      f.input :max_members, hint: "Deixe vazio para ilimitado"
     end
     f.actions
   end
@@ -50,11 +50,11 @@ ActiveAdmin.register Squad do
       row :id
       row :guild
       row :name
+      row :tag
       row :description
       row :leader do |squad|
         link_to squad.leader.discord_username, admin_user_path(squad.leader) if squad.leader
       end
-      row :max_members
       row :created_at
       row :updated_at
     end

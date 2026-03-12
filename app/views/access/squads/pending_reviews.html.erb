@@ -1,0 +1,36 @@
+<div class="min-h-screen py-8 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-white">Revisões de Squads</h1>
+        <p class="text-gray-400">Aprovação de alterações de perfil pendentes</p>
+      </div>
+      <%= link_to "Voltar", squads_path, class: "px-4 py-2 bg-dark-surface border border-gray-700 rounded text-gray-300" %>
+    </div>
+
+    <div class="space-y-4">
+      <% @pending_squads.each do |squad| %>
+        <div class="card-neon p-4">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <h2 class="text-xl text-white font-semibold"><%= squad.name %> [<%= squad.tag %>]</h2>
+              <p class="text-xs text-gray-500">Solicitado por <%= squad.leader.discord_username %> em <%= l(squad.profile_change_requested_at, format: :short) %></p>
+              <pre class="text-xs text-gray-300 bg-dark-bg p-3 rounded border border-gray-700 mt-3"><%= JSON.pretty_generate(squad.pending_profile_changes) %></pre>
+            </div>
+            <div class="flex flex-col gap-2 min-w-48">
+              <%= button_to "Aprovar", approve_profile_change_squad_path(squad), method: :post, class: "px-4 py-2 bg-neon-green/20 border border-neon-green/40 rounded text-neon-green" %>
+              <%= form_with url: reject_profile_change_squad_path(squad), method: :post, local: true, class: "space-y-2" do |f| %>
+                <%= text_field_tag :reason, nil, placeholder: "Motivo da rejeição", required: true, class: "w-full px-2 py-1 text-sm bg-dark-bg border border-gray-700 rounded text-white" %>
+                <%= f.submit "Rejeitar", class: "w-full px-4 py-2 bg-neon-magenta/20 border border-neon-magenta/40 rounded text-neon-magenta" %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      <% end %>
+
+      <% if @pending_squads.empty? %>
+        <div class="card-neon p-6 text-center text-gray-400">Não há alterações pendentes no momento.</div>
+      <% end %>
+    </div>
+  </div>
+</div>

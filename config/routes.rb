@@ -39,6 +39,26 @@ Rails.application.routes.draw do
             only: [ :new, :create, :edit, :update, :destroy ],
             controller: "access/characters"
 
+  resources :squads, controller: "access/squads", only: [ :index, :show, :new, :create ] do
+    member do
+      patch :request_profile_change
+      post :approve_profile_change
+      post :reject_profile_change
+      post :create_invitation
+    end
+
+    collection do
+      get :pending_reviews
+    end
+  end
+
+  resources :squad_invitations, controller: "access/squad_invitations", only: [] do
+    member do
+      post :accept
+      post :decline
+    end
+  end
+
   # Defines the root path route ("/")
   root "access/dashboard#index"
 
