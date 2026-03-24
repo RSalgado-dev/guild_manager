@@ -1,52 +1,137 @@
-<div class="min-h-screen py-8 px-4">
-  <div class="max-w-6xl mx-auto space-y-6">
-    <div class="flex items-center justify-between">
-      <div>
-        <h1 class="text-3xl font-bold text-white">Squads da Guilda</h1>
-        <p class="text-gray-400">Gerencie squads, convites e revisões</p>
-      </div>
-      <div class="flex gap-3">
-        <% if has_permission?(:manage_members) %>
-          <%= link_to "Novo Squad", new_squad_path, class: "px-4 py-2 bg-neon-cyan/20 border border-neon-cyan/40 rounded text-neon-cyan" %>
-          <%= link_to "Revisões Pendentes", pending_reviews_squads_path, class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded text-neon-purple" %>
-        <% end %>
-        <%= link_to "Dashboard", dashboard_path, class: "px-4 py-2 bg-dark-surface border border-gray-700 rounded text-gray-300" %>
-      </div>
-    </div>
+<div class="min-h-screen bg-dark-bg relative overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-16 left-8 w-80 h-80 bg-neon-cyan opacity-10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-12 right-8 w-96 h-96 bg-neon-purple opacity-10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1.2s;"></div>
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-neon-magenta opacity-5 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
+  </div>
 
-    <% if @pending_invitations.any? %>
-      <div class="card-neon p-4">
-        <h2 class="text-lg font-semibold text-neon-green mb-3">Convites Recebidos</h2>
-        <div class="space-y-3">
-          <% @pending_invitations.each do |invitation| %>
-            <div class="p-3 rounded border border-gray-700 flex items-center justify-between">
+  <div class="relative z-10 min-h-screen">
+    <header class="border-b border-gray-800 backdrop-blur-sm bg-dark-surface/50">
+      <div class="max-w-7xl mx-auto px-4 py-4">
+        <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div class="flex items-center gap-4">
+            <%= link_to dashboard_path, class: "flex items-center gap-3 hover:opacity-80 transition-opacity" do %>
+              <span class="text-3xl">🛡️</span>
               <div>
-                <p class="text-white">Squad: <strong><%= invitation.squad.name %></strong> [<%= invitation.squad.tag %>]</p>
-                <p class="text-xs text-gray-500">Convidado por <%= invitation.inviter.discord_username %></p>
+                <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
+                  GUILD SYSTEM
+                </h1>
+                <p class="text-neon-cyan/70 font-mono text-xs">[ SQUADS_CENTER ]</p>
               </div>
-              <div class="flex gap-2">
-                <%= button_to "Aceitar", accept_squad_invitation_path(invitation), method: :post, class: "px-3 py-1 bg-neon-green/20 border border-neon-green/40 rounded text-neon-green text-sm" %>
-                <%= button_to "Recusar", decline_squad_invitation_path(invitation), method: :post, class: "px-3 py-1 bg-neon-magenta/20 border border-neon-magenta/40 rounded text-neon-magenta text-sm" %>
-              </div>
-            </div>
-          <% end %>
+            <% end %>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3">
+            <% if has_permission?(:manage_members) %>
+              <%= link_to new_squad_path, class: "px-4 py-2 bg-dark-card border border-neon-cyan/30 hover:border-neon-cyan text-neon-cyan rounded-lg transition-all duration-300 font-mono text-sm hover:shadow-neon-cyan" do %>
+                + Novo Squad
+              <% end %>
+              <%= link_to pending_reviews_squads_path, class: "px-4 py-2 bg-dark-card border border-neon-purple/30 hover:border-neon-purple text-neon-purple rounded-lg transition-all duration-300 font-mono text-sm hover:shadow-neon-purple" do %>
+                Revisões Pendentes
+              <% end %>
+            <% end %>
+            <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-gray-700 hover:border-neon-cyan/30 text-gray-300 rounded-lg transition-all duration-300 font-mono text-sm" do %>
+              ← Dashboard
+            <% end %>
+          </div>
         </div>
       </div>
-    <% end %>
+    </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <% @squads.each do |squad| %>
-        <div class="card-neon p-4">
-          <div class="flex items-center justify-between">
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <section class="bg-dark-card border border-neon-cyan/20 rounded-lg p-8">
+        <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <div class="space-y-3">
+            <span class="inline-flex items-center px-3 py-1 bg-neon-cyan/20 border border-neon-cyan rounded-full text-neon-cyan text-sm font-mono">
+              Estrutura da guilda
+            </span>
             <div>
-              <h3 class="text-xl text-white font-bold"><%= squad.name %> <span class="text-neon-cyan">[<%= squad.tag %>]</span></h3>
+              <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta">
+                Squads da Guilda
+              </h2>
+              <p class="text-gray-400 mt-3 max-w-2xl">
+                Gerencie esquadrões, acompanhe convites pendentes e acesse revisões de perfil em um fluxo consistente com o restante da aplicação.
+              </p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3 min-w-full sm:min-w-0 sm:w-auto">
+            <div class="bg-dark-bg border border-neon-cyan/20 rounded-lg px-4 py-3">
+              <p class="text-xs text-neon-cyan/70 font-mono uppercase">Squads</p>
+              <p class="text-2xl font-bold text-white"><%= @squads.count %></p>
+            </div>
+            <div class="bg-dark-bg border border-neon-green/20 rounded-lg px-4 py-3">
+              <p class="text-xs text-neon-cyan/70 font-mono uppercase">Convites</p>
+              <p class="text-2xl font-bold text-white"><%= @pending_invitations.count %></p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <% if @pending_invitations.any? %>
+        <section class="bg-dark-card border border-neon-green/30 rounded-lg p-6">
+          <div class="flex items-center justify-between gap-4 mb-4">
+            <div>
+              <h3 class="text-neon-green font-bold text-xl uppercase">Convites Recebidos</h3>
+              <p class="text-gray-400 text-sm">Responda aos convites pendentes para entrar em um squad.</p>
+            </div>
+          </div>
+
+          <div class="space-y-3">
+            <% @pending_invitations.each do |invitation| %>
+              <div class="p-4 bg-dark-bg rounded-lg border border-neon-green/20 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                <div>
+                  <p class="text-white text-lg font-bold">
+                    <%= invitation.squad.name %> <span class="text-neon-cyan">[<%= invitation.squad.tag %>]</span>
+                  </p>
+                  <p class="text-gray-400 text-sm">Convidado por <%= invitation.inviter.discord_username %></p>
+                </div>
+                <div class="flex flex-wrap gap-2">
+                  <%= button_to "Aceitar", accept_squad_invitation_path(invitation), method: :post, class: "px-4 py-2 bg-neon-green/20 border border-neon-green/40 rounded-lg text-neon-green text-sm font-mono" %>
+                  <%= button_to "Recusar", decline_squad_invitation_path(invitation), method: :post, class: "px-4 py-2 bg-neon-magenta/20 border border-neon-magenta/40 rounded-lg text-neon-magenta text-sm font-mono" %>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        </section>
+      <% end %>
+
+      <section class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+        <% @squads.each do |squad| %>
+          <article class="bg-dark-card border border-neon-purple/20 rounded-lg p-4 hover:border-neon-purple hover:shadow-neon-purple transition-all duration-300">
+            <div class="rounded-2xl overflow-hidden border border-neon-cyan/20 bg-dark-bg aspect-[4/3] flex items-center justify-center p-4">
+              <% if squad.emblem.attached? %>
+                <%= image_tag squad.emblem, class: "w-full h-full object-contain" %>
+              <% else %>
+                <div class="w-full h-full rounded-xl border border-dashed border-neon-cyan/20 flex items-center justify-center text-5xl text-gray-500">
+                  🛡️
+                </div>
+              <% end %>
+            </div>
+
+            <div class="mt-4 space-y-2 min-h-[6.5rem]">
+              <h3 class="text-xl text-white font-bold leading-tight pr-2">
+                <%= squad.name %> <span class="text-neon-cyan">[<%= squad.tag %>]</span>
+              </h3>
               <p class="text-sm text-gray-400">Líder: <%= squad.leader.discord_username %></p>
               <p class="text-sm text-gray-500">Membros: <%= squad.members.count %></p>
             </div>
-            <%= link_to "Ver Perfil", squad_path(squad), class: "px-3 py-1 bg-dark-surface border border-gray-700 rounded text-gray-200 text-sm" %>
-          </div>
-        </div>
-      <% end %>
-    </div>
+
+            <p class="text-gray-400 text-sm leading-relaxed mt-3 min-h-[3rem]">
+              <%= squad.description.presence || "Sem descrição cadastrada no momento." %>
+            </p>
+
+            <div class="mt-4 flex items-center justify-between gap-3">
+              <span class="px-3 py-1 bg-neon-purple/20 border border-neon-purple/30 rounded-full text-neon-purple text-xs font-mono uppercase">
+                Squad
+              </span>
+              <%= link_to squad_path(squad), class: "px-4 py-2 bg-dark-bg border border-neon-cyan/30 hover:border-neon-cyan text-neon-cyan rounded-lg transition-all duration-300 text-sm font-mono" do %>
+                Ver Perfil
+              <% end %>
+            </div>
+          </article>
+        <% end %>
+      </section>
+    </main>
   </div>
 </div>

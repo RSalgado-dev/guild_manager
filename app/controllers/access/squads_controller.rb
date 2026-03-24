@@ -7,7 +7,7 @@ module Access
     before_action :require_squad_leader!, only: [ :request_profile_change, :create_invitation ]
 
     def index
-      @squads = @guild.squads.includes(:leader).order(:name)
+      @squads = @guild.squads.includes(:leader, emblem_attachment: :blob).order(:name)
       @pending_invitations = current_user.received_squad_invitations.pending_open.includes(:squad, :inviter)
     end
 
@@ -36,7 +36,7 @@ module Access
     end
 
     def pending_reviews
-      @pending_squads = @guild.squads.with_profile_changes_pending.includes(:leader)
+      @pending_squads = @guild.squads.with_profile_changes_pending.includes(:leader, emblem_attachment: :blob, emblem_pending_attachment: :blob)
     end
 
     def request_profile_change

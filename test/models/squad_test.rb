@@ -95,7 +95,6 @@ class SquadTest < ActiveSupport::TestCase
       name: "Novo Esquadrão",
       tag: "NOVO"
     )
-    # O enum será setado após validação
     assert squad.valid?
   end
 
@@ -143,6 +142,27 @@ class SquadTest < ActiveSupport::TestCase
     assert_equal "ALP2", squad.tag
     assert_equal "profile_approved", squad.profile_change_status
     assert_equal({}, squad.pending_profile_changes)
+  end
+
+  test "alteração com emblema mantém preview pendente e promove imagem ao aprovar" do
+    squad = squads(:one)
+    reviewer = users(:two)
+
+    squad.request_profile_change!(
+      actor: squad.leader,
+      attributes: {},
+      emblem_file: Rack::Test::UploadedFile.new(Rails.root.join("test/fixtures/files/squad_emblem.png"), "image/png")
+    )
+
+    assert squad.reload.emblem_pending.attached?
+    assert_not squad.emblem.attached?
+
+    squad.approve_profile_change!(reviewer: reviewer)
+    squad.reload
+
+    assert squad.emblem.attached?
+    assert_not squad.emblem_pending.attached?
+    assert_equal "profile_approved", squad.profile_change_status
   end
 
   test "rejeitando alteração mantém dados atuais e registra motivo" do
