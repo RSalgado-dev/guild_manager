@@ -222,3 +222,18 @@ body {
 .group:hover .group-hover\:animate-pulse {
   animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important;
 }
+
+.native-datetime-field {
+  appearance: auto !important;
+  -webkit-appearance: auto !important;
+  color-scheme: dark;
+}
+
+.native-datetime-field::-webkit-calendar-picker-indicator {
+  opacity: 1;
+  cursor: pointer;
+}
+
+.native-datetime-field::-webkit-date-and-time-value {
+  text-align: left;
+}

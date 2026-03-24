@@ -1,6 +1,8 @@
 class User < ApplicationRecord
   DISCORD_ROLE_SYNC_MAX_AGE = 2.minutes
   PERMISSION_CHECK_SYNC_MAX_AGE = 30.seconds
+  BASE_XP_PER_LEVEL = 100
+  XP_LEVEL_GROWTH_FACTOR = 1.2
 
   belongs_to :guild
   belongs_to :squad, optional: true
@@ -82,36 +84,67 @@ class User < ApplicationRecord
   validates :xp_points, numericality: { greater_than_or_equal_to: 0 }
   validates :currency_balance, numericality: { greater_than_or_equal_to: 0 }
 
+  scope :with_guild_access, -> { where(has_guild_access: true) }
+
   def admin?
     is_admin == true
   end
 
   def level
-    # Calcula o nível baseado nos XP points
-    # Nível 1: 0-99 XP
-    # Nível 2: 100-299 XP
-    # Nível 3: 300-599 XP
-    # Fórmula: sqrt(xp / 100) + 1
-    return 1 if xp_points.zero?
+    current_level = 0
 
-    (Math.sqrt(xp_points / 100.0).floor + 1)
+    while xp_points >= self.class.total_xp_for_level(current_level + 1)
+      current_level += 1
+    end
+
+    current_level
   end
 
   def xp_for_next_level
-    # XP necessário para o próximo nível
-    next_level = level + 1
-    ((next_level - 1) ** 2) * 100
+    self.class.total_xp_for_level(level + 1)
   end
 
   def xp_progress_percentage
-    # Percentual de progresso para o próximo nível
-    current_level_xp = ((level - 1) ** 2) * 100
+    current_level_xp = self.class.total_xp_for_level(level)
     next_level_xp = xp_for_next_level
 
     return 0 if next_level_xp == current_level_xp
 
     progress = ((xp_points - current_level_xp).to_f / (next_level_xp - current_level_xp) * 100).round(1)
     [ progress, 100 ].min
+  end
+
+  def xp_in_current_level
+    xp_points - self.class.total_xp_for_level(level)
+  end
+
+  def xp_needed_in_current_level
+    xp_for_next_level - self.class.total_xp_for_level(level)
+  end
+
+  def monthly_event_attendance_stats(reference_time: Time.current)
+    participations = event_participations
+      .joins(:event)
+      .where(events: { status: Event.statuses[:completed] })
+      .where(events: { starts_at: 30.days.ago(reference_time)..reference_time })
+      .where.not(final_status: nil)
+
+    total = participations.count
+    counts = {
+      participated: participations.participated.count,
+      justified: participations.justified.count,
+      absent: participations.absent.count
+    }
+
+    percentages = counts.transform_values do |count|
+      total.zero? ? 0.0 : ((count.to_f / total) * 100).round(1)
+    end
+
+    {
+      total: total,
+      counts: counts,
+      percentages: percentages
+    }
   end
 
   def primary_role
@@ -183,6 +216,25 @@ class User < ApplicationRecord
         metadata:      metadata
       )
     end
+  end
+
+  def apply_xp!(delta)
+    transaction do
+      lock!
+      update!(xp_points: xp_points + delta)
+    end
+  end
+
+  def self.total_xp_for_level(target_level)
+    return 0 if target_level <= 0
+
+    (1..target_level).sum { |level_number| xp_required_for_level(level_number) }
+  end
+
+  def self.xp_required_for_level(target_level)
+    return 0 if target_level <= 0
+
+    (BASE_XP_PER_LEVEL * (XP_LEVEL_GROWTH_FACTOR**(target_level - 1))).round
   end
 
   # Encontra ou cria usuário a partir dos dados do Discord OAuth

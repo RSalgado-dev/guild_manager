@@ -8,6 +8,7 @@ class AccessControllerTest < ActionDispatch::IntegrationTest
 
   test "deve exibir página restricted quando usuário está logado" do
     user = users(:one)
+    user.stubs(:sync_discord_roles_if_stale!).returns(true)
     ApplicationController.any_instance.stubs(:logged_in?).returns(true)
     ApplicationController.any_instance.stubs(:current_user).returns(user)
     ApplicationController.any_instance.stubs(:render).returns("")
@@ -19,6 +20,7 @@ class AccessControllerTest < ActionDispatch::IntegrationTest
   test "página restricted deve mostrar mensagem sobre cargo necessário quando user está logado" do
     user = users(:one)
     guild = user.guild
+    user.stubs(:sync_discord_roles_if_stale!).returns(true)
     guild.update(
       required_discord_role_name: "Membro Verificado",
       discord_guild_id: "123456789"
@@ -34,6 +36,7 @@ class AccessControllerTest < ActionDispatch::IntegrationTest
 
   test "página restricted deve ter botão de logout quando usuário logado" do
     user = users(:one)
+    user.stubs(:sync_discord_roles_if_stale!).returns(true)
 
     ApplicationController.any_instance.stubs(:logged_in?).returns(true)
     ApplicationController.any_instance.stubs(:current_user).returns(user)

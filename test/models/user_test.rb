@@ -105,6 +105,34 @@ class UserTest < ActiveSupport::TestCase
     assert_not_nil primary_role
   end
 
+  test "#level segue progressão acumulada com crescimento de 20%" do
+    user = users(:one)
+
+    user.xp_points = 0
+    assert_equal 0, user.level
+
+    user.xp_points = 100
+    assert_equal 1, user.level
+
+    user.xp_points = 219
+    assert_equal 1, user.level
+
+    user.xp_points = 220
+    assert_equal 2, user.level
+
+    user.xp_points = 364
+    assert_equal 3, user.level
+  end
+
+  test "#xp_progress_percentage usa faixa do nível atual" do
+    user = users(:one)
+    user.xp_points = 250
+
+    assert_equal 2, user.level
+    assert_equal 364, user.xp_for_next_level
+    assert_in_delta 20.8, user.xp_progress_percentage, 0.1
+  end
+
   # === OAuth Discord ===
 
   test "find_or_create_from_discord deve retornar nil se usuário não pertence a guild configurada" do

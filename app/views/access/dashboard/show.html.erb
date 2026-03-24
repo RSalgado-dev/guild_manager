@@ -100,7 +100,7 @@
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <!-- Events Module -->
-          <div class="group bg-dark-card border border-neon-cyan/20 rounded-lg p-6 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300 cursor-pointer">
+          <%= link_to events_path, class: "group bg-dark-card border border-neon-cyan/20 rounded-lg p-6 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300 block" do %>
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
                 <span class="text-5xl group-hover:animate-pulse">🎯</span>
@@ -117,7 +117,7 @@
               <span class="text-gray-500 font-mono">Status:</span>
               <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
             </div>
-          </div>
+          <% end %>
 
           <!-- Missions Module -->
           <div class="group bg-dark-card border border-neon-purple/20 rounded-lg p-6 hover:border-neon-purple hover:shadow-neon-purple transition-all duration-300 cursor-pointer">

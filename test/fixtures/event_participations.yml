@@ -3,27 +3,47 @@
 one:
   event: one
   user: one
-  rsvp_status: "yes"
+  rsvp_status: "confirmed"
+  justification:
   attended: false
+  final_status:
+  reward_xp_awarded: 0
+  reward_currency_awarded: 0
   rewarded_at:
+  responded_at:
 
 two:
   event: two
   user: one
-  rsvp_status: "yes"
+  rsvp_status: "confirmed"
+  justification:
   attended: true
+  final_status: participated
+  reward_xp_awarded: 200
+  reward_currency_awarded: 1000
   rewarded_at: 2026-01-10 23:00:00
+  responded_at: 2026-01-10 17:00:00
 
 three:
   event: two
   user: two
-  rsvp_status: "maybe"
+  rsvp_status: "pending"
+  justification:
   attended: false
+  final_status: absent
+  reward_xp_awarded: 0
+  reward_currency_awarded: 0
   rewarded_at:
+  responded_at:
 
 four:
   event: one
   user: two
-  rsvp_status: "no"
+  rsvp_status: "declined"
+  justification: "Tenho compromisso pessoal."
   attended: false
+  final_status:
+  reward_xp_awarded: 0
+  reward_currency_awarded: 0
   rewarded_at:
+  responded_at: 2026-01-19 10:00:00

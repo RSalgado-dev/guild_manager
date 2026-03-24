@@ -21,7 +21,10 @@ module Workspace
     # These settings can be overridden in specific environments using the files
     # in config/environments, which are processed later.
     #
-    # config.time_zone = "Central Time (US & Canada)"
+    config.time_zone = "Brasilia"
+    config.active_record.default_timezone = :utc
+    # TODO: aceitar timezone do usuario no formulario de eventos e converter
+    # antes de salvar, mantendo Brasilia como timezone canonical da aplicacao.
     # config.eager_load_paths << Rails.root.join("extras")
 
     # Configure Sprockets for ActiveAdmin (coexists with Propshaft)

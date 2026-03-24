@@ -7,7 +7,7 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = EventParticipation.new(
       event: events(:one),
       user: users(:three),
-      rsvp_status: "yes",
+      rsvp_status: "confirmed",
       attended: false
     )
     assert participation.valid?
@@ -16,7 +16,7 @@ class EventParticipationTest < ActiveSupport::TestCase
   test "não deve ser válido sem evento" do
     participation = EventParticipation.new(
       user: users(:one),
-      rsvp_status: "yes"
+      rsvp_status: "confirmed"
     )
     assert_not participation.valid?
   end
@@ -24,7 +24,7 @@ class EventParticipationTest < ActiveSupport::TestCase
   test "não deve ser válido sem usuário" do
     participation = EventParticipation.new(
       event: events(:one),
-      rsvp_status: "yes"
+      rsvp_status: "confirmed"
     )
     assert_not participation.valid?
   end
@@ -34,7 +34,7 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = EventParticipation.new(
       event: events(:one),
       user: users(:one),
-      rsvp_status: "yes"
+      rsvp_status: "confirmed"
     )
     assert_not participation.valid?
     assert_includes participation.errors[:event_id], "has already been taken"
@@ -44,7 +44,7 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = EventParticipation.new(
       event: events(:three),
       user: users(:one),
-      rsvp_status: "yes"
+      rsvp_status: "confirmed"
     )
     assert participation.valid?
   end
@@ -53,7 +53,7 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = EventParticipation.new(
       event: events(:one),
       user: users(:three),
-      rsvp_status: "yes"
+      rsvp_status: "confirmed"
     )
     assert participation.valid?
   end
@@ -62,16 +62,13 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = event_participations(:one)
 
     assert_nothing_raised do
-      participation.rsvp_status = "yes"
+      participation.rsvp_status = "confirmed"
       participation.valid?
 
-      participation.rsvp_status = "maybe"
+      participation.rsvp_status = "declined"
       participation.valid?
 
-      participation.rsvp_status = "no"
-      participation.valid?
-
-      participation.rsvp_status = nil
+      participation.rsvp_status = "pending"
       participation.valid?
     end
   end
@@ -120,7 +117,7 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = EventParticipation.new(
       event: events(:one),
       user: users(:three),
-      rsvp_status: "yes"
+      rsvp_status: "confirmed"
     )
     assert_equal false, participation.attended
   end
@@ -129,7 +126,7 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = EventParticipation.new(
       event: events(:one),
       user: users(:three),
-      rsvp_status: "yes",
+      rsvp_status: "confirmed",
       attended: true
     )
     assert participation.valid?
@@ -145,5 +142,21 @@ class EventParticipationTest < ActiveSupport::TestCase
     participation = event_participations(:two)
     assert_not_nil participation.rewarded_at
     assert_instance_of ActiveSupport::TimeWithZone, participation.rewarded_at
+  end
+
+  test "#source_block retorna justified quando avisou ausência com justificativa" do
+    assert_equal :justified, event_participations(:four).source_block
+  end
+
+  test "#default_final_status respeita o bloco de origem" do
+    assert_equal "participated", event_participations(:one).default_final_status
+    assert_equal "justified", event_participations(:four).default_final_status
+    assert_equal "absent", event_participations(:three).default_final_status
+  end
+
+  test "#reward_multiplier_for aplica matriz de recompensas" do
+    assert_equal 1.0, event_participations(:one).reward_multiplier_for(:participated)
+    assert_equal 0.2, event_participations(:four).reward_multiplier_for(:justified)
+    assert_equal 0.0, event_participations(:three).reward_multiplier_for(:absent)
   end
 end

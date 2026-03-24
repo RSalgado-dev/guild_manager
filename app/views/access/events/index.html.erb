@@ -1,0 +1,159 @@
+<div class="min-h-screen bg-dark-bg relative overflow-hidden">
+  <div class="absolute inset-0 overflow-hidden pointer-events-none">
+    <div class="absolute top-16 left-10 w-96 h-96 bg-neon-cyan opacity-10 rounded-full blur-3xl animate-pulse-slow"></div>
+    <div class="absolute bottom-20 right-10 w-96 h-96 bg-neon-magenta opacity-10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1s;"></div>
+  </div>
+
+  <div class="relative z-10 min-h-screen">
+    <header class="border-b border-gray-800 backdrop-blur-sm bg-dark-surface/50">
+      <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+        <div class="flex items-center gap-4">
+          <%= link_to dashboard_path, class: "flex items-center gap-3 hover:opacity-80 transition-opacity" do %>
+            <span class="text-3xl">🎯</span>
+            <div>
+              <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
+                GUILD SYSTEM
+              </h1>
+              <p class="text-neon-cyan/70 font-mono text-xs">[ EVENT_MANAGER ]</p>
+            </div>
+          <% end %>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <% if has_permission?(:manage_events) %>
+            <%= link_to new_event_path, class: "px-4 py-2 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-bold text-sm" do %>
+              + Novo Evento
+            <% end %>
+          <% end %>
+          <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-gray-700 text-gray-300 rounded-lg font-mono text-sm" do %>
+            ← Dashboard
+          <% end %>
+        </div>
+      </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+      <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="bg-dark-card border border-neon-cyan/30 rounded-lg p-5">
+          <p class="text-neon-cyan/70 text-sm font-mono uppercase">Próximos eventos</p>
+          <p class="text-white text-3xl font-bold mt-2"><%= @upcoming_events.count %></p>
+        </div>
+        <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-5">
+          <p class="text-neon-purple/70 text-sm font-mono uppercase">Respondidos por você</p>
+          <p class="text-white text-3xl font-bold mt-2"><%= @my_participations.where.not(rsvp_status: :pending).count %></p>
+        </div>
+        <div class="bg-dark-card border border-neon-green/30 rounded-lg p-5">
+          <p class="text-neon-green/70 text-sm font-mono uppercase">Eventos fechados</p>
+          <p class="text-white text-3xl font-bold mt-2"><%= @past_events.count %></p>
+        </div>
+      </section>
+
+      <% if has_permission?(:manage_events) %>
+        <section class="space-y-4">
+          <div class="flex items-center justify-between">
+            <h2 class="text-2xl font-bold text-white">Pendentes de finalização</h2>
+            <p class="text-gray-500 font-mono text-xs">Eventos já iniciados que ainda precisam ser fechados</p>
+          </div>
+
+          <% if @pending_review_events.any? %>
+            <div class="space-y-3">
+              <% @pending_review_events.each do |event| %>
+                <%= link_to review_event_path(event), class: "block bg-dark-card border border-yellow-400/30 rounded-lg p-4 hover:border-yellow-400 transition-colors" do %>
+                  <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                    <div>
+                      <p class="text-white font-semibold"><%= event.title %></p>
+                      <p class="text-gray-500 text-sm"><%= l(event.starts_at, format: :short) %> • aguardando fechamento</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded text-yellow-300 text-xs font-mono">scheduled</span>
+                      <span class="px-3 py-2 bg-yellow-400/20 border border-yellow-400/40 rounded-lg text-yellow-300 text-xs font-mono">Revisar presença</span>
+                    </div>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-8 text-center">
+              <p class="text-gray-400">Nenhum evento aguardando fechamento.</p>
+            </div>
+          <% end %>
+        </section>
+      <% end %>
+
+      <section class="space-y-4">
+        <div class="flex items-center justify-between">
+          <h2 class="text-2xl font-bold text-white">Próximos eventos</h2>
+          <p class="text-gray-500 font-mono text-xs">Respostas até 15 minutos antes do início</p>
+        </div>
+
+        <% if @upcoming_events.any? %>
+          <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+            <% @upcoming_events.each do |event| %>
+              <% participation = event.event_participations.find { |item| item.user_id == current_user.id } || event.participation_for(current_user) %>
+              <%= link_to event_path(event), class: "block bg-dark-card border border-neon-cyan/20 rounded-lg p-5 hover:border-neon-cyan transition-all duration-300" do %>
+                <div class="flex items-start justify-between gap-4 mb-4">
+                  <div>
+                    <h3 class="text-white font-bold text-xl"><%= event.title %></h3>
+                    <p class="text-gray-400 text-sm mt-1"><%= event.description.presence || "Sem descrição cadastrada." %></p>
+                  </div>
+                  <span class="px-3 py-1 rounded-full text-xs font-mono border <%= participation.confirmed? ? 'border-neon-green text-neon-green bg-neon-green/10' : participation.declined? ? 'border-yellow-400 text-yellow-300 bg-yellow-400/10' : 'border-gray-600 text-gray-400 bg-dark-bg' %>">
+                    <%= participation.confirmed? ? "Presença confirmada" : participation.declined? ? "Ausência avisada" : "Sem resposta" %>
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-2 gap-3 text-sm">
+                  <div class="p-3 bg-dark-bg border border-neon-purple/20 rounded-lg">
+                    <p class="text-gray-500 font-mono uppercase text-xs">Quando</p>
+                    <p class="text-white mt-1"><%= l(event.starts_at, format: :short) %></p>
+                  </div>
+                  <div class="p-3 bg-dark-bg border border-neon-magenta/20 rounded-lg">
+                    <p class="text-gray-500 font-mono uppercase text-xs">Recorrência</p>
+                    <p class="text-white mt-1"><%= event.recurrence.humanize %></p>
+                  </div>
+                  <div class="p-3 bg-dark-bg border border-neon-cyan/20 rounded-lg">
+                    <p class="text-gray-500 font-mono uppercase text-xs">XP</p>
+                    <p class="text-white mt-1"><%= event.reward_xp %></p>
+                  </div>
+                  <div class="p-3 bg-dark-bg border border-yellow-400/20 rounded-lg">
+                    <p class="text-gray-500 font-mono uppercase text-xs">Moedas</p>
+                    <p class="text-white mt-1"><%= event.reward_currency %></p>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-10 text-center">
+            <p class="text-gray-400">Nenhum evento agendado no momento.</p>
+          </div>
+        <% end %>
+      </section>
+
+      <section class="space-y-4">
+        <h2 class="text-2xl font-bold text-white">Últimos eventos</h2>
+        <% if @past_events.any? %>
+          <div class="space-y-3">
+            <% @past_events.each do |event| %>
+              <%= link_to event_path(event), class: "block bg-dark-card border border-gray-800 rounded-lg p-4 hover:border-neon-purple/30 transition-colors" do %>
+                <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <p class="text-white font-semibold"><%= event.title %></p>
+                    <p class="text-gray-500 text-sm"><%= l(event.starts_at, format: :short) %> • <%= event.status.humanize %></p>
+                  </div>
+                  <div class="flex gap-2 text-xs font-mono">
+                    <span class="px-2 py-1 bg-neon-purple/10 border border-neon-purple/30 rounded text-neon-purple"><%= event.reward_xp %> XP</span>
+                    <span class="px-2 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded text-yellow-300"><%= event.reward_currency %> moedas</span>
+                  </div>
+                </div>
+              <% end %>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-10 text-center">
+            <p class="text-gray-400">Ainda não há eventos finalizados.</p>
+          </div>
+        <% end %>
+      </section>
+    </main>
+  </div>
+</div>

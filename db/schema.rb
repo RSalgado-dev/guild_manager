@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_12_143000) do
+ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -121,8 +121,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_143000) do
     t.boolean "attended", default: false, null: false
     t.datetime "created_at", null: false
     t.bigint "event_id", null: false
+    t.string "final_status"
+    t.text "justification"
+    t.datetime "responded_at"
+    t.integer "reward_currency_awarded", default: 0, null: false
+    t.integer "reward_xp_awarded", default: 0, null: false
     t.datetime "rewarded_at"
-    t.string "rsvp_status"
+    t.string "rsvp_status", default: "pending"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.index ["event_id", "user_id"], name: "index_event_participations_on_event_id_and_user_id", unique: true
@@ -137,6 +142,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_12_143000) do
     t.datetime "ends_at"
     t.string "event_type", null: false
     t.bigint "guild_id", null: false
+    t.string "recurrence", default: "unique", null: false
     t.integer "reward_currency", default: 0, null: false
     t.integer "reward_xp", default: 0, null: false
     t.datetime "starts_at", null: false

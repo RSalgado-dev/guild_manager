@@ -38,7 +38,8 @@ module Access
       @user_roles = @user.user_roles.includes(:role)
       @achievements = @user.user_achievements.includes(:achievement)
       @certificates = @user.user_certificates.includes(:certificate)
-      @recent_events = @user.event_participations.includes(:event).order(created_at: :desc).limit(5)
+      @recent_events = @user.event_participations.includes(:event).joins(:event).order("events.starts_at DESC").limit(5)
+      @attendance_stats = @user.monthly_event_attendance_stats
     end
   end
 end

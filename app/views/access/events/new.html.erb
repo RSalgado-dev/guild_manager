@@ -1,0 +1,64 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <h1 class="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">Novo Evento</h1>
+        <p class="text-gray-400 mt-2">Configure recorrência, horário e recompensas.</p>
+      </div>
+      <%= link_to events_path, class: "px-4 py-2 bg-dark-card border border-gray-700 text-gray-300 rounded-lg font-mono text-sm" do %>
+        ← Eventos
+      <% end %>
+    </div>
+
+    <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-6">
+      <%= form_with model: @event, url: events_path, local: true, class: "space-y-5" do |f| %>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="md:col-span-2">
+            <%= f.label :title, "Título", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.text_field :title, class: "w-full px-4 py-3 bg-dark-bg border border-neon-cyan/20 rounded-lg text-white" %>
+          </div>
+
+          <div>
+            <%= f.label :event_type, "Tipo do evento", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.text_field :event_type, class: "w-full px-4 py-3 bg-dark-bg border border-neon-cyan/20 rounded-lg text-white" %>
+          </div>
+
+          <div>
+            <%= f.label :recurrence, "Recorrência", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.select :recurrence, Event.recurrences.keys.map { |value| [ value.humanize, value ] }, {}, class: "w-full px-4 py-3 bg-dark-bg border border-neon-purple/20 rounded-lg text-white" %>
+          </div>
+
+          <div>
+            <% starts_at_value = @event.starts_at&.in_time_zone(Time.zone) %>
+            <%= f.label :starts_at, "Data e hora de início", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.datetime_local_field :starts_at, value: starts_at_value&.strftime("%Y-%m-%dT%H:%M"), step: 60, class: "native-datetime-field w-full px-4 py-3 bg-dark-bg border border-neon-cyan/20 rounded-lg text-white", required: true %>
+            <p class="text-xs text-gray-500 mt-2">Horario fixo em Brasilia (UTC-3). O suporte a timezone por usuario fica para depois.</p>
+          </div>
+
+          <div>
+            <% ends_at_value = @event.ends_at&.in_time_zone(Time.zone) %>
+            <%= f.label :ends_at, "Data e hora de fim", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.datetime_local_field :ends_at, value: ends_at_value&.strftime("%Y-%m-%dT%H:%M"), step: 60, class: "native-datetime-field w-full px-4 py-3 bg-dark-bg border border-neon-cyan/20 rounded-lg text-white" %>
+          </div>
+
+          <div>
+            <%= f.label :reward_xp, "Recompensa de XP", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.number_field :reward_xp, min: 0, class: "w-full px-4 py-3 bg-dark-bg border border-neon-green/20 rounded-lg text-white" %>
+          </div>
+
+          <div>
+            <%= f.label :reward_currency, "Recompensa de moedas", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.number_field :reward_currency, min: 0, class: "w-full px-4 py-3 bg-dark-bg border border-yellow-400/20 rounded-lg text-white" %>
+          </div>
+
+          <div class="md:col-span-2">
+            <%= f.label :description, "Descrição", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.text_area :description, rows: 5, class: "w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-lg text-white" %>
+          </div>
+        </div>
+
+        <%= f.submit "Criar evento", class: "w-full px-4 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-bold cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+</div>

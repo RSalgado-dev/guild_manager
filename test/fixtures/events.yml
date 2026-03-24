@@ -8,6 +8,7 @@ one:
   event_type: "raid"
   starts_at: 2026-01-20 20:00:00
   ends_at: 2026-01-20 23:00:00
+  recurrence: unique
   status: scheduled
   reward_currency: 500
   reward_xp: 100
@@ -20,6 +21,7 @@ two:
   event_type: "tournament"
   starts_at: 2026-01-10 18:00:00
   ends_at: 2026-01-10 22:00:00
+  recurrence: weekly
   status: completed
   reward_currency: 1000
   reward_xp: 200
@@ -32,6 +34,7 @@ three:
   event_type: "social"
   starts_at: 2026-01-25 19:00:00
   ends_at: 2026-01-25 21:00:00
+  recurrence: monthly
   status: canceled
   reward_currency: 0
   reward_xp: 0 

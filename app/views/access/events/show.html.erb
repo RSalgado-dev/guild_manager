@@ -1,0 +1,105 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-neon-cyan font-mono text-xs">[ EVENT_DETAILS ]</p>
+        <h1 class="text-3xl font-black text-white mt-2"><%= @event.title %></h1>
+        <p class="text-gray-400 mt-2"><%= @event.description.presence || "Sem descrição cadastrada." %></p>
+      </div>
+      <div class="flex gap-3">
+        <% if has_permission?(:manage_events) && @event.review_available? %>
+          <%= link_to review_event_path(@event), class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded-lg text-neon-purple font-mono text-sm" do %>
+            Fechar evento
+          <% end %>
+        <% end %>
+        <%= link_to events_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
+          ← Eventos
+        <% end %>
+      </div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-dark-card border border-neon-cyan/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Início</p>
+        <p class="text-white mt-2"><%= l(@event.starts_at, format: :short) %></p>
+      </div>
+      <div class="bg-dark-card border border-neon-purple/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Recorrência</p>
+        <p class="text-white mt-2"><%= @event.recurrence.humanize %></p>
+      </div>
+      <div class="bg-dark-card border border-neon-green/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">XP</p>
+        <p class="text-white mt-2"><%= @event.reward_xp %></p>
+      </div>
+      <div class="bg-dark-card border border-yellow-400/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Moedas</p>
+        <p class="text-white mt-2"><%= @event.reward_currency %></p>
+      </div>
+    </section>
+
+    <section class="bg-dark-card border border-neon-cyan/20 rounded-lg p-6">
+      <div class="flex items-center justify-between gap-4 mb-4">
+        <div>
+          <h2 class="text-xl font-bold text-white">Sua resposta</h2>
+          <p class="text-gray-400 text-sm mt-1">Prazo: <%= l(@event.response_deadline, format: :short) %></p>
+        </div>
+        <span class="px-3 py-1 rounded-full text-xs font-mono border <%= @participation.confirmed? ? 'border-neon-green text-neon-green bg-neon-green/10' : @participation.declined? ? 'border-yellow-400 text-yellow-300 bg-yellow-400/10' : 'border-gray-600 text-gray-400 bg-dark-bg' %>">
+          <%= @participation.confirmed? ? "Confirmado" : @participation.declined? ? "Ausência avisada" : "Sem resposta" %>
+        </span>
+      </div>
+
+      <% if @event.response_open? %>
+        <%= form_with model: @participation, url: respond_event_path(@event), method: :patch, local: true, class: "space-y-4" do |f| %>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <label class="p-4 bg-dark-bg border border-neon-green/20 rounded-lg flex items-start gap-3 cursor-pointer">
+              <%= f.radio_button :rsvp_status, :confirmed, checked: @participation.confirmed? || @participation.pending?, class: "mt-1" %>
+              <div>
+                <p class="text-white font-semibold">Confirmar presença</p>
+                <p class="text-gray-400 text-sm">Se participar depois, recebe 100% da recompensa.</p>
+              </div>
+            </label>
+            <label class="p-4 bg-dark-bg border border-yellow-400/20 rounded-lg flex items-start gap-3 cursor-pointer">
+              <%= f.radio_button :rsvp_status, :declined, checked: @participation.declined?, class: "mt-1" %>
+              <div>
+                <p class="text-white font-semibold">Avisar ausência</p>
+                <p class="text-gray-400 text-sm">Você pode justificar agora e o admin ainda pode ajustar depois.</p>
+              </div>
+            </label>
+          </div>
+
+          <div>
+            <%= f.label :justification, "Justificativa", class: "block text-sm text-gray-300 mb-2" %>
+            <%= f.text_area :justification, rows: 4, class: "w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-lg text-white" %>
+          </div>
+
+          <%= f.submit "Salvar resposta", class: "px-5 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-bold cursor-pointer" %>
+        <% end %>
+      <% else %>
+        <div class="p-4 bg-dark-bg border border-gray-700 rounded-lg">
+          <p class="text-gray-300">O prazo de resposta já encerrou. Você ainda pode participar, mas sua recompensa poderá ser reduzida conforme a revisão do evento.</p>
+        </div>
+      <% end %>
+    </section>
+
+    <% if @event.completed? %>
+      <% my_result = @participation.final_status.presence || @participation.default_final_status %>
+      <section class="bg-dark-card border border-neon-purple/20 rounded-lg p-6">
+        <h2 class="text-xl font-bold text-white mb-4">Resultado final</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 bg-dark-bg border border-neon-purple/20 rounded-lg">
+            <p class="text-gray-500 text-xs font-mono uppercase">Status</p>
+            <p class="text-white mt-2"><%= my_result.humanize %></p>
+          </div>
+          <div class="p-4 bg-dark-bg border border-neon-green/20 rounded-lg">
+            <p class="text-gray-500 text-xs font-mono uppercase">XP recebido</p>
+            <p class="text-white mt-2"><%= @participation.reward_xp_awarded %></p>
+          </div>
+          <div class="p-4 bg-dark-bg border border-yellow-400/20 rounded-lg">
+            <p class="text-gray-500 text-xs font-mono uppercase">Moedas recebidas</p>
+            <p class="text-white mt-2"><%= @participation.reward_currency_awarded %></p>
+          </div>
+        </div>
+      </section>
+    <% end %>
+  </div>
+</div>

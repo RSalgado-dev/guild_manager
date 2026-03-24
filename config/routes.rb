@@ -39,6 +39,14 @@ Rails.application.routes.draw do
             only: [ :new, :create, :edit, :update, :destroy ],
             controller: "access/characters"
 
+  resources :events, controller: "access/events", only: [ :index, :show, :new, :create ] do
+    member do
+      patch :respond
+      get :review
+      patch :complete
+    end
+  end
+
   resources :squads, controller: "access/squads", only: [ :index, :show, :new, :create ] do
     member do
       patch :request_profile_change

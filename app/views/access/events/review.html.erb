@@ -1,0 +1,69 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-neon-purple font-mono text-xs">[ EVENT_REVIEW ]</p>
+        <h1 class="text-3xl font-black text-white mt-2">Fechamento de <%= @event.title %></h1>
+        <p class="text-gray-400 mt-2">Defina o resultado final de cada jogador para distribuir XP e moedas.</p>
+      </div>
+      <%= link_to event_path(@event), class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
+        ← Voltar ao evento
+      <% end %>
+    </div>
+
+    <%= form_with url: complete_event_path(@event), method: :patch, local: true, class: "space-y-6" do %>
+      <% sections = [
+        [ "Confirmaram presença", @confirmed_participations, "border-neon-green/30", "Jogadores desse bloco começam como Participou e recebem 100% se mantidos assim." ],
+        [ "Avisaram ausência com justificativa", @justified_participations, "border-yellow-400/30", "Participou rende 50%, Justificou rende 20% e Ausente rende 0%." ],
+        [ "Sem resposta ou sem justificativa", @absent_participations, "border-neon-cyan/30", "Participou rende 20%, Justificou rende 10% e Ausente rende 0%." ]
+      ] %>
+
+      <% sections.each do |title, participations, border_class, description| %>
+        <section class="bg-dark-card border <%= border_class %> rounded-lg p-5">
+          <div class="mb-4">
+            <h2 class="text-xl font-bold text-white"><%= title %> (<%= participations.count %>)</h2>
+            <p class="text-gray-400 text-sm mt-1"><%= description %></p>
+          </div>
+
+          <% if participations.any? %>
+            <div class="space-y-3">
+              <% participations.each do |participation| %>
+                <div class="p-4 bg-dark-bg border border-gray-800 rounded-lg">
+                  <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div>
+                      <p class="text-white font-semibold"><%= participation.user.display_name_with_squad_tag %></p>
+                      <p class="text-gray-500 text-sm">
+                        RSVP: <%= participation.rsvp_status.humanize %>
+                        <% if participation.justification.present? %>
+                          • "<%= participation.justification %>"
+                        <% end %>
+                      </p>
+                    </div>
+                    <div class="flex flex-col gap-2 md:flex-row md:items-center">
+                      <select name="results[<%= participation.id %>]" class="px-4 py-2 bg-dark-card border border-neon-purple/20 rounded-lg text-white">
+                        <% EventParticipation.final_statuses.keys.each do |status_value| %>
+                          <option value="<%= status_value %>" <%= "selected" if participation.default_final_status == status_value %>>
+                            <%= status_value.humanize %>
+                          </option>
+                        <% end %>
+                      </select>
+                      <div class="text-xs font-mono text-gray-400">
+                        XP <%= participation.awarded_xp_for(participation.default_final_status) %> • moedas <%= participation.awarded_currency_for(participation.default_final_status) %>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-6 text-center text-gray-500 border border-dashed border-gray-700 rounded-lg">
+              Nenhum jogador neste bloco.
+            </div>
+          <% end %>
+        </section>
+      <% end %>
+
+      <%= submit_tag "Finalizar evento e distribuir recompensas", class: "w-full px-4 py-3 bg-gradient-to-r from-neon-purple to-neon-magenta rounded-lg text-white font-bold cursor-pointer" %>
+    <% end %>
+  </div>
+</div>

@@ -10,6 +10,7 @@ class EventTest < ActiveSupport::TestCase
       title: "Evento Teste",
       event_type: "raid",
       starts_at: 1.day.from_now,
+      recurrence: :unique,
       status: :scheduled
     )
     assert event.valid?
@@ -20,7 +21,8 @@ class EventTest < ActiveSupport::TestCase
       guild: guilds(:one),
       creator: users(:one),
       event_type: "raid",
-      starts_at: 1.day.from_now
+      starts_at: 1.day.from_now,
+      recurrence: :unique
     )
     assert_not event.valid?
     assert_includes event.errors[:title], "can't be blank"
@@ -31,7 +33,8 @@ class EventTest < ActiveSupport::TestCase
       guild: guilds(:one),
       creator: users(:one),
       title: "Evento Teste",
-      starts_at: 1.day.from_now
+      starts_at: 1.day.from_now,
+      recurrence: :unique
     )
     assert_not event.valid?
     assert_includes event.errors[:event_type], "can't be blank"
@@ -42,7 +45,8 @@ class EventTest < ActiveSupport::TestCase
       guild: guilds(:one),
       creator: users(:one),
       title: "Evento Teste",
-      event_type: "raid"
+      event_type: "raid",
+      recurrence: :unique
     )
     assert_not event.valid?
     assert_includes event.errors[:starts_at], "can't be blank"
@@ -53,7 +57,8 @@ class EventTest < ActiveSupport::TestCase
       creator: users(:one),
       title: "Evento Teste",
       event_type: "raid",
-      starts_at: 1.day.from_now
+      starts_at: 1.day.from_now,
+      recurrence: :unique
     )
     assert_not event.valid?
   end
@@ -63,7 +68,8 @@ class EventTest < ActiveSupport::TestCase
       guild: guilds(:one),
       title: "Evento Teste",
       event_type: "raid",
-      starts_at: 1.day.from_now
+      starts_at: 1.day.from_now,
+      recurrence: :unique
     )
     assert_not event.valid?
   end
@@ -118,7 +124,8 @@ class EventTest < ActiveSupport::TestCase
       creator: users(:one),
       title: "Novo Evento",
       event_type: "raid",
-      starts_at: 1.day.from_now
+      starts_at: 1.day.from_now,
+      recurrence: :unique
     )
     assert event.valid?
   end
@@ -143,7 +150,8 @@ class EventTest < ActiveSupport::TestCase
       title: "Evento Passado",
       event_type: "raid",
       starts_at: 2.days.ago,
-      ends_at: 1.day.ago
+      ends_at: 1.day.ago,
+      recurrence: :unique
     )
     assert event.finished?
   end
@@ -155,7 +163,8 @@ class EventTest < ActiveSupport::TestCase
       title: "Evento Futuro",
       event_type: "raid",
       starts_at: 1.day.from_now,
-      ends_at: 2.days.from_now
+      ends_at: 2.days.from_now,
+      recurrence: :unique
     )
     assert_not event.finished?
   end
@@ -167,8 +176,57 @@ class EventTest < ActiveSupport::TestCase
       title: "Evento Sem Fim",
       event_type: "raid",
       starts_at: 1.day.ago,
-      ends_at: nil
+      ends_at: nil,
+      recurrence: :unique
     )
     assert_not event.finished?
+  end
+
+  test "deve usar recorrência unique por padrão" do
+    event = Event.new(
+      guild: guilds(:one),
+      creator: users(:one),
+      title: "Evento Teste",
+      event_type: "raid",
+      starts_at: 1.day.from_now
+    )
+
+    assert event.valid?
+    assert_equal "unique", event.recurrence
+  end
+
+  test "#response_deadline deve ser 15 minutos antes do início" do
+    event = events(:one)
+    assert_equal event.starts_at - 15.minutes, event.response_deadline
+  end
+
+  test "#response_open_at? aceita resposta até exatamente 15 minutos antes" do
+    event = Event.new(
+      guild: guilds(:one),
+      creator: users(:one),
+      title: "Evento Limite",
+      event_type: "raid",
+      starts_at: Time.zone.parse("2026-04-01 20:00:00"),
+      recurrence: :unique,
+      status: :scheduled
+    )
+
+    assert event.response_open_at?(Time.zone.parse("2026-04-01 19:45:00"))
+    assert_not event.response_open_at?(Time.zone.parse("2026-04-01 19:45:01"))
+  end
+
+  test "deve criar participações para os usuários da guilda ao salvar" do
+    guild = guilds(:one)
+
+    event = Event.create!(
+      guild: guild,
+      creator: users(:one),
+      title: "Evento com lista",
+      event_type: "raid",
+      starts_at: 2.days.from_now,
+      recurrence: :weekly
+    )
+
+    assert_equal guild.users.count, event.event_participations.count
   end
 end
