@@ -40,9 +40,31 @@ class PermissionGroupTest < ActiveSupport::TestCase
 
   test "all_access deve habilitar todas permissões" do
     group = permission_groups(:one_admin)
-    assert group.permission_enabled?(:manage_members)
-    assert group.permission_enabled?(:manage_store)
-    assert group.permission_enabled?(:manage_events)
-    assert group.permission_enabled?(:manage_certificates)
+
+    PermissionGroup::AVAILABLE_PERMISSIONS.each do |permission|
+      assert group.permission_enabled?(permission), "Esperava que #{permission} estivesse habilitada"
+    end
+  end
+
+  test "deve suportar catálogo expandido de permissões operacionais" do
+    expected_permissions = %w[
+      manage_guild_settings
+      manage_roles
+      manage_administrative_roles
+      manage_members
+      manage_events
+      manage_missions
+      review_mission_submissions
+      manage_achievements
+      grant_achievements
+      manage_certificates
+      grant_certificates
+      manage_rankings
+      manage_store
+      fulfill_store_orders
+      view_audit_logs
+    ]
+
+    assert_equal expected_permissions, PermissionGroup::AVAILABLE_PERMISSIONS
   end
 end

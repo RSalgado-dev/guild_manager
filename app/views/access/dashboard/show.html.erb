@@ -220,7 +220,7 @@
           <% end %>
 
           <!-- Admin Panel (if admin) -->
-          <% if @user.admin? %>
+          <% if @user.admin_panel_access? %>
             <%= link_to admin_root_path, class: "group bg-dark-card border border-neon-pink/20 rounded-lg p-6 hover:border-neon-pink hover:shadow-lg transition-all duration-300 block" do %>
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">

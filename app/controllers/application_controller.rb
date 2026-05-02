@@ -5,7 +5,7 @@ class ApplicationController < ActionController::Base
   # Changes to the importmap will invalidate the etag for HTML responses
   stale_when_importmap_changes
 
-  helper_method :current_user, :logged_in?, :has_guild_access?, :has_permission?
+  helper_method :current_user, :logged_in?, :has_guild_access?, :has_permission?, :admin_panel_access?
 
   private
 
@@ -23,6 +23,10 @@ class ApplicationController < ActionController::Base
 
   def has_permission?(permission_key)
     logged_in? && current_user.has_permission?(permission_key)
+  end
+
+  def admin_panel_access?
+    logged_in? && current_user.admin_panel_access?
   end
 
   def require_login
@@ -47,7 +51,7 @@ class ApplicationController < ActionController::Base
       return
     end
 
-    unless current_user.admin?
+    unless current_user.admin_panel_access?
       redirect_to root_path, alert: "❌ Acesso negado. Você não tem permissão para acessar o painel administrativo."
     end
   end

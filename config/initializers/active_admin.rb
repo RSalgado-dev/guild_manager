@@ -1,3 +1,5 @@
+require Rails.root.join("lib/active_admin_permission_adapter")
+
 ActiveAdmin.setup do |config|
   # == Site Title
   #
@@ -110,6 +112,7 @@ ActiveAdmin.setup do |config|
   # (within the application controller) to return the currently logged in user.
   config.current_user_method = :current_user
   config.authentication_method = :require_admin
+  config.authorization_adapter = ActiveAdminPermissionAdapter
   config.logout_link_path = :logout_path
   config.logout_link_method = :delete
 

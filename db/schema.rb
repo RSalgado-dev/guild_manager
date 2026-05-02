@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -244,15 +244,19 @@ ActiveRecord::Schema[8.1].define(version: 2026_03_24_100000) do
   end
 
   create_table "roles", force: :cascade do |t|
+    t.string "category", default: "cosmetic", null: false
     t.datetime "created_at", null: false
     t.text "description"
     t.string "discord_role_id"
     t.bigint "guild_id", null: false
     t.boolean "is_admin", default: false, null: false
+    t.boolean "managed_by_app", default: false, null: false
     t.string "name", null: false
     t.datetime "updated_at", null: false
+    t.index ["guild_id", "category"], name: "index_roles_on_guild_id_and_category"
     t.index ["guild_id", "name"], name: "index_roles_on_guild_id_and_name", unique: true
     t.index ["guild_id"], name: "index_roles_on_guild_id"
+    t.index ["managed_by_app"], name: "index_roles_on_managed_by_app"
   end
 
   create_table "solid_cable_messages", force: :cascade do |t|

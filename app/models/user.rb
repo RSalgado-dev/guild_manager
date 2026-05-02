@@ -90,6 +90,10 @@ class User < ApplicationRecord
     is_admin == true
   end
 
+  def admin_panel_access?
+    admin? || permission_groups.exists?
+  end
+
   def level
     current_level = 0
 
@@ -175,12 +179,56 @@ class User < ApplicationRecord
     has_permission?(:manage_store)
   end
 
+  def can_fulfill_store_orders?
+    has_permission?(:fulfill_store_orders)
+  end
+
   def can_manage_events?
     has_permission?(:manage_events)
   end
 
+  def can_manage_missions?
+    has_permission?(:manage_missions)
+  end
+
+  def can_review_mission_submissions?
+    has_permission?(:review_mission_submissions)
+  end
+
+  def can_manage_achievements?
+    has_permission?(:manage_achievements)
+  end
+
+  def can_grant_achievements?
+    has_permission?(:grant_achievements)
+  end
+
   def can_manage_certificates?
     has_permission?(:manage_certificates)
+  end
+
+  def can_grant_certificates?
+    has_permission?(:grant_certificates)
+  end
+
+  def can_manage_rankings?
+    has_permission?(:manage_rankings)
+  end
+
+  def can_manage_guild_settings?
+    has_permission?(:manage_guild_settings)
+  end
+
+  def can_manage_roles?
+    has_permission?(:manage_roles)
+  end
+
+  def can_manage_administrative_roles?
+    has_permission?(:manage_administrative_roles)
+  end
+
+  def can_view_audit_logs?
+    has_permission?(:view_audit_logs)
   end
 
   def display_name_with_squad_tag

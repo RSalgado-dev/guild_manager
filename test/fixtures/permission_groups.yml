@@ -5,7 +5,7 @@ one_admin:
   name: "Administração"
   description: "Grupo com acesso total"
   all_access: true
-  permissions: ["manage_members", "manage_store", "manage_events", "manage_certificates"]
+  permissions: ["manage_guild_settings", "manage_roles", "manage_administrative_roles", "manage_members", "manage_events", "manage_missions", "review_mission_submissions", "manage_achievements", "grant_achievements", "manage_certificates", "grant_certificates", "manage_rankings", "manage_store", "fulfill_store_orders", "view_audit_logs"]
 
 one_events:
   guild: one

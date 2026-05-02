@@ -1,16 +1,38 @@
 class PermissionGroup < ApplicationRecord
   AVAILABLE_PERMISSIONS = %w[
+    manage_guild_settings
+    manage_roles
+    manage_administrative_roles
     manage_members
-    manage_store
     manage_events
+    manage_missions
+    review_mission_submissions
+    manage_achievements
+    grant_achievements
     manage_certificates
+    grant_certificates
+    manage_rankings
+    manage_store
+    fulfill_store_orders
+    view_audit_logs
   ].freeze
 
   PERMISSION_LABELS = {
+    "manage_guild_settings" => "Gerenciar configurações da guilda",
+    "manage_roles" => "Gerenciar cargos",
+    "manage_administrative_roles" => "Gerenciar cargos administrativos",
     "manage_members" => "Gerenciar membros",
-    "manage_store" => "Gerenciar loja",
     "manage_events" => "Gerenciar eventos",
-    "manage_certificates" => "Gerenciar certificados"
+    "manage_missions" => "Gerenciar missões",
+    "review_mission_submissions" => "Revisar submissões de missão",
+    "manage_achievements" => "Gerenciar conquistas",
+    "grant_achievements" => "Conceder conquistas",
+    "manage_certificates" => "Gerenciar certificados",
+    "grant_certificates" => "Conceder certificados",
+    "manage_rankings" => "Gerenciar rankings",
+    "manage_store" => "Gerenciar loja",
+    "fulfill_store_orders" => "Atender pedidos da loja",
+    "view_audit_logs" => "Ver auditoria"
   }.freeze
 
   belongs_to :guild

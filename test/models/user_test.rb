@@ -90,6 +90,19 @@ class UserTest < ActiveSupport::TestCase
     assert_not user.admin?
   end
 
+  test "#admin_panel_access? retorna true para usuário com grupos de permissão" do
+    user = users(:two)
+
+    assert user.admin_panel_access?
+  end
+
+  test "#admin_panel_access? retorna false sem admin nem grupo de permissão" do
+    user = users(:five)
+
+    assert_not user.admin?
+    assert_not user.admin_panel_access?
+  end
+
   test "#primary_role deve retornar o cargo primário" do
     user = users(:one)
     primary_role = user.primary_role

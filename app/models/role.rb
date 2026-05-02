@@ -1,4 +1,11 @@
 class Role < ApplicationRecord
+  CATEGORY_LABELS = {
+    "base" => "Cargo base",
+    "cosmetic" => "Cosmético",
+    "special" => "Especial",
+    "administrative" => "Administrativo"
+  }.freeze
+
   belongs_to :guild
 
   has_many :user_roles, dependent: :destroy
@@ -11,6 +18,13 @@ class Role < ApplicationRecord
            through: :role_certificate_requirements,
            source: :certificate
 
+  enum :category, {
+    base: "base",
+    cosmetic: "cosmetic",
+    special: "special",
+    administrative: "administrative"
+  }, validate: true
+
   # Ransacker para busca no ActiveAdmin
   ransacker :guild_name, formatter: proc { |v| v.mb_chars.downcase.to_s } do |parent|
     Arel.sql("LOWER(guilds.name)")
@@ -18,8 +32,8 @@ class Role < ApplicationRecord
 
   # Permitir busca por estes atributos no ActiveAdmin
   def self.ransackable_attributes(auth_object = nil)
-    [ "color", "created_at", "description", "guild_id", "icon", "id",
-     "is_admin", "name", "updated_at", "guild_name" ]
+    [ "category", "created_at", "description", "discord_role_id", "guild_id", "id",
+     "is_admin", "managed_by_app", "name", "updated_at", "guild_name" ]
   end
 
   def self.ransackable_associations(auth_object = nil)
@@ -32,6 +46,10 @@ class Role < ApplicationRecord
             length: { maximum: 50 }
 
   def admin?
-    is_admin
+    is_admin || administrative?
+  end
+
+  def category_label
+    CATEGORY_LABELS[category] || category
   end
 end

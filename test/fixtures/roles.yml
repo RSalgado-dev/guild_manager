@@ -5,6 +5,8 @@ one:
   name: "Administrador"
   description: "Cargo de administração da guilda"
   is_admin: true
+  category: "administrative"
+  managed_by_app: false
   discord_role_id: "123456789012345678"
 
 two:
@@ -12,6 +14,8 @@ two:
   name: "Membro"
   description: "Membro regular da guilda"
   is_admin: false
+  category: "base"
+  managed_by_app: false
   discord_role_id: "999999999999999999"  # Role requerido pela guild one
 
 three:
@@ -19,4 +23,6 @@ three:
   name: "Líder"
   description: "Líder da guilda"
   is_admin: true
+  category: "administrative"
+  managed_by_app: false
   discord_role_id: "345678901234567890"
