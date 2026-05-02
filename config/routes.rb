@@ -57,6 +57,7 @@ Rails.application.routes.draw do
 
   resources :achievements, controller: "access/achievements", only: [ :index, :show ]
   resources :certificates, controller: "access/certificates", only: [ :index, :show ]
+  resources :rankings, controller: "access/rankings", only: [ :index ]
 
   resources :squads, controller: "access/squads", only: [ :index, :show, :new, :create ] do
     member do

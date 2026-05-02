@@ -22,6 +22,8 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Validação da Etapa 4: `bin/rails test` passou com 373 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 - Etapa 5 concluída: conquistas possuem catálogo/prestígio individual, recompensas e personalização de cor; certificados podem conceder cargo cosmético e acionar reconciliação Discord quando gerenciados pelo app.
 - Validação da Etapa 5: `bin/rails test` passou com 386 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
+- Etapa 6 concluída: rankings configuráveis por guilda foram adicionados para usuários e squads, com métricas v1 calculadas sob demanda e tela pública em `/rankings`.
+- Validação da Etapa 6: `bin/rails test` passou com 399 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 
 ### Etapa 0 - Ambiente, Qualidade e Base Operacional
 
@@ -70,7 +72,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Evoluir `Certificate` para vínculo opcional obrigatório com uma `Role` cosmética; conceder certificado pode reconciliar cargo Discord se a role for gerenciada pelo app.
 - Criar telas/admin resources para conceder, revogar e expirar certificados.
 
-### Etapa 6 - Rankings
+### Etapa 6 - Rankings (concluída)
 
 - Criar `Ranking` configurável por guilda com escopo `users`/`squads`, métrica, ordenação, limite e status ativo.
 - Métricas v1: nível, XP, moedas ganhas, poder do personagem principal, XP total do squad, média de nível do squad e número de membros.

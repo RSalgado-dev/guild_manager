@@ -15,6 +15,7 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
     "Certificate" => "manage_certificates",
     "UserCertificate" => "grant_certificates",
     "RoleCertificateRequirement" => "manage_certificates",
+    "Ranking" => "manage_rankings",
     "CurrencyTransaction" => "manage_store",
     "AuditLog" => "view_audit_logs"
   }.freeze

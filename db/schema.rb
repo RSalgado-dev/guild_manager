@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_140100) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_150000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -278,6 +278,23 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_140100) do
     t.datetime "updated_at", null: false
     t.index ["guild_id", "name"], name: "index_permission_groups_on_guild_id_and_name", unique: true
     t.index ["guild_id"], name: "index_permission_groups_on_guild_id"
+  end
+
+  create_table "rankings", force: :cascade do |t|
+    t.boolean "active", default: true, null: false
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.integer "entries_limit", default: 10, null: false
+    t.bigint "guild_id", null: false
+    t.string "metric", null: false
+    t.string "name", null: false
+    t.integer "position", default: 0, null: false
+    t.string "ranking_scope", default: "users", null: false
+    t.string "sort_direction", default: "desc", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guild_id", "active", "position"], name: "index_rankings_on_guild_id_and_active_and_position"
+    t.index ["guild_id", "name"], name: "index_rankings_on_guild_id_and_name", unique: true
+    t.index ["guild_id"], name: "index_rankings_on_guild_id"
   end
 
   create_table "role_certificate_requirements", force: :cascade do |t|
@@ -580,6 +597,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_140100) do
   add_foreign_key "permission_group_roles", "permission_groups"
   add_foreign_key "permission_group_roles", "roles"
   add_foreign_key "permission_groups", "guilds"
+  add_foreign_key "rankings", "guilds", on_delete: :cascade
   add_foreign_key "role_certificate_requirements", "certificates", on_delete: :cascade
   add_foreign_key "role_certificate_requirements", "roles", on_delete: :cascade
   add_foreign_key "roles", "guilds", on_delete: :cascade

@@ -1,0 +1,73 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-neon-cyan font-mono text-xs">[ RANKINGS ]</p>
+        <h1 class="text-3xl font-black text-white mt-2">Rankings</h1>
+        <p class="text-gray-400 mt-2">Classificações ativas da guilda por usuários e squads.</p>
+      </div>
+      <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
+        ← Dashboard
+      <% end %>
+    </header>
+
+    <% if @rankings.any? %>
+      <nav class="flex flex-wrap gap-2">
+        <% @rankings.each do |ranking| %>
+          <% selected = ranking == @ranking %>
+          <%= link_to rankings_path(ranking_id: ranking.id), class: "px-4 py-2 rounded-lg border font-mono text-sm #{selected ? 'border-neon-cyan bg-neon-cyan/10 text-neon-cyan' : 'border-gray-700 bg-dark-card text-gray-400 hover:border-neon-cyan/40'}" do %>
+            <%= ranking.name %>
+          <% end %>
+        <% end %>
+      </nav>
+
+      <section class="bg-dark-card border border-neon-cyan/20 rounded-lg overflow-hidden">
+        <div class="p-5 border-b border-gray-800 flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+          <div>
+            <h2 class="text-2xl font-bold text-white"><%= @ranking.name %></h2>
+            <p class="text-gray-400 text-sm mt-1"><%= @ranking.description.presence || "#{@ranking.scope_label} por #{@ranking.metric_label.downcase}" %></p>
+          </div>
+          <div class="flex gap-2 text-xs font-mono">
+            <span class="px-2 py-1 bg-dark-bg border border-gray-700 rounded text-gray-300"><%= @ranking.scope_label %></span>
+            <span class="px-2 py-1 bg-neon-purple/10 border border-neon-purple/30 rounded text-neon-purple"><%= @ranking.metric_label %></span>
+          </div>
+        </div>
+
+        <% if @entries.any? %>
+          <div class="divide-y divide-gray-800">
+            <% @entries.each do |entry| %>
+              <div class="p-4 flex items-center justify-between gap-4">
+                <div class="flex items-center gap-4 min-w-0">
+                  <span class="w-10 h-10 rounded-lg bg-dark-bg border border-neon-cyan/20 text-neon-cyan font-mono font-bold flex items-center justify-center">
+                    #<%= entry.rank %>
+                  </span>
+                  <div class="min-w-0">
+                    <% if @ranking.users_scope? %>
+                      <p class="text-white font-semibold truncate"><%= entry.record.display_name_with_squad_tag %></p>
+                      <p class="text-gray-500 text-sm font-mono">Nível <%= entry.record.level %> • <%= entry.record.xp_points %> XP</p>
+                    <% else %>
+                      <p class="text-white font-semibold truncate"><%= entry.record.name %></p>
+                      <p class="text-gray-500 text-sm font-mono"><%= entry.record.tag %> • <%= entry.record.users.size %> membros</p>
+                    <% end %>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <p class="text-2xl font-black text-neon-cyan"><%= entry.value %></p>
+                  <p class="text-gray-500 text-xs font-mono"><%= @ranking.metric_label %></p>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% else %>
+          <div class="p-10 text-center border border-dashed border-gray-700">
+            <p class="text-gray-400">Sem dados para este ranking.</p>
+          </div>
+        <% end %>
+      </section>
+    <% else %>
+      <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-10 text-center">
+        <p class="text-gray-400">Nenhum ranking ativo configurado.</p>
+      </div>
+    <% end %>
+  </div>
+</div>

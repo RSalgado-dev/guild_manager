@@ -199,6 +199,26 @@
             </div>
           <% end %>
 
+          <!-- Rankings Module -->
+          <%= link_to rankings_path, class: "group bg-dark-card border border-neon-cyan/20 rounded-lg p-6 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300 block" do %>
+            <div class="flex items-center justify-between mb-4">
+              <div class="flex items-center gap-3">
+                <span class="text-5xl group-hover:animate-pulse">📊</span>
+                <div>
+                  <h4 class="text-neon-cyan font-bold text-lg uppercase">Rankings</h4>
+                  <p class="text-gray-400 text-sm font-mono">Leaderboards</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-gray-400 text-sm mb-4">
+              Compare progresso de membros e squads por XP, nível, poder e participação.
+            </p>
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-gray-500 font-mono">Status:</span>
+              <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
+            </div>
+          <% end %>
+
           <!-- Squads Module -->
           <%= link_to squads_path, class: "group bg-dark-card border border-neon-green/20 rounded-lg p-6 hover:border-neon-green hover:shadow-neon-green transition-all duration-300 block" do %>
             <div class="flex items-center justify-between mb-4">

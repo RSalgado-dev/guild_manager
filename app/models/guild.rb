@@ -17,6 +17,7 @@ class Guild < ApplicationRecord
   has_many :achievements,   dependent: :destroy
   has_many :certificates,   dependent: :destroy
   has_many :permission_groups, dependent: :destroy
+  has_many :rankings, dependent: :destroy
 
   before_validation :parse_character_template_json
   before_validation :ensure_default_character_template

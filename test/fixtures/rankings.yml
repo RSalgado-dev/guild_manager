@@ -1,0 +1,43 @@
+user_xp:
+  guild: one
+  name: "XP dos membros"
+  description: "Ranking por XP total"
+  ranking_scope: "users"
+  metric: "user_xp"
+  sort_direction: "desc"
+  entries_limit: 10
+  position: 1
+  active: true
+
+user_currency:
+  guild: one
+  name: "Moedas ganhas"
+  description: "Ranking por moedas ganhas"
+  ranking_scope: "users"
+  metric: "user_currency_earned"
+  sort_direction: "desc"
+  entries_limit: 10
+  position: 2
+  active: true
+
+squad_members:
+  guild: one
+  name: "Membros por squad"
+  description: "Ranking por número de membros"
+  ranking_scope: "squads"
+  metric: "squad_members_count"
+  sort_direction: "desc"
+  entries_limit: 10
+  position: 3
+  active: true
+
+inactive:
+  guild: one
+  name: "Ranking inativo"
+  description: "Não aparece publicamente"
+  ranking_scope: "users"
+  metric: "user_level"
+  sort_direction: "desc"
+  entries_limit: 10
+  position: 4
+  active: false
