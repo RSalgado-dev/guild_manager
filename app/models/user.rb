@@ -361,47 +361,15 @@ class User < ApplicationRecord
 
   # Busca as guilds do usuário na API do Discord
   def self.fetch_user_guilds(access_token)
-    require "net/http"
-    require "uri"
-    require "json"
-
     Rails.logger.info "Buscando guilds com access_token: #{access_token[0..10]}..."
 
-    uri = URI("https://discord.com/api/v10/users/@me/guilds")
-    request = Net::HTTP::Get.new(uri)
-    request["Authorization"] = "Bearer #{access_token}"
-    request["User-Agent"] = "DiscordBot (Workspace, 1.0)"
-
-    response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-      http.request(request)
+    guilds = DiscordApiClient.new.user_guilds(access_token)
+    Rails.logger.info "✓ Guilds parseadas com sucesso: #{guilds.size} encontradas"
+    if guilds.size > 0
+      Rails.logger.info "Primeiras 5 guilds: #{guilds.first(5).map { |g| "#{g['name']} (#{g['id']})" }.join(', ')}"
     end
 
-    Rails.logger.info "Response status: #{response.code}"
-    Rails.logger.info "Response content-type: #{response['content-type']}"
-    Rails.logger.info "Response body (primeiros 300 chars): #{response.body[0..300]}"
-
-    if response.code == "200" && response["content-type"]&.include?("application/json")
-      guilds = JSON.parse(response.body)
-      Rails.logger.info "✓ Guilds parseadas com sucesso: #{guilds.size} encontradas"
-      if guilds.size > 0
-        Rails.logger.info "Primeiras 5 guilds: #{guilds.first(5).map { |g| "#{g['name']} (#{g['id']})" }.join(', ')}"
-      end
-      guilds
-    else
-      Rails.logger.error "✗ Erro ao buscar guilds: Status #{response.code}, Content-Type: #{response['content-type']}"
-      Rails.logger.error "Body: #{response.body[0..500]}"
-
-      # Se retornou HTML, provavelmente o token não tem scope de guilds
-      if response["content-type"]&.include?("text/html")
-        Rails.logger.error "⚠️  ATENÇÃO: Discord retornou HTML. O access token pode não ter permissão 'guilds'."
-        Rails.logger.error "⚠️  Revogue a autorização no Discord e autorize novamente!"
-      end
-      []
-    end
-  rescue => e
-    Rails.logger.error "Erro ao buscar guilds do Discord: #{e.class} - #{e.message}"
-    Rails.logger.error e.backtrace.first(5).join("\n")
-    []
+    guilds
   end
 
   # Método de instância para verificar acesso
@@ -414,110 +382,7 @@ class User < ApplicationRecord
   # Sincroniza os roles do Discord do usuário com o banco de dados
   # Busca os roles do usuário no servidor, cria/atualiza no banco e vincula
   def sync_discord_roles(access_token, user_guild)
-    Rails.logger.info "🔄 Sincronizando roles para usuário #{discord_username}..."
-
-    bot_token = Rails.application.credentials.dig(:discord, :bot_token)
-    unless bot_token
-      Rails.logger.warn "⚠️  Bot token não configurado, não é possível sincronizar roles"
-      return false
-    end
-
-    begin
-      require "net/http"
-      require "uri"
-      require "json"
-
-      # 1. Buscar os dados do membro no servidor (inclui roles dele)
-      uri = URI("https://discord.com/api/v10/guilds/#{user_guild.discord_guild_id}/members/#{discord_id}")
-      request = Net::HTTP::Get.new(uri)
-      request["Authorization"] = "Bot #{bot_token}"
-      request["Content-Type"] = "application/json"
-
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-        http.request(request)
-      end
-
-      unless response.code == "200"
-        Rails.logger.error "❌ Erro ao buscar membro do Discord: #{response.code}"
-        return false
-      end
-
-      member_data = JSON.parse(response.body)
-      user_role_ids = member_data["roles"] || []
-
-      Rails.logger.info "📋 Usuário tem #{user_role_ids.size} roles no Discord"
-
-      # 2. Buscar todos os roles do servidor para obter nomes e detalhes
-      uri = URI("https://discord.com/api/v10/guilds/#{user_guild.discord_guild_id}/roles")
-      request = Net::HTTP::Get.new(uri)
-      request["Authorization"] = "Bot #{bot_token}"
-      request["Content-Type"] = "application/json"
-
-      response = Net::HTTP.start(uri.hostname, uri.port, use_ssl: true) do |http|
-        http.request(request)
-      end
-
-      unless response.code == "200"
-        Rails.logger.error "❌ Erro ao buscar roles do servidor: #{response.code}"
-        return false
-      end
-
-      guild_roles = JSON.parse(response.body)
-
-      # 3. Filtrar apenas os roles que o usuário possui
-      user_discord_roles = guild_roles.select { |r| user_role_ids.include?(r["id"]) }
-
-      Rails.logger.info "🎭 Processando #{user_discord_roles.size} roles do usuário..."
-
-      # 4. Criar/atualizar roles no banco e vincular ao usuário
-      current_role_ids = []
-
-      user_discord_roles.each do |discord_role|
-        # Pular o role @everyone
-        next if discord_role["name"] == "@everyone"
-
-        # Buscar ou criar o role no banco de dados
-        db_role = Role.find_or_initialize_by(
-          guild: user_guild,
-          discord_role_id: discord_role["id"]
-        )
-
-        # Atualizar informações do role
-        db_role.update(
-          name: discord_role["name"],
-          description: discord_role["name"]
-        )
-
-        current_role_ids << db_role.id
-
-        # Criar associação user_role se não existir
-        unless user_roles.exists?(role_id: db_role.id)
-          user_roles.create(role: db_role)
-          Rails.logger.info "✅ Role vinculado: #{db_role.name}"
-        end
-      end
-
-      # 5. Remover roles antigos que o usuário não tem mais
-      old_roles = user_roles.where.not(role_id: current_role_ids)
-      if old_roles.any?
-        Rails.logger.info "🗑️  Removendo #{old_roles.size} roles antigos"
-        old_roles.destroy_all
-      end
-
-      has_access = User.check_guild_role_access(user_guild, discord_id)
-      update_columns(
-        has_guild_access: has_access,
-        discord_roles_synced_at: Time.current
-      )
-
-      Rails.logger.info "✅ Sincronização de roles concluída!"
-      true
-
-    rescue => e
-      Rails.logger.error "❌ Erro ao sincronizar roles: #{e.class} - #{e.message}"
-      Rails.logger.error e.backtrace.first(3).join("\n")
-      false
-    end
+    DiscordMemberRoleSync.call(user: self, guild: user_guild, access_token:)
   end
 
   def sync_discord_roles_if_stale!(max_age: DISCORD_ROLE_SYNC_MAX_AGE, force: false)
@@ -559,23 +424,11 @@ class User < ApplicationRecord
     return true unless bot_token # Se não tem bot token, libera acesso (modo permissivo)
 
     begin
-      conn = Faraday.new(url: "https://discord.com/api/v10") do |f|
-        f.headers["Authorization"] = "Bot #{bot_token}"
-        f.headers["Content-Type"] = "application/json"
-      end
+      member_data = DiscordApiClient.new(bot_token:).guild_member(guild.discord_guild_id, discord_user_id)
+      return true unless member_data
 
-      response = conn.get("/guilds/#{guild.discord_guild_id}/members/#{discord_user_id}")
-
-      if response.success?
-        member_data = JSON.parse(response.body)
-        user_roles = member_data["roles"] || []
-
-        # Verifica se o usuário tem o cargo requerido
-        user_roles.include?(guild.required_discord_role_id)
-      else
-        Rails.logger.warn("Erro ao verificar cargos do usuário #{discord_user_id}: #{response.status}")
-        true # Modo permissivo em caso de erro
-      end
+      user_roles = member_data["roles"] || []
+      user_roles.include?(guild.required_discord_role_id)
     rescue => e
       Rails.logger.error("Erro ao verificar cargos do Discord: #{e.message}")
       true # Modo permissivo em caso de erro

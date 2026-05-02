@@ -12,8 +12,10 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 
 - Etapa 0 concluída no container existente `guild_manager_devcontainer-app-1`: `bin/rails test` e `bin/rubocop` passaram dentro do container.
 - `bin/ci` executa até o fim, mas falha em `bin/bundler-audit` por advisories em dependências; testes, RuboCop, Brakeman, importmap audit, system tests e seeds passam.
-- Etapa 1 iniciada: `Role` agora possui categoria operacional e flag de gerenciamento pelo app; `PermissionGroup` possui catálogo expandido de permissões para os módulos planejados.
+- Etapa 1 concluída: `Role` agora possui categoria operacional e flag de gerenciamento pelo app; `PermissionGroup` possui catálogo expandido de permissões para os módulos planejados.
 - ActiveAdmin passou a usar autorização por permissão e escopo por guilda; o painel admin é acessível por usuários com grupos operacionais, não apenas por superadmin.
+- Etapa 2 concluída: chamadas Discord foram extraídas para serviços, roles gerenciadas pelo app são reconciliadas por jobs, roles externas são apenas importadas e mudanças de cargo registram auditoria.
+- Validação da Etapa 2: `bin/rails test` passou com 356 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 
 ### Etapa 0 - Ambiente, Qualidade e Base Operacional
 
@@ -21,7 +23,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Ajustar configuração recorrente/queue se necessário e garantir que `bin/rails test`, `bin/rubocop`, `bin/brakeman`, `bin/bundler-audit` e `bin/ci` rodam dentro do container.
 - Atualizar docs de setup para explicitar fluxo único: abrir/subir DevContainer, nunca executar Rails no host.
 
-### Etapa 1 - Fundação de Cargos, Permissões e Admin
+### Etapa 1 - Fundação de Cargos, Permissões e Admin (concluída)
 
 - Manter `guilds.required_discord_role_id/name` como o cargo base de acesso.
 - Evoluir `Role` com categoria: `base`, `cosmetic`, `special`, `administrative`; adicionar `managed_by_app:boolean`.
@@ -29,7 +31,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Expandir permissões para cobrir: configurações da guilda, roles, roles administrativas, membros/squads, eventos, missões, conquistas, certificados, rankings, loja, fulfillment e auditoria.
 - Refatorar ActiveAdmin para autorização granular por permissão e escopo de guilda: officers não editam cargos administrativos; apenas `all_access` configura guilda e grupos administrativos.
 
-### Etapa 2 - Sincronização Discord Autoritativa pelo App
+### Etapa 2 - Sincronização Discord Autoritativa pelo App (concluída)
 
 - Extrair chamadas Discord de `User` para serviços dedicados: cliente REST, sync de guild/roles/membro e reconciliador de cargos.
 - Para roles `managed_by_app`, o app mantém o estado desejado e reconcilia no Discord; para roles não gerenciadas, o app apenas importa o estado do Discord.

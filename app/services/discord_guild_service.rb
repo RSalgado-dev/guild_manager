@@ -7,30 +7,16 @@
 class DiscordGuildService
   # Sincroniza uma guild específica do Discord
   def self.sync_guild(discord_guild_id, bot_token = nil)
-    bot_token ||= Rails.application.credentials.dig(:discord, :bot_token)
+    client = bot_token ? DiscordApiClient.new(bot_token:) : DiscordApiClient.new
+    guild_data = client.guild(discord_guild_id)
 
-    return unless bot_token
+    return unless guild_data
 
-    # Faz requisição à API do Discord para obter informações da guild
-    conn = Faraday.new(url: "https://discord.com/api/v10") do |f|
-      f.headers["Authorization"] = "Bot #{bot_token}"
-      f.headers["Content-Type"] = "application/json"
-    end
-
-    response = conn.get("/guilds/#{discord_guild_id}")
-
-    if response.success?
-      guild_data = JSON.parse(response.body)
-
-      Guild.find_or_create_from_discord(
-        guild_data["id"],
-        guild_data["name"],
-        guild_icon_url(guild_data)
-      )
-    else
-      Rails.logger.error("Erro ao sincronizar guild #{discord_guild_id}: #{response.status}")
-      nil
-    end
+    Guild.find_or_create_from_discord(
+      guild_data["id"],
+      guild_data["name"],
+      guild_icon_url(guild_data)
+    )
   rescue => e
     Rails.logger.error("Erro ao sincronizar guild #{discord_guild_id}: #{e.message}")
     nil
