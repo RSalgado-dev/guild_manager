@@ -53,6 +53,7 @@ module Access
       end
 
       if @participation.update(response_params.merge(responded_at: Time.current))
+        audit_rsvp_response!(@participation)
         redirect_to event_path(@event), notice: "✅ Sua resposta foi registrada."
       else
         redirect_to event_path(@event), alert: "❌ Não foi possível registrar sua resposta: #{@participation.errors.full_messages.join(', ')}"
@@ -67,7 +68,7 @@ module Access
     end
 
     def complete
-      @event.complete_with_results!(results: completion_params.to_h)
+      @event.complete_with_results!(results: completion_params.to_h, actor: current_user)
       redirect_to event_path(@event), notice: "✅ Evento finalizado e recompensas distribuídas."
     rescue ArgumentError, ActiveRecord::RecordInvalid => e
       redirect_to review_event_path(@event), alert: "❌ #{e.message}"
@@ -117,9 +118,31 @@ module Access
     end
 
     def ensure_event_can_be_reviewed!
+      if @event.completed?
+        redirect_to event_path(@event), alert: "❌ O evento já foi finalizado."
+        return
+      end
+
       return if @event.review_available?
 
       redirect_to event_path(@event), alert: "❌ O evento ainda não pode ser finalizado."
+    end
+
+    def audit_rsvp_response!(participation)
+      AuditLog.create!(
+        user: current_user,
+        guild: @guild,
+        action: "event_rsvp_updated",
+        entity_type: "EventParticipation",
+        entity_id: participation.id,
+        metadata: {
+          origin: "user",
+          result: "success",
+          event_id: @event.id,
+          rsvp_status: participation.rsvp_status,
+          justification_present: participation.justification.present?
+        }
+      )
     end
   end
 end

@@ -156,7 +156,27 @@ class EventParticipationTest < ActiveSupport::TestCase
 
   test "#reward_multiplier_for aplica matriz de recompensas" do
     assert_equal 1.0, event_participations(:one).reward_multiplier_for(:participated)
+    assert_equal 0.0, event_participations(:one).reward_multiplier_for(:justified)
+    assert_equal 0.0, event_participations(:one).reward_multiplier_for(:absent)
     assert_equal 0.2, event_participations(:four).reward_multiplier_for(:justified)
+    assert_equal 0.5, event_participations(:four).reward_multiplier_for(:participated)
+    assert_equal 0.25, event_participations(:three).reward_multiplier_for(:participated)
+    assert_equal 0.0, event_participations(:three).reward_multiplier_for(:justified)
     assert_equal 0.0, event_participations(:three).reward_multiplier_for(:absent)
+  end
+
+  test "#apply_review_result! impede recompensa duplicada" do
+    participation = event_participations(:one)
+    participation.apply_review_result!("participated", actor: users(:one))
+
+    xp_after_reward = participation.user.reload.xp_points
+    transaction_count_after_reward = CurrencyTransaction.count
+
+    assert_raises(ArgumentError) do
+      participation.apply_review_result!("participated", actor: users(:one))
+    end
+
+    assert_equal xp_after_reward, participation.user.reload.xp_points
+    assert_equal transaction_count_after_reward, CurrencyTransaction.count
   end
 end

@@ -15,7 +15,7 @@
       <% sections = [
         [ "Confirmaram presença", @confirmed_participations, "border-neon-green/30", "Jogadores desse bloco começam como Participou e recebem 100% se mantidos assim." ],
         [ "Avisaram ausência com justificativa", @justified_participations, "border-yellow-400/30", "Participou rende 50%, Justificou rende 20% e Ausente rende 0%." ],
-        [ "Sem resposta ou sem justificativa", @absent_participations, "border-neon-cyan/30", "Participou rende 20%, Justificou rende 10% e Ausente rende 0%." ]
+        [ "Sem resposta ou sem justificativa", @absent_participations, "border-neon-cyan/30", "Participou rende 25%, Justificou rende 0% e Ausente rende 0%." ]
       ] %>
 
       <% sections.each do |title, participations, border_class, description| %>

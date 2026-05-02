@@ -27,19 +27,21 @@ class Access::EventsControllerTest < ActionDispatch::IntegrationTest
   test "usuário com permissão pode criar evento" do
     sign_in(users(:one))
 
-    assert_difference("Event.count", 1) do
-      post events_path, params: {
-        event: {
-          title: "Cerco semanal",
-          description: "Ataque coordenado",
-          event_type: "siege",
-          starts_at: 2.days.from_now,
-          ends_at: 2.days.from_now + 2.hours,
-          recurrence: "weekly",
-          reward_xp: 180,
-          reward_currency: 90
+    assert_difference -> { AuditLog.where(action: "event_created").count }, 1 do
+      assert_difference("Event.count", 1) do
+        post events_path, params: {
+          event: {
+            title: "Cerco semanal",
+            description: "Ataque coordenado",
+            event_type: "siege",
+            starts_at: 2.days.from_now,
+            ends_at: 2.days.from_now + 2.hours,
+            recurrence: "weekly",
+            reward_xp: 180,
+            reward_currency: 90
+          }
         }
-      }
+      end
     end
 
     event = Event.order(:created_at).last
@@ -86,12 +88,14 @@ class Access::EventsControllerTest < ActionDispatch::IntegrationTest
       reward_currency: 50
     )
 
-    patch respond_event_path(event), params: {
-      event_participation: {
-        rsvp_status: "declined",
-        justification: "Viagem"
+    assert_difference -> { AuditLog.where(action: "event_rsvp_updated").count }, 1 do
+      patch respond_event_path(event), params: {
+        event_participation: {
+          rsvp_status: "declined",
+          justification: "Viagem"
+        }
       }
-    }
+    end
 
     assert_redirected_to event_path(event)
     participation = event.event_participations.find_by!(user: users(:two))
@@ -157,23 +161,45 @@ class Access::EventsControllerTest < ActionDispatch::IntegrationTest
       four: users(:four).xp_points
     }
 
-    patch complete_event_path(event), params: {
-      results: {
-        confirmed.id => "participated",
-        justified.id => "justified",
-        unanswered.id => "participated"
-      }
-    }
+    assert_difference -> { AuditLog.where(action: "event_completed").count }, 1 do
+      assert_difference -> { AuditLog.where(action: "event_reward_awarded").count }, event.event_participations.count do
+        patch complete_event_path(event), params: {
+          results: {
+            confirmed.id => "participated",
+            justified.id => "justified",
+            unanswered.id => "participated"
+          }
+        }
+      end
+    end
 
     assert_redirected_to event_path(event)
     assert_equal "completed", event.reload.status
 
     assert_equal 100, confirmed.reload.reward_xp_awarded
     assert_equal 20, justified.reload.reward_xp_awarded
-    assert_equal 20, unanswered.reload.reward_xp_awarded
+    assert_equal 25, unanswered.reload.reward_xp_awarded
 
     assert_equal original_xp[:one] + 100, users(:one).reload.xp_points
     assert_equal original_xp[:two] + 20, users(:two).reload.xp_points
-    assert_equal original_xp[:four] + 20, users(:four).reload.xp_points
+    assert_equal original_xp[:four] + 25, users(:four).reload.xp_points
+
+    xp_after_completion = users(:one).reload.xp_points
+    currency_transactions_after_completion = CurrencyTransaction.count
+
+    assert_no_difference -> { AuditLog.where(action: "event_reward_awarded").count } do
+      assert_no_difference -> { CurrencyTransaction.count } do
+        patch complete_event_path(event), params: {
+          results: {
+            confirmed.id => "participated"
+          }
+        }
+      end
+    end
+
+    assert_redirected_to event_path(event)
+    assert_equal "❌ O evento já foi finalizado.", flash[:alert]
+    assert_equal xp_after_completion, users(:one).reload.xp_points
+    assert_equal currency_transactions_after_completion, CurrencyTransaction.count
   end
 end

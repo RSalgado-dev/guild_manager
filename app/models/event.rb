@@ -28,6 +28,7 @@ class Event < ApplicationRecord
   scope :recent_first, -> { order(starts_at: :desc) }
 
   after_create :create_initial_participations!
+  after_create :audit_created!
 
   def finished?
     ends_at.present? && ends_at < Time.current
@@ -59,17 +60,18 @@ class Event < ApplicationRecord
     scheduled? && starts_at <= Time.current
   end
 
-  def complete_with_results!(results:)
+  def complete_with_results!(results:, actor: nil)
     transaction do
       raise ArgumentError, "Evento já foi finalizado." if completed?
 
       event_participations.includes(:user).find_each do |participation|
         final_status = results[participation.id.to_s] || results[participation.id] || participation.default_final_status
 
-        participation.apply_review_result!(final_status)
+        participation.apply_review_result!(final_status, actor: actor)
       end
 
       update!(status: :completed)
+      audit_completed!(actor)
     end
   end
 
@@ -80,5 +82,42 @@ class Event < ApplicationRecord
     return if ends_at > starts_at
 
     errors.add(:ends_at, "deve ser maior do que o horário de início")
+  end
+
+  def audit_created!
+    AuditLog.create!(
+      user: creator,
+      guild: guild,
+      action: "event_created",
+      entity_type: "Event",
+      entity_id: id,
+      metadata: {
+        origin: "admin",
+        result: "success",
+        event_type: event_type,
+        starts_at: starts_at,
+        ends_at: ends_at,
+        recurrence: recurrence,
+        reward_xp: reward_xp,
+        reward_currency: reward_currency
+      }
+    )
+  end
+
+  def audit_completed!(actor)
+    AuditLog.create!(
+      user: actor,
+      guild: guild,
+      action: "event_completed",
+      entity_type: "Event",
+      entity_id: id,
+      metadata: {
+        origin: "admin",
+        result: "success",
+        participation_count: event_participations.count,
+        reward_xp_total: event_participations.sum(:reward_xp_awarded),
+        reward_currency_total: event_participations.sum(:reward_currency_awarded)
+      }
+    )
   end
 end

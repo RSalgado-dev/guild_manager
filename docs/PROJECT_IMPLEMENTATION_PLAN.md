@@ -16,6 +16,8 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - ActiveAdmin passou a usar autorização por permissão e escopo por guilda; o painel admin é acessível por usuários com grupos operacionais, não apenas por superadmin.
 - Etapa 2 concluída: chamadas Discord foram extraídas para serviços, roles gerenciadas pelo app são reconciliadas por jobs, roles externas são apenas importadas e mudanças de cargo registram auditoria.
 - Validação da Etapa 2: `bin/rails test` passou com 356 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
+- Etapa 3 concluída: eventos agora seguem a matriz de recompensa do `idea.md`, fechamento duplicado não distribui recompensa novamente e criação, RSVP, fechamento e recompensas geram auditoria.
+- Validação da Etapa 3: `bin/rails test` passou com 358 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 
 ### Etapa 0 - Ambiente, Qualidade e Base Operacional
 
@@ -39,7 +41,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Preservar sync atual no login e nas permissões com TTL curto, mas mover lógica para serviços/jobs.
 - Registrar auditoria para mudanças de cargo, origem (`app`, `discord`, `job`, `admin`) e resultado.
 
-### Etapa 3 - Eventos
+### Etapa 3 - Eventos (concluída)
 
 - Corrigir matriz de recompensa para bater com o `idea.md`: confirmou+participou 100%, confirmou+faltou 0%, justificou+justificado 20%, justificou+participou 50%, sem resposta+faltou 0%, sem resposta+participou 25%.
 - Tornar fechamento idempotente: impedir recompensa duplicada se evento já foi concluído.

@@ -11,8 +11,8 @@ class EventParticipation < ApplicationRecord
       "absent" => 0.0
     },
     absent: {
-      "participated" => 0.2,
-      "justified" => 0.1,
+      "participated" => 0.25,
+      "justified" => 0.0,
       "absent" => 0.0
     }
   }.freeze
@@ -71,9 +71,12 @@ class EventParticipation < ApplicationRecord
     (event.reward_currency * reward_multiplier_for(status_value)).round
   end
 
-  def apply_review_result!(status_value)
+  def apply_review_result!(status_value, actor: nil)
+    raise ArgumentError, "Participação já recompensada." if rewarded_at.present?
+
     awarded_xp = awarded_xp_for(status_value)
     awarded_currency = awarded_currency_for(status_value)
+    multiplier = reward_multiplier_for(status_value)
 
     transaction do
       update!(
@@ -95,10 +98,36 @@ class EventParticipation < ApplicationRecord
             participation_id: id,
             source_block: source_block,
             final_status: status_value,
-            reward_multiplier: reward_multiplier_for(status_value)
+            reward_multiplier: multiplier
           }
         )
       end
+
+      audit_reward!(status_value, awarded_xp, awarded_currency, multiplier, actor)
     end
+  end
+
+  private
+
+  def audit_reward!(status_value, awarded_xp, awarded_currency, multiplier, actor)
+    AuditLog.create!(
+      user: actor || user,
+      guild: event.guild,
+      action: "event_reward_awarded",
+      entity_type: "EventParticipation",
+      entity_id: id,
+      metadata: {
+        origin: "admin",
+        result: "success",
+        event_id: event_id,
+        rewarded_user_id: user_id,
+        source_block: source_block,
+        rsvp_status: rsvp_status,
+        final_status: status_value.to_s,
+        reward_multiplier: multiplier,
+        reward_xp_awarded: awarded_xp,
+        reward_currency_awarded: awarded_currency
+      }
+    )
   end
 end

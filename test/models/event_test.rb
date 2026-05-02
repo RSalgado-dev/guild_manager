@@ -218,15 +218,50 @@ class EventTest < ActiveSupport::TestCase
   test "deve criar participações para os usuários da guilda ao salvar" do
     guild = guilds(:one)
 
+    assert_difference -> { AuditLog.where(action: "event_created").count }, 1 do
+      @event = Event.create!(
+        guild: guild,
+        creator: users(:one),
+        title: "Evento com lista",
+        event_type: "raid",
+        starts_at: 2.days.from_now,
+        recurrence: :weekly
+      )
+    end
+
+    assert_equal guild.users.count, @event.event_participations.count
+  end
+
+  test "#complete_with_results! finaliza evento e impede fechamento duplicado" do
+    guild = guilds(:one)
+    reviewer = users(:one)
     event = Event.create!(
       guild: guild,
-      creator: users(:one),
-      title: "Evento com lista",
+      creator: reviewer,
+      title: "Evento idempotente",
       event_type: "raid",
-      starts_at: 2.days.from_now,
-      recurrence: :weekly
+      starts_at: 1.day.ago,
+      ends_at: 23.hours.ago,
+      recurrence: :unique,
+      reward_xp: 40,
+      reward_currency: 20
     )
+    participation = event.event_participations.find_by!(user: reviewer)
+    participation.update!(rsvp_status: :confirmed)
 
-    assert_equal guild.users.count, event.event_participations.count
+    event.complete_with_results!(results: { participation.id => "participated" }, actor: reviewer)
+
+    assert_equal "completed", event.reload.status
+    assert_equal 40, participation.reload.reward_xp_awarded
+
+    xp_after_completion = reviewer.reload.xp_points
+    currency_transactions_after_completion = CurrencyTransaction.count
+
+    assert_raises(ArgumentError) do
+      event.complete_with_results!(results: { participation.id => "participated" }, actor: reviewer)
+    end
+
+    assert_equal xp_after_completion, reviewer.reload.xp_points
+    assert_equal currency_transactions_after_completion, CurrencyTransaction.count
   end
 end
