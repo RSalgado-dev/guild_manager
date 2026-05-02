@@ -10,23 +10,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_140100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
   create_table "achievements", force: :cascade do |t|
+    t.string "achievement_type", default: "predefined", null: false
     t.boolean "active", default: true, null: false
     t.string "category"
     t.string "code", null: false
     t.datetime "created_at", null: false
+    t.jsonb "criteria", default: {}, null: false
     t.text "description"
     t.bigint "guild_id", null: false
     t.string "icon_url"
     t.string "name", null: false
+    t.integer "reward_currency", default: 0, null: false
+    t.string "reward_profile_name_color"
+    t.integer "reward_xp", default: 0, null: false
     t.datetime "updated_at", null: false
+    t.string "visibility", default: "catalog", null: false
+    t.index ["guild_id", "achievement_type", "visibility", "active"], name: "idx_achievements_catalog"
     t.index ["guild_id", "code"], name: "index_achievements_on_guild_id_and_code", unique: true
     t.index ["guild_id", "name"], name: "index_achievements_on_guild_id_and_name"
     t.index ["guild_id"], name: "index_achievements_on_guild_id"
+    t.index ["reward_profile_name_color"], name: "index_achievements_on_reward_profile_name_color"
   end
 
   create_table "active_admin_comments", force: :cascade do |t|
@@ -96,10 +104,13 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
     t.bigint "guild_id", null: false
     t.string "icon_url"
     t.string "name", null: false
+    t.bigint "role_id"
     t.datetime "updated_at", null: false
     t.index ["guild_id", "code"], name: "index_certificates_on_guild_id_and_code", unique: true
     t.index ["guild_id", "name"], name: "index_certificates_on_guild_id_and_name"
+    t.index ["guild_id", "role_id"], name: "index_certificates_on_guild_id_and_role_id"
     t.index ["guild_id"], name: "index_certificates_on_guild_id"
+    t.index ["role_id"], name: "index_certificates_on_role_id"
   end
 
   create_table "currency_transactions", force: :cascade do |t|
@@ -552,6 +563,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
   add_foreign_key "audit_logs", "guilds", on_delete: :cascade
   add_foreign_key "audit_logs", "users", on_delete: :cascade
   add_foreign_key "certificates", "guilds", on_delete: :cascade
+  add_foreign_key "certificates", "roles", on_delete: :nullify
   add_foreign_key "currency_transactions", "users", on_delete: :cascade
   add_foreign_key "event_participations", "events", on_delete: :cascade
   add_foreign_key "event_participations", "users", on_delete: :cascade

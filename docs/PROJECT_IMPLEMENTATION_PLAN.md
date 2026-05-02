@@ -20,6 +20,8 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Validação da Etapa 3: `bin/rails test` passou com 358 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 - Etapa 4 concluída: missões v1 possuem fluxo manual, revisão/recompensa administrativa, comprovante via ActiveStorage, missão automática de atualização do personagem principal e `MissionRequest` para cargos especiais.
 - Validação da Etapa 4: `bin/rails test` passou com 373 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
+- Etapa 5 concluída: conquistas possuem catálogo/prestígio individual, recompensas e personalização de cor; certificados podem conceder cargo cosmético e acionar reconciliação Discord quando gerenciados pelo app.
+- Validação da Etapa 5: `bin/rails test` passou com 386 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 
 ### Etapa 0 - Ambiente, Qualidade e Base Operacional
 
@@ -60,7 +62,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Implementar primeira missão automática: atualizar personagem principal dentro do período semanal.
 - Adicionar `MissionRequest` para cargos especiais, como Artesão, solicitarem missões à administração.
 
-### Etapa 5 - Conquistas e Certificados
+### Etapa 5 - Conquistas e Certificados (concluída)
 
 - Evoluir `Achievement` com tipo `predefined`/`individual`, visibilidade `catalog`/`profile_only`, critérios, XP/moeda e recompensa de personalização.
 - v1 de personalização: desbloqueio de cor do nome no perfil via achievement preexistente; conquistas individuais não dão personalização.

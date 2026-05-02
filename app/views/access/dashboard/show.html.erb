@@ -140,7 +140,7 @@
           <% end %>
 
           <!-- Achievements Module -->
-          <div class="group bg-dark-card border border-neon-magenta/20 rounded-lg p-6 hover:border-neon-magenta hover:shadow-neon-magenta transition-all duration-300 cursor-pointer">
+          <%= link_to achievements_path, class: "group bg-dark-card border border-neon-magenta/20 rounded-lg p-6 hover:border-neon-magenta hover:shadow-neon-magenta transition-all duration-300 block" do %>
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
                 <span class="text-5xl group-hover:animate-pulse">🏆</span>
@@ -157,10 +157,10 @@
               <span class="text-gray-500 font-mono">Status:</span>
               <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
             </div>
-          </div>
+          <% end %>
 
           <!-- Certificates Module -->
-          <div class="group bg-dark-card border border-yellow-400/20 rounded-lg p-6 hover:border-yellow-400 hover:shadow-lg transition-all duration-300 cursor-pointer">
+          <%= link_to certificates_path, class: "group bg-dark-card border border-yellow-400/20 rounded-lg p-6 hover:border-yellow-400 hover:shadow-lg transition-all duration-300 block" do %>
             <div class="flex items-center justify-between mb-4">
               <div class="flex items-center gap-3">
                 <span class="text-5xl group-hover:animate-pulse">📜</span>
@@ -177,7 +177,7 @@
               <span class="text-gray-500 font-mono">Status:</span>
               <span class="text-neon-green font-bold font-mono">DISPONÍVEL</span>
             </div>
-          </div>
+          <% end %>
 
           <!-- Profile Module -->
           <%= link_to profile_path, class: "group bg-dark-card border border-neon-blue/20 rounded-lg p-6 hover:border-neon-blue hover:shadow-lg transition-all duration-300 block" do %>

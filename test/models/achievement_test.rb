@@ -79,4 +79,33 @@ class AchievementTest < ActiveSupport::TestCase
     )
     assert achievement_guild_two.valid?
   end
+
+  test "conquista individual não pode liberar personalização" do
+    achievement = Achievement.new(
+      guild: guilds(:one),
+      code: "individual_color",
+      name: "Feito único",
+      achievement_type: "individual",
+      visibility: "profile_only",
+      reward_profile_name_color: "#ff00ff"
+    )
+
+    assert_not achievement.valid?
+    assert_includes achievement.errors[:reward_profile_name_color], "não pode ser definido para conquistas individuais"
+  end
+
+  test "catálogo lista apenas conquistas preexistentes visíveis e ativas" do
+    catalog = Achievement.catalog_visible
+
+    assert_includes catalog, achievements(:one)
+    assert_not_includes catalog, achievements(:inactive)
+  end
+
+  test "criteria_json precisa ser JSON válido" do
+    achievement = achievements(:one)
+    achievement.criteria_json = "{invalid"
+
+    assert_not achievement.valid?
+    assert_includes achievement.errors[:criteria], "deve estar em JSON válido"
+  end
 end

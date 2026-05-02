@@ -36,8 +36,10 @@ module Access
     def load_profile_data
       # Carrega dados completos do perfil com eager loading
       @user_roles = @user.user_roles.includes(:role)
-      @achievements = @user.user_achievements.includes(:achievement)
-      @certificates = @user.user_certificates.includes(:certificate)
+      @profile_name_color = @user.profile_name_color
+      @achievements = @user.user_achievements.includes(:achievement).order(earned_at: :desc)
+      @individual_achievements = @achievements.select(&:individual?)
+      @certificates = @user.user_certificates.includes(certificate: :role).granted.select(&:active_certificate?)
       @recent_events = @user.event_participations.includes(:event).joins(:event).order("events.starts_at DESC").limit(5)
       @attendance_stats = @user.monthly_event_attendance_stats
     end

@@ -1,6 +1,8 @@
 require "test_helper"
 
 class UserCertificateTest < ActiveSupport::TestCase
+  include ActiveJob::TestHelper
+
   # === Validações ===
 
   test "deve ser válido com atributos válidos" do
@@ -121,5 +123,71 @@ class UserCertificateTest < ActiveSupport::TestCase
   test "#expired? deve retornar false quando expires_at é nil" do
     user_cert = user_certificates(:two)
     assert_not user_cert.expired?, "Certificado sem expiração não deveria estar expirado"
+  end
+
+  test "conceder certificado com cargo cosmético atribui role ao usuário" do
+    user = users(:five)
+    role = Role.create!(
+      guild: user.guild,
+      name: "Certificado Visual",
+      category: "cosmetic",
+      managed_by_app: false
+    )
+    certificate = Certificate.create!(
+      guild: user.guild,
+      role: role,
+      code: "visual_cert",
+      name: "Certificado Visual"
+    )
+
+    assert_difference -> { AuditLog.where(action: "certificate_granted").count }, 1 do
+      UserCertificate.create!(user: user, certificate: certificate, granted_by: users(:one))
+    end
+
+    assert user.roles.exists?(role.id)
+  end
+
+  test "revogar certificado remove role e audita" do
+    user = users(:five)
+    role = Role.create!(
+      guild: user.guild,
+      name: "Certificado Temporário",
+      category: "cosmetic"
+    )
+    certificate = Certificate.create!(
+      guild: user.guild,
+      role: role,
+      code: "temporary_cert",
+      name: "Certificado Temporário"
+    )
+    user_certificate = UserCertificate.create!(user: user, certificate: certificate, granted_by: users(:one))
+
+    assert_difference -> { AuditLog.where(action: "certificate_revoked").count }, 1 do
+      user_certificate.revoke!(revoked_by: users(:one))
+    end
+
+    assert_equal "revoked", user_certificate.reload.status
+    assert_not user.roles.exists?(role.id)
+  end
+
+  test "certificado com role gerenciada agenda reconciliação Discord" do
+    user = users(:five)
+    role = Role.create!(
+      guild: user.guild,
+      name: "Certificado Gerenciado",
+      category: "cosmetic",
+      managed_by_app: true,
+      discord_role_id: "191919191919191919"
+    )
+    certificate = Certificate.create!(
+      guild: user.guild,
+      role: role,
+      code: "managed_cert",
+      name: "Certificado Gerenciado"
+    )
+
+    assert_enqueued_with(job: DiscordManagedRoleReconciliationJob, args: [ user.guild_id, user.id ]) do
+      UserCertificate.create!(user: user, certificate: certificate, granted_by: users(:one))
+    end
   end
 end

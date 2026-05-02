@@ -1,0 +1,37 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-neon-blue font-mono text-xs">[ CERTIFICATE_DETAILS ]</p>
+        <h1 class="text-3xl font-black text-white mt-2"><%= @certificate.name %></h1>
+        <p class="text-gray-400 mt-2"><%= @certificate.description.presence || "Sem descrição cadastrada." %></p>
+      </div>
+      <%= link_to certificates_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
+        ← Certificados
+      <% end %>
+    </header>
+
+    <section class="bg-dark-card border border-neon-blue/20 rounded-lg p-6 space-y-5">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="p-4 bg-dark-bg border border-gray-800 rounded-lg">
+          <p class="text-gray-500 text-xs font-mono uppercase">Categoria</p>
+          <p class="text-white mt-2"><%= @certificate.category.presence || "Geral" %></p>
+        </div>
+        <div class="p-4 bg-dark-bg border border-neon-purple/20 rounded-lg">
+          <p class="text-gray-500 text-xs font-mono uppercase">Cargo vinculado</p>
+          <p class="text-white mt-2"><%= @certificate.role&.name || "Nenhum" %></p>
+        </div>
+        <div class="p-4 bg-dark-bg border border-neon-blue/20 rounded-lg">
+          <p class="text-gray-500 text-xs font-mono uppercase">Status</p>
+          <p class="text-white mt-2"><%= @user_certificate&.active_certificate? ? "Obtido" : "Pendente" %></p>
+        </div>
+      </div>
+
+      <% if @user_certificate&.active_certificate? %>
+        <div class="p-4 bg-neon-blue/10 border border-neon-blue/30 rounded-lg text-neon-blue font-mono text-sm">
+          Emitido em <%= l(@user_certificate.granted_at, format: :short) %>
+        </div>
+      <% end %>
+    </section>
+  </div>
+</div>

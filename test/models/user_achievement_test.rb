@@ -100,4 +100,47 @@ class UserAchievementTest < ActiveSupport::TestCase
     assert_nil user_achievement.source_type
     assert_nil user_achievement.source_id
   end
+
+  test "aplica recompensas ao conceder conquista" do
+    user = users(:five)
+    achievement = Achievement.create!(
+      guild: user.guild,
+      code: "rewarded_achievement",
+      name: "Conquista Recompensada",
+      reward_xp: 25,
+      reward_currency: 10
+    )
+    original_xp = user.xp_points
+    original_currency = user.currency_balance
+
+    assert_difference -> { CurrencyTransaction.count }, 1 do
+      assert_difference -> { AuditLog.where(action: "achievement_granted").count }, 1 do
+        UserAchievement.create!(user: user, achievement: achievement)
+      end
+    end
+
+    assert_equal original_xp + 25, user.reload.xp_points
+    assert_equal original_currency + 10, user.currency_balance
+  end
+
+  test "usuário usa cor da conquista preexistente mais recente" do
+    user = users(:five)
+    old_achievement = Achievement.create!(
+      guild: user.guild,
+      code: "old_color",
+      name: "Cor antiga",
+      reward_profile_name_color: "#111111"
+    )
+    new_achievement = Achievement.create!(
+      guild: user.guild,
+      code: "new_color",
+      name: "Cor nova",
+      reward_profile_name_color: "#abcdef"
+    )
+
+    UserAchievement.create!(user: user, achievement: old_achievement, earned_at: 2.days.ago)
+    UserAchievement.create!(user: user, achievement: new_achievement, earned_at: 1.day.ago)
+
+    assert_equal "#abcdef", user.profile_name_color
+  end
 end

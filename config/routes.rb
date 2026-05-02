@@ -55,6 +55,9 @@ Rails.application.routes.draw do
 
   resources :mission_requests, controller: "access/mission_requests", only: [ :new, :create ]
 
+  resources :achievements, controller: "access/achievements", only: [ :index, :show ]
+  resources :certificates, controller: "access/certificates", only: [ :index, :show ]
+
   resources :squads, controller: "access/squads", only: [ :index, :show, :new, :create ] do
     member do
       patch :request_profile_change

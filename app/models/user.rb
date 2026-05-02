@@ -251,6 +251,15 @@ class User < ApplicationRecord
     user_achievements.find_by(achievement: achievement)
   end
 
+  def profile_name_color
+    achievements
+      .where.not(reward_profile_name_color: [ nil, "" ])
+      .where(achievement_type: "predefined")
+      .order("user_achievements.earned_at DESC")
+      .limit(1)
+      .pick(:reward_profile_name_color)
+  end
+
   def apply_currency!(delta, reason: nil, description: nil, metadata: {})
     new_balance = currency_balance + delta
 

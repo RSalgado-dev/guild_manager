@@ -79,4 +79,22 @@ class CertificateTest < ActiveSupport::TestCase
       certificate.destroy
     end
   end
+
+  test "role vinculada deve ser cosmética e da mesma guilda" do
+    certificate = certificates(:one)
+    certificate.role = roles(:one)
+
+    assert_not certificate.valid?
+    assert_includes certificate.errors[:role], "deve ser um cargo cosmético"
+
+    cosmetic_role = Role.create!(
+      guild: guilds(:two),
+      name: "Cosmético externo",
+      category: "cosmetic"
+    )
+    certificate.role = cosmetic_role
+
+    assert_not certificate.valid?
+    assert_includes certificate.errors[:role], "deve pertencer à guilda"
+  end
 end

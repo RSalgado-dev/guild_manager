@@ -1,0 +1,52 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-yellow-400 font-mono text-xs">[ ACHIEVEMENT_CATALOG ]</p>
+        <h1 class="text-3xl font-black text-white mt-2">Conquistas</h1>
+        <p class="text-gray-400 mt-2">Catálogo de conquistas preexistentes da guilda.</p>
+      </div>
+      <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
+        ← Dashboard
+      <% end %>
+    </header>
+
+    <% if @achievements.any? %>
+      <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+        <% @achievements.each do |achievement| %>
+          <% earned = @earned_achievement_ids.include?(achievement.id) %>
+          <%= link_to achievement_path(achievement), class: "block bg-dark-card border #{earned ? 'border-yellow-400/50' : 'border-gray-800'} rounded-lg p-5 hover:border-yellow-400 transition-colors" do %>
+            <div class="flex items-start justify-between gap-4">
+              <div class="flex items-start gap-3">
+                <span class="text-4xl"><%= achievement.icon_url.presence || "🏆" %></span>
+                <div>
+                  <h2 class="text-white font-bold text-lg"><%= achievement.name %></h2>
+                  <p class="text-gray-500 text-xs font-mono mt-1"><%= achievement.category.presence || "geral" %></p>
+                </div>
+              </div>
+              <span class="px-2 py-1 rounded border text-xs font-mono <%= earned ? 'border-yellow-400 text-yellow-300 bg-yellow-400/10' : 'border-gray-700 text-gray-500 bg-dark-bg' %>">
+                <%= earned ? "desbloqueada" : "pendente" %>
+              </span>
+            </div>
+
+            <% if achievement.description.present? %>
+              <p class="text-gray-400 text-sm mt-4"><%= achievement.description %></p>
+            <% end %>
+
+            <div class="flex flex-wrap gap-2 mt-5 text-xs font-mono">
+              <span class="px-2 py-1 bg-neon-green/10 border border-neon-green/30 rounded text-neon-green"><%= achievement.reward_xp %> XP</span>
+              <span class="px-2 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded text-yellow-300"><%= achievement.reward_currency %> moedas</span>
+              <% if achievement.grants_customization? %>
+                <span class="px-2 py-1 bg-neon-purple/10 border border-neon-purple/30 rounded text-neon-purple">cor de nome</span>
+              <% end %>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    <% else %>
+      <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-10 text-center">
+        <p class="text-gray-400">Nenhuma conquista de catálogo ativa no momento.</p>
+      </div>
+    <% end %>
+  </div>
+</div>
