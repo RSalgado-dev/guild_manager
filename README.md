@@ -6,12 +6,17 @@ Sistema de gerenciamento de guildas com autenticação Discord OAuth e controle 
 
 ### Requisitos
 
-- Ruby 4.0.0
-- Rails 8.1.0
-- PostgreSQL 9.3+
-- Node.js (para Tailwind CSS)
+- DevContainer ativo (`guild_manager_devcontainer-app-1`)
+- Ruby 4.0.0, Rails 8.1.0 e PostgreSQL provisionados no container
+- Node.js/Tailwind no ambiente do container
 
 ### Configuração Rápida
+
+Todos os comandos devem ser executados dentro do container, nunca no host:
+
+```bash
+docker exec guild_manager_devcontainer-app-1 bash -lc 'export PATH=/home/vscode/.rbenv/bin:/home/vscode/.rbenv/shims:$PATH; cd /workspace && <command>'
+```
 
 ```bash
 # 1. Instalar dependências
@@ -122,6 +127,7 @@ SOLID_QUEUE_IN_PUMA=true     # Executar jobs no Puma
 - ✅ **Interface Admin (ActiveAdmin)** - Gerenciamento completo
 - ✅ **Sistema de Gamificação** - XP, conquistas, certificados, moeda virtual
 - ✅ **Eventos e Missões** - Sistema completo de RSVP e recompensas
+- ✅ **Squads, Rankings e Loja** - Times, leaderboards e pedidos com débito/reembolso
 - ✅ **Auditoria** - Logs de todas as ações importantes
 
 ### Modelos
@@ -134,11 +140,16 @@ SOLID_QUEUE_IN_PUMA=true     # Executar jobs no Puma
 - **Mission** - Missões semanais
 - **Achievement** - Sistema de conquistas
 - **Certificate** - Certificados com requisitos para cargos
+- **Ranking** - Rankings configuráveis por guilda
+- **StoreItem / StoreOrder** - Loja com fulfillment manual
 - **CurrencyTransaction** - Economia interna com rastreamento
+- **AuditLog** - Trilha de ações operacionais e administrativas
 
 ---
 
 ## 🧪 Testes
+
+Use os comandos abaixo como `<command>` no wrapper do DevContainer.
 
 ```bash
 # Executar todos os testes
@@ -155,9 +166,9 @@ rails test test/models/user_test.rb
 ```
 
 **Cobertura**:
-- ✅ 208 testes de models
-- ✅ 10 testes de controllers
-- ✅ 362 assertions
+- ✅ 400+ testes automatizados
+- ✅ Models, controllers, permissões, economia, rankings e loja
+- ✅ WebMock para isolar chamadas Discord
 
 📊 **Relatório completo**: [docs/TESTING_COVERAGE.md](docs/TESTING_COVERAGE.md)
 
@@ -165,10 +176,10 @@ rails test test/models/user_test.rb
 
 ## 📚 Documentação
 
-- [CHANGELOG.md](CHANGELOG.md) - Histórico completo de mudanças
 - [docs/ENVIRONMENT_SETUP.md](docs/ENVIRONMENT_SETUP.md) - Configuração detalhada de ambiente
-- [docs/DISCORD_INTEGRATION.md](docs/DISCORD_INTEGRATION.md) - Integração Discord OAuth
+- [docs/DISCORD_LOGIN.md](docs/DISCORD_LOGIN.md) - Integração Discord OAuth
 - [docs/ACTIVEADMIN_IMPLEMENTATION.md](docs/ACTIVEADMIN_IMPLEMENTATION.md) - Interface administrativa
+- [docs/OPERATIONS.md](docs/OPERATIONS.md) - Operação dos módulos atuais
 - [docs/TESTING_COVERAGE.md](docs/TESTING_COVERAGE.md) - Cobertura de testes
 
 ---
@@ -193,6 +204,8 @@ rails test test/models/user_test.rb
 ---
 
 ## 🛠️ Comandos Úteis
+
+Use estes comandos como o trecho final do wrapper `docker exec ... cd /workspace && <command>`.
 
 ```bash
 # Desenvolvimento
@@ -230,13 +243,14 @@ rails tailwindcss:build         # Compilar Tailwind
 - **Ruby**: 4.0.0
 - **Status**: ✅ Em desenvolvimento ativo
 
-### Última Atualização: 8 de Fevereiro de 2026
+### Última Atualização: 2 de Maio de 2026
 
 - ✅ Integração Discord OAuth completa
 - ✅ Controle de acesso em dois níveis
 - ✅ Interface ActiveAdmin
-- ✅ Sistema de testes implementado
-- ✅ Documentação completa
+- ✅ Eventos, missões, conquistas, certificados, rankings, squads e loja v1
+- ✅ Auditoria e permissionamento granular por guilda
+- ✅ Suite de testes e documentação operacional atualizadas
 
 ---
 
@@ -269,9 +283,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 **PostgreSQL não conecta**:
 ```bash
-# Verificar se está rodando
-sudo systemctl status postgresql   # Linux
-brew services list                  # macOS
+# Verificar containers
+docker ps --filter name=guild_manager_devcontainer
 ```
 
 **Discord OAuth não funciona**:
@@ -305,4 +318,3 @@ brew services list                  # macOS
 ---
 
 **Desenvolvido com ❤️ usando Ruby on Rails e Discord API**
-

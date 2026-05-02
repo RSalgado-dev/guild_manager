@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_150000) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_160100) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -511,6 +511,48 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_150000) do
     t.index ["profile_change_status"], name: "index_squads_on_profile_change_status"
   end
 
+  create_table "store_items", force: :cascade do |t|
+    t.string "category"
+    t.datetime "created_at", null: false
+    t.text "description"
+    t.string "fulfillment_type", default: "manual", null: false
+    t.bigint "guild_id", null: false
+    t.string "name", null: false
+    t.integer "price", default: 0, null: false
+    t.string "status", default: "active", null: false
+    t.integer "stock_quantity"
+    t.datetime "updated_at", null: false
+    t.index ["guild_id", "category"], name: "index_store_items_on_guild_id_and_category"
+    t.index ["guild_id", "name"], name: "index_store_items_on_guild_id_and_name"
+    t.index ["guild_id", "status"], name: "index_store_items_on_guild_id_and_status"
+    t.index ["guild_id"], name: "index_store_items_on_guild_id"
+  end
+
+  create_table "store_orders", force: :cascade do |t|
+    t.text "admin_notes"
+    t.datetime "canceled_at"
+    t.bigint "canceled_by_id"
+    t.datetime "created_at", null: false
+    t.datetime "fulfilled_at"
+    t.bigint "fulfilled_by_id"
+    t.integer "price_paid", null: false
+    t.datetime "refunded_at"
+    t.datetime "rejected_at"
+    t.bigint "rejected_by_id"
+    t.string "status", default: "pending", null: false
+    t.bigint "store_item_id", null: false
+    t.datetime "updated_at", null: false
+    t.bigint "user_id", null: false
+    t.index ["canceled_by_id"], name: "index_store_orders_on_canceled_by_id"
+    t.index ["fulfilled_by_id"], name: "index_store_orders_on_fulfilled_by_id"
+    t.index ["rejected_by_id"], name: "index_store_orders_on_rejected_by_id"
+    t.index ["status"], name: "index_store_orders_on_status"
+    t.index ["store_item_id", "status"], name: "index_store_orders_on_store_item_id_and_status"
+    t.index ["store_item_id"], name: "index_store_orders_on_store_item_id"
+    t.index ["user_id", "status"], name: "index_store_orders_on_user_id_and_status"
+    t.index ["user_id"], name: "index_store_orders_on_user_id"
+  end
+
   create_table "user_achievements", force: :cascade do |t|
     t.bigint "achievement_id", null: false
     t.datetime "created_at", null: false
@@ -615,6 +657,12 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_150000) do
   add_foreign_key "squads", "users", column: "emblem_uploaded_by_id"
   add_foreign_key "squads", "users", column: "leader_id", on_delete: :cascade
   add_foreign_key "squads", "users", column: "profile_change_reviewed_by_id"
+  add_foreign_key "store_items", "guilds", on_delete: :cascade
+  add_foreign_key "store_orders", "store_items"
+  add_foreign_key "store_orders", "users", column: "canceled_by_id", on_delete: :nullify
+  add_foreign_key "store_orders", "users", column: "fulfilled_by_id", on_delete: :nullify
+  add_foreign_key "store_orders", "users", column: "rejected_by_id", on_delete: :nullify
+  add_foreign_key "store_orders", "users", on_delete: :cascade
   add_foreign_key "user_achievements", "achievements", on_delete: :cascade
   add_foreign_key "user_achievements", "users", on_delete: :cascade
   add_foreign_key "user_certificates", "certificates", on_delete: :cascade

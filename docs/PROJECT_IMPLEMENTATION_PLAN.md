@@ -79,20 +79,34 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Criar rota pública `/rankings` com abas por ranking ativo.
 - Adicionar cache/snapshot apenas se cálculo direto ficar pesado; começar com queries otimizadas.
 
-### Etapa 7 - Loja v1
+### Etapa 7 - Loja v1 (concluída)
 
 - Criar `StoreItem` com guilda, nome, descrição, categoria, preço, estoque opcional, status e fulfillment manual.
 - Criar `StoreOrder` com usuário, item, preço pago, status `pending`, `fulfilled`, `rejected`, `canceled`, timestamps e notas admin.
 - No pedido, debitar moedas imediatamente; ao rejeitar/cancelar, reembolsar por `CurrencyTransaction`.
 - Criar tela membro para catálogo/pedidos e ActiveAdmin para gerenciar itens e cumprir pedidos.
 - Proteger criação/edição por `manage_store` e fulfillment por `fulfill_store_orders`.
+- Implementação validada com catálogo `/store`, pedidos `/store/orders`, débito transacional, estoque, reembolso idempotente e auditoria.
+- Testes adicionados para modelos e controllers da loja; validações executadas: `bin/rails test`, `bin/rubocop`, `git diff --check`.
 
-### Etapa 8 - UX, Navegação, Auditoria e Documentação
+### Etapa 8 - UX, Navegação, Auditoria e Documentação (concluída)
 
 - Substituir cards "disponível" sem rota por links reais ou status "em breve" até o módulo existir.
 - Padronizar dashboard, perfil, squads, eventos, missões, rankings e loja com navegação consistente.
 - Cobrir ações administrativas relevantes com `AuditLog`.
 - Atualizar README/docs conforme cada etapa: permissões, Discord sync, missões, loja, rankings e operação admin.
+- Implementada navegação global de membro para módulos ativos, com link admin quando aplicável.
+- `AuditLog` exposto em leitura no ActiveAdmin e helper `AuditLog.record!` criado para ações administrativas.
+- README, status de desenvolvimento, guia ActiveAdmin e operação dos módulos atualizados.
+- Validações executadas: `bin/rails test`, `bin/rubocop`, `git diff --check`.
+
+### Etapa 9 - Jobs Discord e Smoke Tests (concluída)
+
+- Jobs recorrentes configurados para sincronizar roles de guilda, roles de membros e reconciliação de roles gerenciadas pelo app.
+- Reconciliação assíncrona de roles gerenciadas é disparada por concessão/revogação de certificados vinculados a roles `managed_by_app`.
+- System tests ativados com driver Chromium compatível com DevContainer.
+- Smoke tests cobrem navegação de membro, loja, rankings e leitura de auditoria no ActiveAdmin.
+- Documentação operacional atualizada com comandos manuais e agendamento dos jobs.
 
 ## Interfaces e Contratos Principais
 

@@ -16,6 +16,8 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
     "UserCertificate" => "grant_certificates",
     "RoleCertificateRequirement" => "manage_certificates",
     "Ranking" => "manage_rankings",
+    "StoreItem" => "manage_store",
+    "StoreOrder" => "fulfill_store_orders",
     "CurrencyTransaction" => "manage_store",
     "AuditLog" => "view_audit_logs"
   }.freeze
@@ -39,7 +41,11 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
     return collection if user&.admin?
     return collection.none unless user&.guild_id
 
-    if collection.klass == User || collection.klass.column_names.include?("guild_id")
+    if collection.klass == StoreOrder
+      collection.joins(:store_item).where(store_items: { guild_id: user.guild_id })
+    elsif collection.klass == CurrencyTransaction
+      collection.joins(:user).where(users: { guild_id: user.guild_id })
+    elsif collection.klass == User || collection.klass.column_names.include?("guild_id")
       collection.where(guild_id: user.guild_id)
     else
       collection

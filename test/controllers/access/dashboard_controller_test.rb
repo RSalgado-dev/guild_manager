@@ -44,6 +44,18 @@ module Access
       assert_not_nil assigns(:guild)
     end
 
+    test "dashboard renders shared member navigation" do
+      sign_in @user
+      get dashboard_path
+
+      assert_response :success
+      assert_select "nav[aria-label=?]", "Navegação principal"
+      assert_select "a", text: "Eventos"
+      assert_select "a", text: "Missões"
+      assert_select "a", text: "Rankings"
+      assert_select "a", text: "Loja"
+    end
+
     test "should redirect to restricted when logged in without access" do
       @user.update!(has_guild_access: false)
       sign_in_without_role(@user)

@@ -58,6 +58,13 @@ Rails.application.routes.draw do
   resources :achievements, controller: "access/achievements", only: [ :index, :show ]
   resources :certificates, controller: "access/certificates", only: [ :index, :show ]
   resources :rankings, controller: "access/rankings", only: [ :index ]
+  get "/store", to: "access/store#index", as: :store
+
+  resources :store_orders, path: "store/orders", controller: "access/store_orders", only: [ :index, :create ] do
+    member do
+      post :cancel
+    end
+  end
 
   resources :squads, controller: "access/squads", only: [ :index, :show, :new, :create ] do
     member do

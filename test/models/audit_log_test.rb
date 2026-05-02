@@ -65,6 +65,23 @@ class AuditLogTest < ActiveSupport::TestCase
     assert_equal squad.id, entity.id
   end
 
+  test ".record! infere guilda da entidade" do
+    squad = squads(:one)
+
+    audit_log = AuditLog.record!(
+      action: "squad_profile_reviewed",
+      actor: users(:one),
+      entity: squad,
+      metadata: { "origin" => "admin" }
+    )
+
+    assert_equal users(:one), audit_log.user
+    assert_equal guilds(:one), audit_log.guild
+    assert_equal "Squad", audit_log.entity_type
+    assert_equal squad.id, audit_log.entity_id
+    assert_equal "admin", audit_log.metadata["origin"]
+  end
+
   test "#entity deve retornar nil quando entity_type está em branco" do
     audit_log = AuditLog.new(
       user: users(:one),

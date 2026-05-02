@@ -140,6 +140,16 @@ ActiveAdmin.register Guild do
         updated_count += 1
       end
     end
+    AuditLog.record!(
+      action: "guild_access_synced",
+      actor: current_user,
+      entity: guild,
+      metadata: {
+        "origin" => "admin",
+        "result" => "success",
+        "updated_count" => updated_count
+      }
+    )
 
     redirect_to admin_guild_path(guild), notice: "Acesso atualizado para #{updated_count} usuário(s)."
   end

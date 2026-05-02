@@ -14,9 +14,10 @@ http://localhost:3000/admin
 ### Autenticação
 
 O ActiveAdmin usa o sistema de autenticação existente:
-- **Login**: Faça login via Discord normalmente
-- **Requisito**: Apenas usuários **admin** podem acessar o painel
-- **Como tornar admin**: Configure o usuário com um cargo (Role) que tenha `is_admin: true`
+- **Login**: Faça login via Discord normalmente.
+- **Requisito**: Usuários `admin?` ou com grupos de permissão administrativos podem acessar o painel.
+- **Como tornar admin**: configure o usuário com um cargo `is_admin: true` ou vincule uma role a um `PermissionGroup`.
+- **Escopo**: usuários não superadmin são limitados aos dados da própria guilda.
 
 ## 📋 Recursos Disponíveis
 
@@ -108,6 +109,28 @@ O ActiveAdmin usa o sistema de autenticação existente:
 **Detalhes**:
 - Informações do squad
 - Lista completa de membros
+
+### 6. **Missões, Conquistas, Certificados e Rankings**
+
+Recursos operacionais para configurar catálogos, recompensas, critérios e rankings ativos por guilda.
+
+Permissões principais:
+- `manage_missions` e `review_mission_submissions`
+- `manage_achievements` e `grant_achievements`
+- `manage_certificates` e `grant_certificates`
+- `manage_rankings`
+
+### 7. **Loja** (`/admin/store_items`, `/admin/store_orders`)
+
+`StoreItem` gerencia catálogo, preço, status e estoque. `StoreOrder` permite entregar, rejeitar ou cancelar pedidos pendentes. Rejeição e cancelamento reembolsam moedas automaticamente.
+
+Permissões:
+- `manage_store` para itens.
+- `fulfill_store_orders` para pedidos.
+
+### 8. **Auditoria** (`/admin/audit_logs`)
+
+Auditoria é leitura. Use filtros por guilda, usuário, ação, entidade e data para investigar eventos operacionais.
 
 ## 🎯 Casos de Uso Comuns
 
@@ -211,7 +234,7 @@ O dashboard mostra:
 2. **Batch Actions**: Selecione múltiplos itens para ações em lote (deletar, etc)
 3. **Exportação**: ActiveAdmin suporta exportar para CSV
 4. **Comentários**: Você pode adicionar comentários em qualquer recurso
-5. **Auditoria**: Todas as ações são rastreáveis
+5. **Auditoria**: ações operacionais relevantes aparecem em `/admin/audit_logs`
 
 ## 🚀 Vantagens sobre Rake Tasks
 
@@ -226,10 +249,10 @@ O dashboard mostra:
 
 ## 🔒 Segurança
 
-- Apenas usuários **admin** podem acessar
+- Apenas usuários autenticados e autorizados podem acessar
 - Todas as ações passam pelos mesmos `permit_params`
 - ActiveAdmin respeita os callbacks e validações do modelo
-- Logs de todas as mudanças via ActiveAdmin Comments
+- Ações críticas usam `AuditLog`; comentários do ActiveAdmin continuam disponíveis como contexto adicional
 
 ## 📝 Customizações Futuras
 

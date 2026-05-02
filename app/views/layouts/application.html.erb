@@ -159,6 +159,9 @@
         <% end %>
       </div>
     <% end %>
+    <% if logged_in? && has_guild_access? %>
+      <%= render "shared/member_navigation" %>
+    <% end %>
     <%= yield %>
   </body>
 </html>

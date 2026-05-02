@@ -1,27 +1,15 @@
 require "test_helper"
 
-module SystemTestCase
-  extend ActiveSupport::Concern
+Capybara.register_driver :headless_chrome_container do |app|
+  options = Selenium::WebDriver::Chrome::Options.new
+  options.add_argument("--headless=new")
+  options.add_argument("--no-sandbox")
+  options.add_argument("--disable-dev-shm-usage")
+  options.add_argument("--disable-gpu")
 
-  included do
-    include ActionDispatch::SystemTestCase
-  end
-
-  class_methods do
-    def driver_for(browser)
-      case browser
-      when :headless_chrome
-        driven_by :selenium, using: :headless_chrome, screen_size: [ 1400, 1400 ]
-      when :headless_firefox
-        driven_by :selenium, using: :headless_firefox, screen_size: [ 1400, 1400 ]
-      else
-        driven_by :selenium, using: browser, screen_size: [ 1400, 1400 ]
-      end
-    end
-  end
+  Capybara::Selenium::Driver.new(app, browser: :chrome, options:)
 end
 
-class ApplicationSystemTestCase < ActiveSupport::TestCase
-  include SystemTestCase
-  driver_for :headless_chrome
+class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  driven_by :headless_chrome_container, screen_size: [ 1400, 1400 ]
 end

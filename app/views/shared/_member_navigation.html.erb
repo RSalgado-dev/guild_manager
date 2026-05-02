@@ -1,0 +1,38 @@
+<% nav_items = [
+  [ "Dashboard", dashboard_path, "/dashboard" ],
+  [ "Eventos", events_path, "/events" ],
+  [ "Missões", missions_path, "/missions" ],
+  [ "Conquistas", achievements_path, "/achievements" ],
+  [ "Certificados", certificates_path, "/certificates" ],
+  [ "Rankings", rankings_path, "/rankings" ],
+  [ "Squads", squads_path, "/squads" ],
+  [ "Loja", store_path, "/store" ],
+  [ "Perfil", profile_path, "/profile" ]
+] %>
+
+<nav class="sticky top-0 z-40 border-b border-gray-800 bg-dark-surface/95 backdrop-blur-sm" aria-label="Navegação principal">
+  <div class="max-w-7xl mx-auto px-4 py-3 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+    <%= link_to dashboard_path, class: "flex items-center gap-3 hover:opacity-80 transition-opacity" do %>
+      <span class="text-2xl">🏰</span>
+      <div>
+        <p class="text-white font-black leading-tight">GUILD SYSTEM</p>
+        <p class="text-neon-cyan/70 font-mono text-xs"><%= current_user.guild.name %></p>
+      </div>
+    <% end %>
+
+    <div class="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
+      <% nav_items.each do |label, path, prefix| %>
+        <% active = request.path == path || (prefix != "/dashboard" && request.path.start_with?(prefix)) %>
+        <%= link_to label,
+                    path,
+                    class: "shrink-0 px-3 py-2 rounded border font-mono text-xs transition-colors #{active ? 'border-neon-cyan bg-neon-cyan/10 text-neon-cyan' : 'border-gray-700 bg-dark-card text-gray-300 hover:border-neon-cyan/40 hover:text-neon-cyan'}" %>
+      <% end %>
+
+      <% if current_user.admin_panel_access? %>
+        <%= link_to "Admin",
+                    admin_root_path,
+                    class: "shrink-0 px-3 py-2 rounded border border-neon-magenta/40 bg-neon-magenta/10 text-neon-magenta font-mono text-xs hover:border-neon-magenta transition-colors" %>
+      <% end %>
+    </div>
+  </div>
+</nav>

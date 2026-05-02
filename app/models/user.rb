@@ -27,6 +27,7 @@ class User < ApplicationRecord
   has_many :certificates, through: :user_certificates
 
   has_many :currency_transactions, dependent: :destroy
+  has_many :store_orders, dependent: :destroy
 
   has_many :audit_logs, dependent: :nullify
 
@@ -79,7 +80,7 @@ class User < ApplicationRecord
 
   def self.ransackable_associations(auth_object = nil)
     [ "guild", "squad", "roles", "user_roles", "events", "missions",
-     "achievements", "certificates", "currency_transactions" ]
+     "achievements", "certificates", "currency_transactions", "store_orders" ]
   end
 
   validates :discord_id, presence: true, uniqueness: true

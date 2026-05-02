@@ -1,133 +1,68 @@
 # Status Atual do Desenvolvimento
 
-Última atualização: 2026-03-12
+Última atualização: 2026-05-02
 
 ## Visão Geral
-A base do sistema está funcional para autenticação Discord, segregação por guilda, cadastro de personagens e controle de acesso por grupos de permissão.
+
+A aplicação está funcional como plataforma multi-guild com login Discord, sincronização de roles, controle de permissões por grupo, módulos de membros e operação administrativa via ActiveAdmin. A execução local deve ocorrer dentro do DevContainer `guild_manager_devcontainer-app-1`.
 
 ## Módulos Implementados
 
-### 1. Autenticação e vínculo com Discord
-- Login via OAuth Discord.
-- Descoberta de guildas do usuário no Discord.
-- Criação/atualização de usuário local associando à guilda autorizada.
-- Sincronização de roles Discord para roles locais.
+### Autenticação, Guildas e Permissões
 
-Arquivos principais:
-- `app/controllers/sessions_controller.rb`
-- `app/models/user.rb`
-- `app/services/discord_guild_service.rb`
+- Login via Discord OAuth.
+- Descoberta de guilda do usuário e vínculo local.
+- Sincronização de roles Discord com TTL de acesso interno e TTL curto para permissões.
+- Cargo base opcional por guilda (`required_discord_role_id`).
+- `PermissionGroup` com permissões granulares: membros, roles, eventos, missões, conquistas, certificados, rankings, loja e auditoria.
 
-### 2. Controle de acesso por guilda
-- Cada guilda pode definir cargo obrigatório (`required_discord_role_id`).
-- Usuários sem cargo exigido são direcionados para área restrita.
-- Campo `has_guild_access` atualizado após sincronização.
+### Perfil, Personagens e Squads
 
-Arquivos principais:
-- `app/models/guild.rb`
-- `app/models/user.rb`
-- `app/controllers/application_controller.rb`
-- `app/controllers/access/dashboard_controller.rb`
+- Perfil com XP, moedas, conquistas, certificados, roles e estatísticas de presença.
+- Múltiplos personagens por usuário, template dinâmico por guilda e personagem principal único.
+- Squads com líder, convites, revisão de alterações de perfil e emblema.
 
-### 3. Personagens de jogo
-- Usuário pode ter múltiplos personagens.
-- Cada guilda define um template de personagem (JSON) com campos obrigatórios/opcionais.
-- Validação de campos dinâmicos baseada no template da guilda.
-- Um único personagem principal por usuário (`is_primary = true`).
-- Promoção automática de principal em criação/remoção conforme regras de consistência.
+### Eventos e Missões
 
-Arquivos principais:
-- `app/models/game_character.rb`
-- `app/models/guild.rb`
-- `app/controllers/access/characters_controller.rb`
-- `app/views/access/characters/*.erb`
+- Eventos com RSVP, justificativa, revisão de presença, recompensas de XP/moeda e auditoria.
+- Missões ativas por guilda, submissões manuais, limite por período, aprovação/rejeição e distribuição de recompensa.
+- Pedidos de missão por membros elegíveis.
 
-### 4. Permissionamento por grupos
-- Criação de `PermissionGroup` por guilda.
-- Associação de um grupo a uma ou mais roles Discord locais.
-- Permissões granulares implementadas:
-  - `manage_members`
-  - `manage_store`
-  - `manage_events`
-  - `manage_certificates`
-- Grupo padrão `Administração` criado automaticamente com acesso total (`all_access`).
-- Método central de checagem: `user.has_permission?(permission_key)`.
+### Conquistas, Certificados e Rankings
 
-Arquivos principais:
-- `app/models/permission_group.rb`
-- `app/models/permission_group_role.rb`
-- `app/models/user.rb`
-- `app/admin/permission_groups.rb`
+- Conquistas predefinidas ou individuais, catálogo, perfil e recompensa cosmética de cor de nome.
+- Certificados com concessão, revogação, expiração e vínculo opcional com roles cosméticas.
+- Rankings configuráveis por guilda para usuários e squads.
 
-### 5. Gestão de Squads no site (não-ActiveAdmin)
-- Usuário com permissão `manage_members` pode criar squad e definir líder na criação.
-- Squad possui `name`, `tag` e `description`.
-- Líder pode solicitar alterações de perfil (nome, TAG, descrição e emblema) sem aplicar imediatamente.
-- Alterações vão para fila de revisão (`profile_change_status = pending`).
-- Usuário com `manage_members` pode aprovar ou rejeitar alterações.
-- Existe proteção antiabuso para alterações de perfil:
-  - Apenas uma alteração pendente por vez.
-  - Cooldown entre aprovações (`7 dias`).
-- Líder pode convidar usuários sem squad.
-- Usuário convidado pode aceitar/recusar convite.
-- Ao aceitar, passa a integrar o squad e exibe a TAG junto ao nome (`display_name_with_squad_tag`).
+### Loja
 
-Arquivos principais:
-- `app/models/squad.rb`
-- `app/models/squad_invitation.rb`
-- `app/controllers/access/squads_controller.rb`
-- `app/controllers/access/squad_invitations_controller.rb`
-- `app/views/access/squads/*`
-- `db/migrate/20260312143000_add_squad_profile_review_and_invitations.rb`
+- Catálogo em `/store` e pedidos em `/store/orders`.
+- `StoreItem` com categoria, preço, estoque opcional, status e fulfillment manual.
+- `StoreOrder` com débito imediato, reserva de estoque, cancelamento/rejeição com reembolso e auditoria.
+- ActiveAdmin para itens e pedidos com permissões `manage_store` e `fulfill_store_orders`.
 
-## Estratégia de Sincronização de Roles Discord
-Para reduzir janela de inconsistência entre Discord e sistema interno:
+### ActiveAdmin e Auditoria
 
-1. Login:
-- Sincronização imediata dos roles.
+- Recursos administrativos para guilds, users, roles, permission groups, squads, events, missions, achievements, certificates, rankings, store items, store orders e audit logs.
+- Escopo por guilda para usuários não superadmin.
+- `AuditLog` exposto como leitura em `/admin/audit_logs`.
+- Ações administrativas relevantes usam `AuditLog.record!`.
 
-2. Acesso à área interna:
-- Revalidação automática com TTL (`DISCORD_ROLE_SYNC_MAX_AGE = 2.minutes`).
+### Jobs Discord e Smoke Tests
 
-3. Ações protegidas por permissão:
-- Revalidação com TTL curto (`PERMISSION_CHECK_SYNC_MAX_AGE = 30.seconds`) antes de `require_permission`.
+- `DiscordGuildRolesSyncJob`, `DiscordMembersSyncJob` e `DiscordManagedRoleReconciliationJob` estão configurados em `config/recurring.yml`.
+- Reconciliação assíncrona de roles gerenciadas pelo app é disparada por certificados com role `managed_by_app`.
+- System smoke tests cobrem navegação de membro, compra na loja, rankings e leitura de auditoria no ActiveAdmin.
 
-4. Controle de sincronização:
-- `users.discord_roles_synced_at` para evitar chamadas excessivas.
+## Qualidade
 
-Arquivos principais:
-- `app/models/user.rb`
-- `app/controllers/access_controller.rb`
-- `app/controllers/application_controller.rb`
-- `db/migrate/20260312131500_add_discord_roles_synced_at_to_users.rb`
-
-## ActiveAdmin
-Painéis administrativos ativos para:
-- Guilds
-- Users
-- Roles
-- Permission Groups
-- Squads
-
-Com formulários e listagens funcionais para gerenciamento operacional.
-
-## Estado de Qualidade
-- Suite de testes verde.
+- Suite completa executada dentro do container.
 - RuboCop sem offenses.
-- Migrações recentes aplicadas para:
-  - Template e dados dinâmicos de personagem
-  - Personagem principal
-  - Grupos de permissão
-  - Timestamp de sincronização de roles
-  - Fluxo operacional de squads com revisão e convites
+- Testes cobrem modelos, controllers, jobs, serviços, permissões, Discord WebMock, rankings, loja, squads, missões, eventos e smoke/system.
 
-## Decisões Técnicas Relevantes
-- Migração de permission groups isolada de modelos da aplicação (evita acoplamento temporal de migrations).
-- Checagem de permissão otimizada com `exists?` em SQL (evita carga desnecessária de objetos em memória).
+## Próximos Pontos Técnicos
 
-## Pontos em Aberto (Próximos Passos)
-1. Aplicar `require_permission` nos módulos funcionais reais (membros, loja, eventos, certificados) ao implementar/expandir controllers.
-2. Criar job recorrente para sincronização proativa de roles em usuários ativos.
-3. Adicionar auditoria explícita para mudanças de grupos/permissões administrativas.
-4. Criar testes de integração focados em revogação de permissão em tempo real (Discord -> sistema).
-5. Evoluir catálogo de permissões com versionamento e migração de compatibilidade.
+1. Evoluir avaliação automática de missões e conquistas.
+2. Criar jobs de expiração/reconciliação de certificados expirados.
+3. Adicionar observabilidade operacional para falhas de jobs Discord.
+4. Avaliar cache/snapshots para rankings apenas se surgirem gargalos reais.

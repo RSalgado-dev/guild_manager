@@ -160,6 +160,16 @@ ActiveAdmin.register User do
     user = User.find(params[:id])
     has_access = User.check_guild_role_access(user.guild, user.discord_id)
     user.update(has_guild_access: has_access)
+    AuditLog.record!(
+      action: "user_access_checked",
+      actor: current_user,
+      entity: user,
+      metadata: {
+        "origin" => "admin",
+        "result" => "success",
+        "has_access" => has_access
+      }
+    )
 
     redirect_to admin_user_path(user), notice: "Acesso verificado. Status: #{has_access ? 'Com Acesso' : 'Sem Acesso'}"
   end

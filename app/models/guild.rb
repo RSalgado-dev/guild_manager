@@ -18,6 +18,7 @@ class Guild < ApplicationRecord
   has_many :certificates,   dependent: :destroy
   has_many :permission_groups, dependent: :destroy
   has_many :rankings, dependent: :destroy
+  has_many :store_items, dependent: :destroy
 
   before_validation :parse_character_template_json
   before_validation :ensure_default_character_template
@@ -39,7 +40,8 @@ class Guild < ApplicationRecord
   end
 
   def self.ransackable_associations(auth_object = nil)
-    [ "users", "roles", "squads", "missions", "events", "achievements", "certificates", "permission_groups" ]
+    [ "users", "roles", "squads", "missions", "events", "achievements", "certificates",
+      "permission_groups", "rankings", "store_items" ]
   end
 
   validates :name,
