@@ -18,6 +18,8 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Validação da Etapa 2: `bin/rails test` passou com 356 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 - Etapa 3 concluída: eventos agora seguem a matriz de recompensa do `idea.md`, fechamento duplicado não distribui recompensa novamente e criação, RSVP, fechamento e recompensas geram auditoria.
 - Validação da Etapa 3: `bin/rails test` passou com 358 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
+- Etapa 4 concluída: missões v1 possuem fluxo manual, revisão/recompensa administrativa, comprovante via ActiveStorage, missão automática de atualização do personagem principal e `MissionRequest` para cargos especiais.
+- Validação da Etapa 4: `bin/rails test` passou com 373 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
 
 ### Etapa 0 - Ambiente, Qualidade e Base Operacional
 
@@ -49,7 +51,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Adicionar auditoria de criação, RSVP, fechamento e recompensas.
 - Manter rotas atuais de eventos, com `manage_events` para criação/revisão.
 
-### Etapa 4 - Missões v1
+### Etapa 4 - Missões v1 (concluída)
 
 - Expandir `Mission` com tipo `manual`/`automatic`, frequência, limite de submissões, modo de recompensa `fixed`/`per_unit`, XP/moeda por unidade e metadados seguros.
 - Expandir `MissionSubmission` com status `pending`, `approved`, `rejected`, `rewarded`, comprovante via ActiveStorage, quantidade, revisão, notas e recompensa calculada.

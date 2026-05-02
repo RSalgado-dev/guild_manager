@@ -1,0 +1,107 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-7xl mx-auto px-4 py-8 space-y-8">
+    <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <p class="text-neon-purple font-mono text-xs">[ MISSION_BOARD ]</p>
+        <h1 class="text-3xl font-black text-white mt-2">Missões</h1>
+        <p class="text-gray-400 mt-2">Complete objetivos ativos da guilda para ganhar XP e moedas.</p>
+      </div>
+      <div class="flex gap-3">
+        <% if @can_request_mission %>
+          <%= link_to new_mission_request_path, class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded-lg text-neon-purple font-mono text-sm" do %>
+            Requisitar missão
+          <% end %>
+        <% end %>
+        <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
+          ← Dashboard
+        <% end %>
+      </div>
+    </header>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-dark-card border border-neon-purple/20 rounded-lg p-5">
+        <p class="text-gray-500 text-xs font-mono uppercase">Ativas</p>
+        <p class="text-white text-3xl font-bold mt-2"><%= @missions.count %></p>
+      </div>
+      <div class="bg-dark-card border border-neon-green/20 rounded-lg p-5">
+        <p class="text-gray-500 text-xs font-mono uppercase">Recompensadas</p>
+        <p class="text-white text-3xl font-bold mt-2"><%= @my_submissions.rewarded.count %></p>
+      </div>
+      <div class="bg-dark-card border border-yellow-400/20 rounded-lg p-5">
+        <p class="text-gray-500 text-xs font-mono uppercase">Pendentes</p>
+        <p class="text-white text-3xl font-bold mt-2"><%= @my_submissions.pending.count %></p>
+      </div>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="text-2xl font-bold text-white">Missões disponíveis</h2>
+      <% if @missions.any? %>
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+          <% @missions.each do |mission| %>
+            <% period = mission.current_period_reference %>
+            <% submissions_count = mission.submissions_count_for(current_user, period) %>
+            <%= link_to mission_path(mission), class: "block bg-dark-card border border-neon-purple/20 rounded-lg p-5 hover:border-neon-purple transition-colors" do %>
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h3 class="text-white text-xl font-bold"><%= mission.name %></h3>
+                  <p class="text-gray-400 text-sm mt-2"><%= mission.description.presence || "Sem descrição cadastrada." %></p>
+                </div>
+                <span class="px-3 py-1 border border-gray-700 rounded-full text-xs font-mono text-gray-300"><%= mission.mission_type.humanize %></span>
+              </div>
+
+              <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-5 text-sm">
+                <div class="p-3 bg-dark-bg border border-neon-cyan/20 rounded-lg">
+                  <p class="text-gray-500 text-xs font-mono uppercase">Período</p>
+                  <p class="text-white mt-1"><%= mission.frequency.humanize %></p>
+                </div>
+                <div class="p-3 bg-dark-bg border border-neon-green/20 rounded-lg">
+                  <p class="text-gray-500 text-xs font-mono uppercase">XP</p>
+                  <p class="text-white mt-1"><%= mission.fixed? ? mission.reward_xp : "#{mission.reward_xp_per_unit}/un" %></p>
+                </div>
+                <div class="p-3 bg-dark-bg border border-yellow-400/20 rounded-lg">
+                  <p class="text-gray-500 text-xs font-mono uppercase">Moedas</p>
+                  <p class="text-white mt-1"><%= mission.fixed? ? mission.reward_currency : "#{mission.reward_currency_per_unit}/un" %></p>
+                </div>
+                <div class="p-3 bg-dark-bg border border-neon-purple/20 rounded-lg">
+                  <p class="text-gray-500 text-xs font-mono uppercase">Envios</p>
+                  <p class="text-white mt-1"><%= submissions_count %>/<%= mission.max_submissions_per_period %></p>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-10 text-center">
+          <p class="text-gray-400">Nenhuma missão ativa no momento.</p>
+        </div>
+      <% end %>
+    </section>
+
+    <section class="space-y-4">
+      <h2 class="text-2xl font-bold text-white">Minhas submissões</h2>
+      <% if @my_submissions.any? %>
+        <div class="space-y-3">
+          <% @my_submissions.limit(12).each do |submission| %>
+            <%= link_to mission_path(submission.mission), class: "block bg-dark-card border border-gray-800 rounded-lg p-4 hover:border-neon-purple/30 transition-colors" do %>
+              <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <p class="text-white font-semibold"><%= submission.mission.name %></p>
+                  <p class="text-gray-500 text-sm"><%= submission.week_reference %> • envio <%= submission.period_sequence %></p>
+                </div>
+                <div class="flex gap-2 text-xs font-mono">
+                  <span class="px-2 py-1 bg-dark-bg border border-gray-700 rounded text-gray-300"><%= submission.status.humanize %></span>
+                  <span class="px-2 py-1 bg-neon-green/10 border border-neon-green/30 rounded text-neon-green"><%= submission.reward_xp_awarded %> XP</span>
+                  <span class="px-2 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded text-yellow-300"><%= submission.reward_currency_awarded %> moedas</span>
+                </div>
+              </div>
+            <% end %>
+          <% end %>
+        </div>
+      <% else %>
+        <div class="bg-dark-card border border-dashed border-gray-700 rounded-lg p-10 text-center">
+          <p class="text-gray-400">Você ainda não enviou submissões.</p>
+        </div>
+      <% end %>
+    </section>
+  </div>
+</div>

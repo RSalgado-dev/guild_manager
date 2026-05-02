@@ -17,6 +17,8 @@ class User < ApplicationRecord
 
   has_many :mission_submissions, dependent: :destroy
   has_many :missions, through: :mission_submissions
+  has_many :mission_requests, foreign_key: :requester_id, dependent: :destroy, inverse_of: :requester
+  has_many :reviewed_mission_requests, class_name: "MissionRequest", foreign_key: :reviewer_id, dependent: :nullify
 
   has_many :user_achievements, dependent: :destroy
   has_many :achievements, through: :user_achievements

@@ -47,6 +47,14 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :missions, controller: "access/missions", only: [ :index, :show ] do
+    member do
+      post :submit
+    end
+  end
+
+  resources :mission_requests, controller: "access/mission_requests", only: [ :new, :create ]
+
   resources :squads, controller: "access/squads", only: [ :index, :show, :new, :create ] do
     member do
       patch :request_profile_change

@@ -1,0 +1,27 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-8">
+      <div>
+        <p class="text-neon-purple font-mono text-xs">[ MISSION_REQUEST ]</p>
+        <h1 class="text-3xl font-black text-white mt-2">Requisitar missão</h1>
+      </div>
+      <%= link_to missions_path, class: "px-4 py-2 bg-dark-card border border-gray-700 text-gray-300 rounded-lg font-mono text-sm" do %>
+        ← Missões
+      <% end %>
+    </div>
+
+    <div class="bg-dark-card border border-neon-purple/30 rounded-lg p-6">
+      <%= form_with model: @mission_request, url: mission_requests_path, local: true, class: "space-y-5" do |f| %>
+        <div>
+          <%= f.label :title, "Título", class: "block text-sm text-gray-300 mb-2" %>
+          <%= f.text_field :title, class: "w-full px-4 py-3 bg-dark-bg border border-neon-purple/20 rounded-lg text-white" %>
+        </div>
+        <div>
+          <%= f.label :description, "Descrição", class: "block text-sm text-gray-300 mb-2" %>
+          <%= f.text_area :description, rows: 8, class: "w-full px-4 py-3 bg-dark-bg border border-gray-700 rounded-lg text-white" %>
+        </div>
+        <%= f.submit "Enviar requisição", class: "w-full px-4 py-3 bg-gradient-to-r from-neon-purple to-neon-magenta rounded-lg text-white font-bold cursor-pointer" %>
+      <% end %>
+    </div>
+  </div>
+</div>

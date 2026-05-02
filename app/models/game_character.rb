@@ -8,6 +8,7 @@ class GameCharacter < ApplicationRecord
   before_save :demote_other_primary_characters, if: :becoming_primary?
   before_destroy :store_primary_state_before_destroy
   after_destroy :promote_another_character_if_needed
+  after_commit :evaluate_primary_character_update_missions, on: :update
 
   validates :nickname, presence: true, length: { minimum: 2, maximum: 50 }
   validates :level, presence: true, numericality: { only_integer: true, greater_than_or_equal_to: 1, less_than_or_equal_to: 999 }
@@ -139,5 +140,12 @@ class GameCharacter < ApplicationRecord
     return true if value == true || value == false
 
     %w[true false 1 0].include?(value.to_s.downcase)
+  end
+
+  def evaluate_primary_character_update_missions
+    return unless is_primary?
+    return if (previous_changes.keys & %w[nickname level power character_data]).empty?
+
+    AutomaticMissionEvaluator.evaluate_primary_character_update!(character: self)
   end
 end

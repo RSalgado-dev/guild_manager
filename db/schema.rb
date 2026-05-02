@@ -182,16 +182,46 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
     t.index ["name"], name: "index_guilds_on_name"
   end
 
+  create_table "mission_requests", force: :cascade do |t|
+    t.text "admin_notes"
+    t.datetime "created_at", null: false
+    t.text "description", null: false
+    t.bigint "guild_id", null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.bigint "requester_id", null: false
+    t.datetime "reviewed_at"
+    t.bigint "reviewer_id"
+    t.string "status", default: "pending", null: false
+    t.string "title", null: false
+    t.datetime "updated_at", null: false
+    t.index ["guild_id", "status"], name: "index_mission_requests_on_guild_id_and_status"
+    t.index ["guild_id"], name: "index_mission_requests_on_guild_id"
+    t.index ["requester_id", "status"], name: "index_mission_requests_on_requester_id_and_status"
+    t.index ["requester_id"], name: "index_mission_requests_on_requester_id"
+    t.index ["reviewer_id"], name: "index_mission_requests_on_reviewer_id"
+  end
+
   create_table "mission_submissions", force: :cascade do |t|
     t.jsonb "answers_json", default: {}, null: false
     t.datetime "created_at", null: false
     t.bigint "mission_id", null: false
+    t.integer "period_sequence", default: 1, null: false
+    t.integer "quantity", default: 1, null: false
+    t.text "review_notes"
+    t.datetime "reviewed_at"
+    t.bigint "reviewer_id"
+    t.integer "reward_currency_awarded", default: 0, null: false
+    t.integer "reward_xp_awarded", default: 0, null: false
     t.datetime "rewarded_at"
+    t.string "status", default: "pending", null: false
+    t.datetime "submitted_at"
     t.datetime "updated_at", null: false
     t.bigint "user_id", null: false
     t.string "week_reference", null: false
-    t.index ["mission_id", "user_id", "week_reference"], name: "idx_on_mission_id_user_id_week_reference_1fc796d003", unique: true
+    t.index ["mission_id", "user_id", "week_reference", "period_sequence"], name: "idx_mission_submissions_period_sequence", unique: true
     t.index ["mission_id"], name: "index_mission_submissions_on_mission_id"
+    t.index ["reviewer_id"], name: "index_mission_submissions_on_reviewer_id"
+    t.index ["status", "reviewed_at"], name: "index_mission_submissions_on_status_and_reviewed_at"
     t.index ["user_id"], name: "index_mission_submissions_on_user_id"
     t.index ["week_reference"], name: "index_mission_submissions_on_week_reference"
   end
@@ -202,11 +232,18 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
     t.text "description"
     t.string "frequency", default: "weekly", null: false
     t.bigint "guild_id", null: false
+    t.integer "max_submissions_per_period", default: 1, null: false
+    t.jsonb "metadata", default: {}, null: false
+    t.string "mission_type", default: "manual", null: false
     t.string "name", null: false
     t.integer "reward_currency", default: 0, null: false
+    t.integer "reward_currency_per_unit", default: 0, null: false
+    t.string "reward_mode", default: "fixed", null: false
     t.integer "reward_xp", default: 0, null: false
+    t.integer "reward_xp_per_unit", default: 0, null: false
     t.datetime "updated_at", null: false
     t.index ["guild_id", "active"], name: "index_missions_on_guild_id_and_active"
+    t.index ["guild_id", "mission_type", "active"], name: "index_missions_on_guild_id_and_mission_type_and_active"
     t.index ["guild_id"], name: "index_missions_on_guild_id"
   end
 
@@ -521,7 +558,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_134000) do
   add_foreign_key "events", "guilds", on_delete: :cascade
   add_foreign_key "events", "users", column: "creator_id", on_delete: :nullify
   add_foreign_key "game_characters", "users"
+  add_foreign_key "mission_requests", "guilds", on_delete: :cascade
+  add_foreign_key "mission_requests", "users", column: "requester_id", on_delete: :cascade
+  add_foreign_key "mission_requests", "users", column: "reviewer_id", on_delete: :nullify
   add_foreign_key "mission_submissions", "missions", on_delete: :cascade
+  add_foreign_key "mission_submissions", "users", column: "reviewer_id", on_delete: :nullify
   add_foreign_key "mission_submissions", "users", on_delete: :cascade
   add_foreign_key "missions", "guilds", on_delete: :cascade
   add_foreign_key "permission_group_roles", "permission_groups"

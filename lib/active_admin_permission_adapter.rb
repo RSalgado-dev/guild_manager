@@ -9,6 +9,7 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
     "EventParticipation" => "manage_events",
     "Mission" => "manage_missions",
     "MissionSubmission" => "review_mission_submissions",
+    "MissionRequest" => "manage_missions",
     "Achievement" => "manage_achievements",
     "UserAchievement" => "grant_achievements",
     "Certificate" => "manage_certificates",

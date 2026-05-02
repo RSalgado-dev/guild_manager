@@ -28,13 +28,14 @@ class MissionSubmissionTest < ActiveSupport::TestCase
     assert_not submission.valid?
   end
 
-  test "não deve ser válido sem week_reference" do
+  test "preenche week_reference automaticamente quando há missão" do
     submission = MissionSubmission.new(
       mission: missions(:one),
       user: users(:one)
     )
-    assert_not submission.valid?
-    assert_includes submission.errors[:week_reference], "can't be blank"
+
+    assert submission.valid?
+    assert_not_nil submission.week_reference
   end
 
   test "não deve permitir combinação duplicada de mission, user e week_reference" do
@@ -136,5 +137,62 @@ class MissionSubmissionTest < ActiveSupport::TestCase
       week_reference: "2026-W10"
     )
     assert submission.valid?
+  end
+
+  test "permite múltiplas submissões no mesmo período com sequência diferente" do
+    mission = missions(:one)
+    mission.update!(max_submissions_per_period: 2)
+
+    submission = MissionSubmission.new(
+      mission: mission,
+      user: users(:one),
+      week_reference: "2026-W03",
+      period_sequence: 2
+    )
+
+    assert submission.valid?
+  end
+
+  test "aprova, recompensa e impede recompensa duplicada" do
+    submission = MissionSubmission.create!(
+      mission: missions(:one),
+      user: users(:five),
+      week_reference: "2026-W30",
+      quantity: 1
+    )
+    reviewer = users(:one)
+    original_xp = submission.user.xp_points
+    original_currency = submission.user.currency_balance
+
+    submission.approve!(reviewer: reviewer, notes: "ok")
+    assert_equal "approved", submission.status
+    assert_equal 50, submission.reward_xp_awarded
+    assert_equal 100, submission.reward_currency_awarded
+    assert_equal reviewer, submission.reviewer
+
+    assert_difference -> { CurrencyTransaction.count }, 1 do
+      submission.reward!(reviewer: reviewer)
+    end
+
+    assert_equal "rewarded", submission.reload.status
+    assert_equal original_xp + 50, submission.user.reload.xp_points
+    assert_equal original_currency + 100, submission.user.currency_balance
+
+    assert_raises(ArgumentError) { submission.reward!(reviewer: reviewer) }
+  end
+
+  test "rejeita submissão sem recompensa" do
+    submission = MissionSubmission.create!(
+      mission: missions(:one),
+      user: users(:five),
+      week_reference: "2026-W31"
+    )
+
+    submission.reject!(reviewer: users(:one), notes: "faltou comprovante")
+
+    assert_equal "rejected", submission.status
+    assert_equal "faltou comprovante", submission.review_notes
+    assert_equal 0, submission.reward_xp_awarded
+    assert_equal 0, submission.reward_currency_awarded
   end
 end
