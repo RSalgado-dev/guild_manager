@@ -21,4 +21,4 @@ production:
     schedule: every 10 minutes
   reconcile_discord_managed_roles:
     class: DiscordManagedRoleReconciliationJob
-    schedule: every 5 minutes
+    schedule: every 30 minutes at minute 7

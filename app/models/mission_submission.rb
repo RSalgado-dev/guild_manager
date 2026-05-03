@@ -14,6 +14,7 @@ class MissionSubmission < ApplicationRecord
 
   validates :mission_id, uniqueness: { scope: [ :user_id, :week_reference, :period_sequence ] }
   validate :proof_format
+  validate :mission_belongs_to_user_guild
 
   before_validation :set_defaults
 
@@ -101,6 +102,7 @@ class MissionSubmission < ApplicationRecord
       )
 
       audit!("mission_submission_rewarded", actor: reviewer || self.reviewer)
+      AutomaticMissionEvaluator.evaluate_mission_completed_streak!(submission: self) unless mission.automatic?
     end
   end
 
@@ -146,5 +148,12 @@ class MissionSubmission < ApplicationRecord
     allowed_types = %w[image/jpeg image/jpg image/png image/webp application/pdf text/plain]
     errors.add(:proof, "deve ser imagem, PDF ou texto") unless proof.content_type.in?(allowed_types)
     errors.add(:proof, "deve ter no máximo 10MB") if proof.byte_size > 10.megabytes
+  end
+
+  def mission_belongs_to_user_guild
+    return unless mission && user
+    return if mission.guild_id == user.guild_id
+
+    errors.add(:mission, "deve pertencer à mesma guilda do usuário")
   end
 end

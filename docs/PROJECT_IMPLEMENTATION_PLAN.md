@@ -12,7 +12,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 
 - Etapa 0 concluída no container existente `guild_manager_devcontainer-app-1`: `bin/rails test` e `bin/rubocop` passaram dentro do container.
 - `bin/ci` executa até o fim, mas falha em `bin/bundler-audit` por advisories em dependências; testes, RuboCop, Brakeman, importmap audit, system tests e seeds passam.
-- Etapa 1 concluída: `Role` agora possui categoria operacional e flag de gerenciamento pelo app; `PermissionGroup` possui catálogo expandido de permissões para os módulos planejados.
+- Etapa 1 concluída: `Role` agora possui categoria operacional, incluindo cargo máximo, e flag de gerenciamento pelo app; `PermissionGroup` possui catálogo expandido de permissões para os módulos planejados.
 - ActiveAdmin passou a usar autorização por permissão e escopo por guilda; o painel admin é acessível por usuários com grupos operacionais, não apenas por superadmin.
 - Etapa 2 concluída: chamadas Discord foram extraídas para serviços, roles gerenciadas pelo app são reconciliadas por jobs, roles externas são apenas importadas e mudanças de cargo registram auditoria.
 - Validação da Etapa 2: `bin/rails test` passou com 356 testes e `bin/rubocop` não encontrou offenses, ambos dentro do container.
@@ -34,7 +34,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 ### Etapa 1 - Fundação de Cargos, Permissões e Admin (concluída)
 
 - Manter `guilds.required_discord_role_id/name` como o cargo base de acesso.
-- Evoluir `Role` com categoria: `base`, `cosmetic`, `special`, `administrative`; adicionar `managed_by_app:boolean`.
+- Evoluir `Role` com categoria: `base`, `cosmetic`, `special`, `administrative`, `role_maximum`; adicionar `managed_by_app:boolean`.
 - Tratar cargo máximo como role administrativa vinculada a `PermissionGroup` com `all_access=true`; `users.is_admin` fica apenas como superadmin/dev fallback.
 - Expandir permissões para cobrir: configurações da guilda, roles, roles administrativas, membros/squads, eventos, missões, conquistas, certificados, rankings, loja, fulfillment e auditoria.
 - Refatorar ActiveAdmin para autorização granular por permissão e escopo de guilda: officers não editam cargos administrativos; apenas `all_access` configura guilda e grupos administrativos.
@@ -108,9 +108,22 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Smoke tests cobrem navegação de membro, loja, rankings e leitura de auditoria no ActiveAdmin.
 - Documentação operacional atualizada com comandos manuais e agendamento dos jobs.
 
+### Etapa 10 - Hardening do Code Review (concluída)
+
+- Tokens Discord passaram a usar Active Record Encryption e logs sensíveis foram removidos ou colocados atrás de `DISCORD_DEBUG`.
+- OAuth state foi reativado, helpers dev foram bloqueados fora de desenvolvimento e scripts administrativos não rodam em produção.
+- A categoria de cargo máximo foi explicitada no enum de `Role`, mantendo `PermissionGroup#all_access` como fonte das permissões totais.
+- Certificados agora exigem role cosmética, com FK restritiva e migração de backfill para certificados existentes.
+- Saldo e XP usam transações com lock; submissões de missão, squads e eventos ganharam validações contra manipulação de guilda/status.
+- `AuditLog` sanitiza metadados sensíveis antes da persistência.
+- Discord API client ganhou refresh de token e retry básico para 429/5xx/timeouts.
+- Adicionados `/up/full`, webhook interno de atualização de membro Discord, rankings públicos por guilda, seeds idempotentes, avaliação automática de missões adicionais e avaliador de conquistas.
+- Validações executadas: `bin/rails test`, `bin/rails test:system`, `bin/rubocop`, `git diff --check`.
+
 ## Interfaces e Contratos Principais
 
 - Rotas membro novas: `/missions`, `/achievements`, `/certificates`, `/rankings`, `/store`, `/store/orders`.
+- Rotas públicas/operacionais novas: `/public/guilds/:guild_id/rankings`, `/up/full` e `POST /webhooks/discord/member_update`.
 - ActiveAdmin evoluído para: guilds, users, roles, permission groups, events, missions, mission requests, achievements, certificates, rankings, store items, store orders e audit logs.
 - Serviços novos: Discord client/sync/reconcile, reward distribution, mission evaluation, achievement evaluator, ranking calculator e store checkout/refund.
 - Jobs novos: sync recorrente de roles/membros Discord, reconciliação de cargos gerenciados, avaliação periódica de missões automáticas e conquistas.

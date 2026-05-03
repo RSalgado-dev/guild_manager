@@ -29,7 +29,7 @@ ActiveAdmin.register Certificate do
       f.input :icon_url
       f.input :role,
               collection: Role.cosmetic.order(:name),
-              hint: "Cargo cosmético opcional concedido junto com o certificado."
+              hint: "Cargo cosmético obrigatório concedido junto com o certificado."
       f.input :active
     end
     f.actions

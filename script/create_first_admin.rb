@@ -4,6 +4,8 @@
 # Script para criar o primeiro usuário administrador
 # Uso: bin/rails runner script/create_first_admin.rb
 
+raise "script/create_first_admin.rb só pode ser executado em development" unless Rails.env.development?
+
 puts "🔧 Criando primeiro usuário administrador..."
 puts ""
 

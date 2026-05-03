@@ -3,7 +3,8 @@ class Role < ApplicationRecord
     "base" => "Cargo base",
     "cosmetic" => "Cosmético",
     "special" => "Especial",
-    "administrative" => "Administrativo"
+    "administrative" => "Administrativo",
+    "role_maximum" => "Máximo"
   }.freeze
 
   belongs_to :guild
@@ -22,7 +23,8 @@ class Role < ApplicationRecord
     base: "base",
     cosmetic: "cosmetic",
     special: "special",
-    administrative: "administrative"
+    administrative: "administrative",
+    role_maximum: "maximum"
   }, validate: true
 
   # Ransacker para busca no ActiveAdmin
@@ -46,7 +48,7 @@ class Role < ApplicationRecord
             length: { maximum: 50 }
 
   def admin?
-    is_admin || administrative?
+    is_admin || administrative? || role_maximum?
   end
 
   def category_label

@@ -8,6 +8,7 @@ class Guild < ApplicationRecord
   SYSTEM_CHARACTER_FIELD_KEYS = DEFAULT_CHARACTER_TEMPLATE.map { |field| field["key"] }.freeze
 
   has_many :users,          dependent: :destroy
+  has_many :certificates,   dependent: :destroy
   has_many :roles,          dependent: :destroy
   has_many :squads,         dependent: :destroy
   has_many :squad_invitations, through: :squads
@@ -15,7 +16,6 @@ class Guild < ApplicationRecord
   has_many :mission_requests, dependent: :destroy
   has_many :events,         dependent: :destroy
   has_many :achievements,   dependent: :destroy
-  has_many :certificates,   dependent: :destroy
   has_many :permission_groups, dependent: :destroy
   has_many :rankings, dependent: :destroy
   has_many :store_items, dependent: :destroy

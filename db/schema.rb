@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.1].define(version: 2026_05_02_160100) do
+ActiveRecord::Schema[8.1].define(version: 2026_05_02_171000) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -104,7 +104,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_160100) do
     t.bigint "guild_id", null: false
     t.string "icon_url"
     t.string "name", null: false
-    t.bigint "role_id"
+    t.bigint "role_id", null: false
     t.datetime "updated_at", null: false
     t.index ["guild_id", "code"], name: "index_certificates_on_guild_id_and_code", unique: true
     t.index ["guild_id", "name"], name: "index_certificates_on_guild_id_and_name"
@@ -595,11 +595,11 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_160100) do
   create_table "users", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.integer "currency_balance", default: 0, null: false
-    t.string "discord_access_token"
+    t.text "discord_access_token"
     t.string "discord_avatar_url"
     t.string "discord_id", null: false
     t.string "discord_nickname"
-    t.string "discord_refresh_token"
+    t.text "discord_refresh_token"
     t.datetime "discord_roles_synced_at"
     t.datetime "discord_token_expires_at"
     t.string "discord_username"
@@ -622,7 +622,7 @@ ActiveRecord::Schema[8.1].define(version: 2026_05_02_160100) do
   add_foreign_key "audit_logs", "guilds", on_delete: :cascade
   add_foreign_key "audit_logs", "users", on_delete: :cascade
   add_foreign_key "certificates", "guilds", on_delete: :cascade
-  add_foreign_key "certificates", "roles", on_delete: :nullify
+  add_foreign_key "certificates", "roles"
   add_foreign_key "currency_transactions", "users", on_delete: :cascade
   add_foreign_key "event_participations", "events", on_delete: :cascade
   add_foreign_key "event_participations", "users", on_delete: :cascade

@@ -7,6 +7,9 @@ class User < ApplicationRecord
   belongs_to :guild
   belongs_to :squad, optional: true
 
+  encrypts :discord_access_token, deterministic: false
+  encrypts :discord_refresh_token, deterministic: false
+
   has_many :user_roles, dependent: :destroy
   has_many :roles, through: :user_roles
 
@@ -262,27 +265,38 @@ class User < ApplicationRecord
   end
 
   def apply_currency!(delta, reason: nil, description: nil, metadata: {})
-    new_balance = currency_balance + delta
+    transaction(requires_new: true) do
+      with_lock do
+        reload
+        new_balance = currency_balance + delta
+        if new_balance.negative?
+          errors.add(:currency_balance, "não pode ficar negativo")
+          raise ActiveRecord::RecordInvalid, self
+        end
 
-    transaction do
-      update!(currency_balance: new_balance)
+        update!(currency_balance: new_balance)
 
-      currency_transactions.create!(
-        amount:        delta,
-        balance_after: new_balance,
-        reason_type:   reason&.class&.name,
-        reason_id:     reason&.id,
-        description:   description,
-        metadata:      metadata
-      )
+        currency_transactions.create!(
+          amount:        delta,
+          balance_after: new_balance,
+          reason_type:   reason&.class&.name,
+          reason_id:     reason&.id,
+          description:   description,
+          metadata:      metadata
+        )
+      end
     end
+    AchievementEvaluator.call(self)
   end
 
   def apply_xp!(delta)
-    transaction do
-      lock!
-      update!(xp_points: xp_points + delta)
+    transaction(requires_new: true) do
+      with_lock do
+        reload
+        update!(xp_points: xp_points + delta)
+      end
     end
+    AchievementEvaluator.call(self)
   end
 
   def self.total_xp_for_level(target_level)
@@ -373,7 +387,7 @@ class User < ApplicationRecord
 
   # Busca as guilds do usuário na API do Discord
   def self.fetch_user_guilds(access_token)
-    Rails.logger.info "Buscando guilds com access_token: #{access_token[0..10]}..."
+    Rails.logger.info "Buscando guilds do Discord. Access token presente: #{access_token.present?}"
 
     guilds = DiscordApiClient.new.user_guilds(access_token)
     Rails.logger.info "✓ Guilds parseadas com sucesso: #{guilds.size} encontradas"
@@ -401,7 +415,23 @@ class User < ApplicationRecord
     return false unless persisted? && guild.present?
     return false if !force && discord_roles_synced_at.present? && discord_roles_synced_at >= max_age.ago
 
+    refresh_discord_access_token_if_expired!
     sync_discord_roles(discord_access_token, guild)
+  end
+
+  def refresh_discord_access_token_if_expired!(client: DiscordApiClient.new)
+    return false if discord_refresh_token.blank?
+    return false if discord_token_expires_at.blank? || discord_token_expires_at > 2.minutes.from_now
+
+    token_data = client.refresh_access_token(discord_refresh_token)
+    return false unless token_data
+
+    update!(
+      discord_access_token: token_data["access_token"],
+      discord_refresh_token: token_data["refresh_token"].presence || discord_refresh_token,
+      discord_token_expires_at: token_data["expires_in"].to_i.seconds.from_now
+    )
+    true
   end
 
   # Verifica se o usuário tem o cargo requerido pela guild
@@ -433,17 +463,20 @@ class User < ApplicationRecord
     # Fallback: Se o usuário não existe no banco, consulta a API do Discord
     Rails.logger.info "Fallback: Consultando API do Discord para verificar role"
     bot_token = Rails.application.credentials.dig(:discord, :bot_token)
-    return true unless bot_token # Se não tem bot token, libera acesso (modo permissivo)
+    unless bot_token
+      Rails.logger.warn "Bot token não configurado para verificar cargos."
+      return Rails.env.development?
+    end
 
     begin
       member_data = DiscordApiClient.new(bot_token:).guild_member(guild.discord_guild_id, discord_user_id)
-      return true unless member_data
+      return Rails.env.development? unless member_data
 
       user_roles = member_data["roles"] || []
       user_roles.include?(guild.required_discord_role_id)
     rescue => e
       Rails.logger.error("Erro ao verificar cargos do Discord: #{e.message}")
-      true # Modo permissivo em caso de erro
+      Rails.env.development?
     end
   end
 end

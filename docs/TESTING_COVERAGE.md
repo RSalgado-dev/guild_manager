@@ -27,7 +27,7 @@ bin/rails test test/jobs/discord_members_sync_job_test.rb
 
 - Models: guildas, usuários, roles, squads, eventos, missões, conquistas, certificados, rankings, loja, moeda e auditoria.
 - Controllers: autenticação, acesso restrito, dashboard, perfil, eventos, missões, squads, rankings, loja e pedidos.
-- Services: Discord API client, sync de roles, reconciliação de roles gerenciadas, ranking calculator e avaliação automática de missões.
+- Services: Discord API client, sync de roles, reconciliação de roles gerenciadas, ranking calculator, avaliação automática de missões e avaliação de conquistas.
 - Jobs: sync de roles da guilda, sync de membros e reconciliação de roles gerenciadas.
 - System smoke: navegação membro, compra na loja, rankings e leitura de auditoria no ActiveAdmin.
 
@@ -40,6 +40,6 @@ bin/rails test test/jobs/discord_members_sync_job_test.rb
 
 ## Última Validação Registrada
 
-- `bin/rails test`: 417 testes, 1122 assertions, 0 falhas.
+- `bin/rails test`: 434 testes, 1178 assertions, 0 falhas.
 - `bin/rails test:system`: 2 testes, 14 assertions, 0 falhas.
-- `bin/rubocop`: 192 arquivos, 0 offenses.
+- `bin/rubocop`: 203 arquivos, 0 offenses.

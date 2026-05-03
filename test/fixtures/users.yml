@@ -9,11 +9,10 @@ one:
   discord_avatar_url: "https://cdn.discordapp.com/avatars/111111111111111111/avatar.png"
   discord_access_token: "access_token_1"
   discord_refresh_token: "refresh_token_1"
-  discord_token_expires_at: 2026-02-13 15:15:38
+  discord_token_expires_at: 2027-02-13 15:15:38
   xp_points: 100
   currency_balance: 500
   is_admin: true
-  has_guild_access: true
   has_guild_access: true
 
 two:
@@ -25,7 +24,7 @@ two:
   discord_avatar_url: "https://cdn.discordapp.com/avatars/222222222222222222/avatar.png"
   discord_access_token: "access_token_2"
   discord_refresh_token: "refresh_token_2"
-  discord_token_expires_at: 2026-02-13 15:15:38
+  discord_token_expires_at: 2027-02-13 15:15:38
   xp_points: 50
   currency_balance: 200
   has_guild_access: true
@@ -39,7 +38,7 @@ three:
   discord_avatar_url: "https://cdn.discordapp.com/avatars/333333333333333333/avatar.png"
   discord_access_token: "access_token_3"
   discord_refresh_token: "refresh_token_3"
-  discord_token_expires_at: 2026-02-13 15:15:38
+  discord_token_expires_at: 2027-02-13 15:15:38
   xp_points: 200
   currency_balance: 1000
   has_guild_access: true
@@ -53,7 +52,7 @@ four:
   discord_avatar_url: "https://cdn.discordapp.com/avatars/444444444444444444/avatar.png"
   discord_access_token: "access_token_4"
   discord_refresh_token: "refresh_token_4"
-  discord_token_expires_at: 2026-02-13 15:15:38
+  discord_token_expires_at: 2027-02-13 15:15:38
   xp_points: 25
   currency_balance: 100
   has_guild_access: true
@@ -67,7 +66,7 @@ five:
   discord_avatar_url: "https://cdn.discordapp.com/avatars/555555555555555555/avatar.png"
   discord_access_token: "access_token_5"
   discord_refresh_token: "refresh_token_5"
-  discord_token_expires_at: 2026-02-13 15:15:38
+  discord_token_expires_at: 2027-02-13 15:15:38
   xp_points: 10
   currency_balance: 50
   has_guild_access: true
@@ -81,7 +80,7 @@ six:
   discord_avatar_url: "https://cdn.discordapp.com/avatars/666666666666666666/avatar.png"
   discord_access_token: "access_token_6"
   discord_refresh_token: "refresh_token_6"
-  discord_token_expires_at: 2026-02-13 15:15:38
+  discord_token_expires_at: 2027-02-13 15:15:38
   xp_points: 12
   currency_balance: 75
   has_guild_access: true

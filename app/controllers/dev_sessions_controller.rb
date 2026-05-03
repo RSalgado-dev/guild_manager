@@ -1,5 +1,6 @@
 class DevSessionsController < ApplicationController
   # ⚠️ APENAS PARA DESENVOLVIMENTO! Remover em produção!
+  before_action :ensure_development_environment!
   skip_before_action :verify_authenticity_token, only: [ :create ]
 
   def new
@@ -51,5 +52,11 @@ class DevSessionsController < ApplicationController
     )
 
     redirect_to admin_root_path, notice: "✅ Login admin dev realizado!"
+  end
+
+  private
+
+  def ensure_development_environment!
+    head :forbidden unless Rails.env.development?
   end
 end

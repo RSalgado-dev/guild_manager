@@ -60,4 +60,25 @@ class DiscordApiClientTest < ActiveSupport::TestCase
     assert_not DiscordApiClient.new(bot_token: nil)
                                .add_guild_member_role("guild_id", "user_id", "role_id")
   end
+
+  test "#refresh_access_token renova token via OAuth" do
+    Rails.application.credentials.stubs(:dig).with(:discord, :client_id).returns("client_id")
+    Rails.application.credentials.stubs(:dig).with(:discord, :client_secret).returns("client_secret")
+    stub_request(:post, "https://discord.com/api/oauth2/token")
+      .with { |request| URI.decode_www_form(request.body).to_h.slice("grant_type", "refresh_token") == { "grant_type" => "refresh_token", "refresh_token" => "refresh_token" } }
+      .to_return(
+        status: 200,
+        body: {
+          access_token: "new_access",
+          refresh_token: "new_refresh",
+          expires_in: 3600
+        }.to_json,
+        headers: { "Content-Type" => "application/json" }
+      )
+
+    token_data = DiscordApiClient.new(bot_token: nil).refresh_access_token("refresh_token")
+
+    assert_equal "new_access", token_data["access_token"]
+    assert_equal "new_refresh", token_data["refresh_token"]
+  end
 end

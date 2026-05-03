@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   # Reveal health status on /up that returns 200 if the app boots with no exceptions, otherwise 500.
   # Can be used by load balancers and uptime monitors to verify that the app is live.
   get "up" => "rails/health#show", as: :rails_health_check
+  get "up/full" => "health_checks#show", as: :full_health_check
 
   # Render dynamic PWA files from app/views/pwa/* (remember to link manifest in application.html.erb)
   # get "manifest" => "rails/pwa#manifest", as: :pwa_manifest
@@ -20,6 +21,7 @@ Rails.application.routes.draw do
 
   # Fallback para /auth se acessado diretamente
   get "/auth", to: "auth#index"
+  post "/webhooks/discord/member_update", to: "discord_webhooks#member_update", as: :discord_member_update_webhook
 
   delete "/logout", to: "sessions#destroy", as: :logout
 
@@ -58,6 +60,7 @@ Rails.application.routes.draw do
   resources :achievements, controller: "access/achievements", only: [ :index, :show ]
   resources :certificates, controller: "access/certificates", only: [ :index, :show ]
   resources :rankings, controller: "access/rankings", only: [ :index ]
+  get "/public/guilds/:guild_id/rankings", to: "public/rankings#index", as: :public_guild_rankings
   get "/store", to: "access/store#index", as: :store
 
   resources :store_orders, path: "store/orders", controller: "access/store_orders", only: [ :index, :create ] do

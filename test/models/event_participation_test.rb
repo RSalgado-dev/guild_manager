@@ -66,9 +66,11 @@ class EventParticipationTest < ActiveSupport::TestCase
       participation.valid?
 
       participation.rsvp_status = "declined"
+      participation.justification = "Compromisso"
       participation.valid?
 
       participation.rsvp_status = "pending"
+      participation.justification = nil
       participation.valid?
     end
   end

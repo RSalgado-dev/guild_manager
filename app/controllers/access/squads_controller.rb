@@ -23,7 +23,8 @@ module Access
     end
 
     def create
-      @squad = @guild.squads.new(squad_create_params)
+      @squad = @guild.squads.new(squad_create_params.except(:leader_id))
+      @squad.leader = selected_leader_candidate
       @leader_candidates = @guild.users.where(squad_id: nil).order(:discord_username)
 
       if @squad.save
@@ -85,6 +86,10 @@ module Access
 
     def squad_create_params
       params.require(:squad).permit(:name, :tag, :description, :leader_id)
+    end
+
+    def selected_leader_candidate
+      @guild.users.where(squad_id: nil).find_by(id: params.dig(:squad, :leader_id))
     end
 
     def squad_profile_change_params

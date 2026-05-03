@@ -2,6 +2,7 @@
 
 one:
   guild: one
+  role: certificate_one
   code: "raid_leader"
   name: "Líder de Raid"
   description: "Certificado para líderes de raid experientes"
@@ -11,6 +12,7 @@ one:
 
 two:
   guild: one
+  role: certificate_two
   code: "tank_certified"
   name: "Tank Certificado"
   description: "Certificado para tanks qualificados"
@@ -20,6 +22,7 @@ two:
 
 three:
   guild: two
+  role: certificate_three
   code: "healer_master"
   name: "Mestre Curandeiro"
   description: "Certificado para curandeiros experientes"
@@ -29,6 +32,7 @@ three:
 
 inactive:
   guild: one
+  role: certificate_inactive
   code: "old_cert"
   name: "Certificado Antigo"
   description: "Este certificado não é mais usado"

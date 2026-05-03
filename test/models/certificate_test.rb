@@ -6,6 +6,7 @@ class CertificateTest < ActiveSupport::TestCase
   test "deve ser válido com atributos válidos" do
     certificate = Certificate.new(
       guild: guilds(:one),
+      role: roles(:certificate_one),
       code: "test_cert",
       name: "Test Certificate"
     )
@@ -15,6 +16,7 @@ class CertificateTest < ActiveSupport::TestCase
   test "deve exigir code" do
     certificate = Certificate.new(
       guild: guilds(:one),
+      role: roles(:certificate_one),
       name: "Test"
     )
     assert_not certificate.valid?
@@ -24,10 +26,22 @@ class CertificateTest < ActiveSupport::TestCase
   test "deve exigir name" do
     certificate = Certificate.new(
       guild: guilds(:one),
+      role: roles(:certificate_one),
       code: "test"
     )
     assert_not certificate.valid?
     assert_includes certificate.errors[:name], "can't be blank"
+  end
+
+  test "deve exigir role cosmética" do
+    certificate = Certificate.new(
+      guild: guilds(:one),
+      code: "without_role",
+      name: "Sem Role"
+    )
+
+    assert_not certificate.valid?
+    assert_includes certificate.errors[:role], "must exist"
   end
 
   # === Relacionamentos ===

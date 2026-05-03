@@ -82,6 +82,27 @@ class AuditLogTest < ActiveSupport::TestCase
     assert_equal "admin", audit_log.metadata["origin"]
   end
 
+  test "filtra metadados sensíveis antes de gravar" do
+    audit_log = AuditLog.create!(
+      user: users(:one),
+      guild: guilds(:one),
+      action: "discord_debug",
+      metadata: {
+        "access_token" => "token-real",
+        "user_email" => "user@example.com",
+        "nested" => {
+          "refresh_secret" => "segredo",
+          "discord_user_id" => "123"
+        }
+      }
+    )
+
+    assert_equal AuditLog::FILTERED_METADATA_VALUE, audit_log.metadata["access_token"]
+    assert_equal AuditLog::FILTERED_METADATA_VALUE, audit_log.metadata["user_email"]
+    assert_equal AuditLog::FILTERED_METADATA_VALUE, audit_log.metadata["nested"]["refresh_secret"]
+    assert_equal "123", audit_log.metadata["nested"]["discord_user_id"]
+  end
+
   test "#entity deve retornar nil quando entity_type está em branco" do
     audit_log = AuditLog.new(
       user: users(:one),

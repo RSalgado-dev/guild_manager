@@ -104,6 +104,36 @@ class Access::EventsControllerTest < ActionDispatch::IntegrationTest
     assert_not_nil participation.responded_at
   end
 
+  test "usuário precisa justificar ausência ao recusar presença" do
+    user = users(:two)
+    sign_in(user)
+
+    event = Event.create!(
+      guild: user.guild,
+      creator: users(:one),
+      title: "Evento com justificativa obrigatória",
+      event_type: "raid",
+      starts_at: 2.days.from_now,
+      ends_at: 2.days.from_now + 1.hour,
+      recurrence: "unique",
+      reward_xp: 100,
+      reward_currency: 50
+    )
+
+    assert_no_difference -> { AuditLog.where(action: "event_rsvp_updated").count } do
+      patch respond_event_path(event), params: {
+        event_participation: {
+          rsvp_status: "declined",
+          justification: ""
+        }
+      }
+    end
+
+    assert_redirected_to event_path(event)
+    participation = event.event_participations.find_by!(user: user)
+    assert_not_equal "declined", participation.rsvp_status
+  end
+
   test "usuário não pode responder presença após o prazo de 15 minutos" do
     sign_in(users(:two))
 

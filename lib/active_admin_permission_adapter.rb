@@ -75,6 +75,6 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
   end
 
   def administrative_role_subject?(subject)
-    subject.is_a?(Role) && subject.administrative?
+    subject.is_a?(Role) && (subject.administrative? || subject.role_maximum?)
   end
 end

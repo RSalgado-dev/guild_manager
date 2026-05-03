@@ -13,12 +13,12 @@ module Access
     end
 
     def update
-      # Atualização de perfil
-      # Valida email antes de atualizar se foi fornecido
-      if user_profile_params[:email].present? && user_profile_params[:email].blank?
+      profile_params = user_profile_params
+
+      if profile_params.key?(:email) && profile_params[:email].blank?
         flash.now[:alert] = "❌ Erro ao atualizar perfil: Email não pode ficar em branco"
         render :edit, status: :unprocessable_entity
-      elsif @user.update(user_profile_params)
+      elsif @user.update(profile_params)
         redirect_to profile_path, notice: "✅ Perfil atualizado com sucesso!"
       else
         flash.now[:alert] = "❌ Erro ao atualizar perfil: #{@user.errors.full_messages.join(', ')}"

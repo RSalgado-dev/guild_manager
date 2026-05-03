@@ -98,4 +98,16 @@ class CurrencyTransactionTest < ActiveSupport::TestCase
     transaction = currency_transactions(:two)
     assert_nil transaction.reason
   end
+
+  test "#reason retorna nil para tipo não permitido" do
+    transaction = CurrencyTransaction.create!(
+      user: users(:one),
+      amount: 10,
+      balance_after: users(:one).currency_balance + 10,
+      reason_type: "User",
+      reason_id: users(:one).id
+    )
+
+    assert_nil transaction.reason
+  end
 end

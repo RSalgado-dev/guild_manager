@@ -108,10 +108,8 @@ module Access
         }
       }
 
-      # Email vazio no params é tratado como presente mas blank
-      # O controller deve rejeitar mas pode aceitar se validação do modelo permitir
-      # Como não há validação de email no modelo User, o update sucede
-      assert_response :redirect
+      assert_response :unprocessable_entity
+      assert_equal "❌ Erro ao atualizar perfil: Email não pode ficar em branco", flash[:alert]
     end
 
     test "should only update permitted parameters" do

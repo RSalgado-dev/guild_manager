@@ -1,6 +1,6 @@
 class Certificate < ApplicationRecord
   belongs_to :guild
-  belongs_to :role, optional: true
+  belongs_to :role
 
   has_many :user_certificates, dependent: :destroy
   has_many :users, through: :user_certificates
@@ -13,6 +13,7 @@ class Certificate < ApplicationRecord
 
   validates :name,
             presence: true
+  validates :role, presence: true
 
   validates :code,
             uniqueness: { scope: :guild_id }

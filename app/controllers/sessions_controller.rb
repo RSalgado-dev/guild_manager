@@ -8,21 +8,15 @@ class SessionsController < ApplicationController
   def create
     auth = request.env["omniauth.auth"]
 
-    # Debug em desenvolvimento
-    if Rails.env.development?
+    if Rails.env.development? && ENV["DISCORD_DEBUG"].present?
       Rails.logger.info "=" * 80
       Rails.logger.info "Discord OAuth Callback"
       Rails.logger.info "Discord ID: #{auth.uid}"
       Rails.logger.info "Username: #{auth.info.name}"
       Rails.logger.info "Auth structure keys: #{auth.to_hash.keys}"
-      Rails.logger.info "Credentials keys: #{auth.credentials&.keys}"
       Rails.logger.info "Access token presente: #{auth.credentials&.token.present?}"
-      Rails.logger.info "Access token (10 primeiros chars): #{auth.credentials&.token&.[](0..10)}"
-      Rails.logger.info "Extra keys: #{auth.extra&.keys}"
-      Rails.logger.info "Raw info keys: #{auth.extra&.raw_info&.keys}"
-      Rails.logger.info "Raw info: #{auth.extra&.raw_info&.to_hash&.except('guilds')}"
-      Rails.logger.info "Guilds data: #{auth.extra&.raw_info&.guilds}"
-      Rails.logger.info "Guilds do usuário: #{auth.extra&.raw_info&.guilds&.map { |g| "#{g['name']} (#{g['id']})" }&.join(', ')}"
+      Rails.logger.info "Refresh token presente: #{auth.credentials&.refresh_token.present?}"
+      Rails.logger.info "OmniAuth state presente: #{request.env['omniauth.state'].present?}"
       Rails.logger.info "=" * 80
     end
 
@@ -45,6 +39,7 @@ class SessionsController < ApplicationController
           has_guild_access: user.has_guild_access
         }
       )
+      AutomaticMissionEvaluator.evaluate_first_login_of_week!(user: user) if user.has_guild_access
 
       # Redireciona baseado no acesso
       if user.has_guild_access

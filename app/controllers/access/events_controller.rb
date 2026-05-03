@@ -61,10 +61,11 @@ module Access
     end
 
     def review
-      @participations = @event.event_participations.includes(:user).order("users.discord_username ASC")
-      @confirmed_participations = @participations.select { |participation| participation.source_block == :confirmed }
-      @justified_participations = @participations.select { |participation| participation.source_block == :justified }
-      @absent_participations = @participations.select { |participation| participation.source_block == :absent }
+      participation_scope = @event.event_participations.joins(:user).includes(:user).order("users.discord_username ASC")
+      @participations = participation_scope
+      @confirmed_participations = participation_scope.where(rsvp_status: :confirmed)
+      @justified_participations = participation_scope.where(rsvp_status: :declined).where.not(justification: [ nil, "" ])
+      @absent_participations = participation_scope.where.not(id: @confirmed_participations.select(:id)).where.not(id: @justified_participations.select(:id))
     end
 
     def complete
@@ -96,6 +97,9 @@ module Access
     def response_params
       permitted = params.require(:event_participation).permit(:rsvp_status, :justification)
       permitted[:justification] = nil if permitted[:rsvp_status] == "confirmed"
+      if permitted[:rsvp_status] == "declined" && permitted[:justification].to_s.strip.blank?
+        @participation.errors.add(:justification, "deve ser informada ao recusar presença")
+      end
       permitted
     end
 

@@ -67,6 +67,17 @@ class RoleTest < ActiveSupport::TestCase
     assert role.admin?
   end
 
+  test "#admin? deve retornar true para categoria máxima" do
+    role = Role.new(
+      guild: guilds(:one),
+      name: "Guild Master",
+      category: "role_maximum",
+      is_admin: false
+    )
+
+    assert role.admin?
+  end
+
   test "#admin? deve retornar false quando is_admin é false" do
     role = roles(:two) # fixture 'two' tem is_admin: false
     assert_not role.admin?
@@ -83,5 +94,6 @@ class RoleTest < ActiveSupport::TestCase
   test "#category_label deve retornar rótulo humano" do
     assert_equal "Cargo base", roles(:two).category_label
     assert_equal "Administrativo", roles(:one).category_label
+    assert_equal "Máximo", Role.new(category: "role_maximum").category_label
   end
 end

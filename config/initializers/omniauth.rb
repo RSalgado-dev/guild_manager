@@ -15,6 +15,7 @@ Rails.application.config.middleware.use OmniAuth::Builder do
            Rails.application.credentials.dig(:discord, :client_id),
            Rails.application.credentials.dig(:discord, :client_secret),
            scope: "identify guilds email",
+           provider_ignores_state: false,
            request_options: {
              fetch_guilds: true
            }

@@ -1,6 +1,11 @@
 class AuditLog < ApplicationRecord
+  SENSITIVE_METADATA_KEY_PATTERN = /(token|secret|password|authorization|email)/i
+  FILTERED_METADATA_VALUE = "[FILTERED]"
+
   belongs_to :user, optional: true
   belongs_to :guild, optional: true
+
+  before_validation :sanitize_metadata
 
   def self.record!(action:, actor: nil, guild: nil, entity: nil, metadata: {})
     create!(
@@ -43,4 +48,28 @@ class AuditLog < ApplicationRecord
     nil
   end
   private_class_method :infer_guild
+
+  def self.sanitize_metadata_value(value)
+    case value
+    when Hash
+      value.each_with_object({}) do |(key, nested_value), sanitized|
+        key = key.to_s
+        sanitized_value =
+          if key.match?(SENSITIVE_METADATA_KEY_PATTERN)
+            FILTERED_METADATA_VALUE
+          else
+            sanitize_metadata_value(nested_value)
+          end
+        sanitized[key] = sanitized_value
+      end
+    when Array
+      value.map { |nested_value| sanitize_metadata_value(nested_value) }
+    else
+      value
+    end
+  end
+
+  def sanitize_metadata
+    self.metadata = self.class.sanitize_metadata_value(metadata || {})
+  end
 end

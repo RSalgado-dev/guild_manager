@@ -366,4 +366,41 @@ class UserTest < ActiveSupport::TestCase
     user.expects(:sync_discord_roles).with(user.discord_access_token, user.guild).returns(true)
     assert user.sync_discord_roles_if_stale!(max_age: 2.minutes, force: true)
   end
+
+  test "tokens Discord são criptografados no banco" do
+    user = User.create!(
+      guild: guilds(:one),
+      discord_id: "999999999999999991",
+      discord_username: "encrypted_user",
+      discord_access_token: "plain_access_token",
+      discord_refresh_token: "plain_refresh_token"
+    )
+
+    raw = User.connection.select_one("SELECT discord_access_token, discord_refresh_token FROM users WHERE id = #{user.id}")
+
+    assert_not_equal "plain_access_token", raw["discord_access_token"]
+    assert_not_equal "plain_refresh_token", raw["discord_refresh_token"]
+    assert_equal "plain_access_token", user.reload.discord_access_token
+    assert_equal "plain_refresh_token", user.discord_refresh_token
+  end
+
+  test "renova access token expirado com refresh token" do
+    user = users(:five)
+    user.update!(
+      discord_access_token: "old_access",
+      discord_refresh_token: "old_refresh",
+      discord_token_expires_at: 1.minute.ago
+    )
+    client = mock("discord_client")
+    client.expects(:refresh_access_token).with("old_refresh").returns(
+      "access_token" => "new_access",
+      "refresh_token" => "new_refresh",
+      "expires_in" => 3600
+    )
+
+    assert user.refresh_discord_access_token_if_expired!(client: client)
+    assert_equal "new_access", user.reload.discord_access_token
+    assert_equal "new_refresh", user.discord_refresh_token
+    assert user.discord_token_expires_at > 30.minutes.from_now
+  end
 end

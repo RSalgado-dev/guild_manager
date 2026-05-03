@@ -16,6 +16,8 @@ O login usa Discord OAuth. Após autenticação, o app sincroniza roles do Disco
 
 Usuários com `admin?` ou grupos administrativos acessam o ActiveAdmin em `/admin`. O escopo administrativo é limitado por guilda para usuários não superadmin.
 
+Em desenvolvimento, rotas de sessão dev existem apenas com `Rails.env.development?`. Scripts de bootstrap administrativo, como `script/create_first_admin.rb`, também são bloqueados fora de desenvolvimento.
+
 ## Módulos Membro
 
 - `/dashboard`: visão geral e atalhos reais para módulos ativos.
@@ -37,7 +39,15 @@ Permissões:
 
 ## Rankings
 
-`Ranking` define escopo (`users` ou `squads`), métrica, ordenação e limite. A tela pública mostra apenas rankings ativos da guilda atual. Comece com cálculo direto; snapshots/cache só devem ser adicionados se houver gargalo real.
+`Ranking` define escopo (`users` ou `squads`), métrica, ordenação e limite. A tela autenticada usa `/rankings`; a tela pública por guilda usa `/public/guilds/:guild_id/rankings` e mostra apenas rankings ativos. Comece com cálculo direto; snapshots/cache só devem ser adicionados se houver gargalo real.
+
+## Saúde e Configuração
+
+- `/up`: health check padrão simples.
+- `/up/full`: health check JSON com banco, Solid Queue e presença de token Discord.
+- Active Record Encryption protege tokens Discord salvos em `users`.
+- Em produção, configure chaves de criptografia via credentials ou variáveis `ACTIVE_RECORD_ENCRYPTION_PRIMARY_KEY`, `ACTIVE_RECORD_ENCRYPTION_DETERMINISTIC_KEY` e `ACTIVE_RECORD_ENCRYPTION_KEY_DERIVATION_SALT`.
+- `DISCORD_WEBHOOK_SECRET` protege o webhook interno de atualização de membros.
 
 ## Jobs Discord
 
@@ -45,7 +55,9 @@ Os jobs recorrentes ficam em `config/recurring.yml` para produção com Solid Qu
 
 - `DiscordGuildRolesSyncJob`: importa/atualiza roles da guilda a cada 15 minutos.
 - `DiscordMembersSyncJob`: sincroniza roles e acesso dos usuários a cada 10 minutos.
-- `DiscordManagedRoleReconciliationJob`: aplica/remove no Discord roles marcadas como `managed_by_app` a cada 5 minutos.
+- `DiscordManagedRoleReconciliationJob`: aplica/remove no Discord roles marcadas como `managed_by_app` a cada 30 minutos, com enfileiramento imediato em mudanças de certificado.
+
+O webhook interno `POST /webhooks/discord/member_update` aceita `guild_id` e `user_id`, registra auditoria e enfileira sincronização/reconciliação do membro afetado.
 
 Para rodar manualmente no container:
 

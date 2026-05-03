@@ -35,6 +35,7 @@ class EventParticipation < ApplicationRecord
   validates :event_id, uniqueness: { scope: :user_id }
   validates :reward_xp_awarded, :reward_currency_awarded,
             numericality: { only_integer: true, greater_than_or_equal_to: 0 }
+  validate :justification_required_when_declined
 
   scope :attended, -> { where(attended: true) }
   scope :participated, -> { where(final_status: :participated) }
@@ -104,6 +105,7 @@ class EventParticipation < ApplicationRecord
       end
 
       audit_reward!(status_value, awarded_xp, awarded_currency, multiplier, actor)
+      AutomaticMissionEvaluator.evaluate_event_attended_count!(participation: self) if participated?
     end
   end
 
@@ -129,5 +131,12 @@ class EventParticipation < ApplicationRecord
         reward_currency_awarded: awarded_currency
       }
     )
+  end
+
+  def justification_required_when_declined
+    return unless declined?
+    return if justification.to_s.strip.present?
+
+    errors.add(:justification, "deve ser informada ao recusar presença")
   end
 end

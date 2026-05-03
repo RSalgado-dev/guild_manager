@@ -1,4 +1,11 @@
 class CurrencyTransaction < ApplicationRecord
+  ALLOWED_REASON_TYPES = %w[
+    Achievement
+    Event
+    Mission
+    StoreOrder
+  ].freeze
+
   belongs_to :user
 
   validates :amount,
@@ -16,6 +23,7 @@ class CurrencyTransaction < ApplicationRecord
   # Acessar a "origem" (Event, Mission, etc.) se estiver preenchida
   def reason
     return nil if reason_type.blank? || reason_id.blank?
+    return nil unless ALLOWED_REASON_TYPES.include?(reason_type)
 
     reason_type.constantize.find_by(id: reason_id)
   rescue NameError

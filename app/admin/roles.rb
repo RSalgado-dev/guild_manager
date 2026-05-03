@@ -27,7 +27,8 @@ ActiveAdmin.register Role do
       existing_role = Role.find_by(id: params[:id])
       requested_category = params.dig(:role, :category)
 
-      existing_role&.administrative? || requested_category == "administrative"
+      existing_role&.administrative? || existing_role&.role_maximum? ||
+        requested_category.in?(%w[administrative role_maximum])
     end
   end
 
@@ -73,7 +74,7 @@ ActiveAdmin.register Role do
               as: :select,
               collection: Role.categories.keys.map { |category| [ Role::CATEGORY_LABELS[category], category ] },
               include_blank: false,
-              hint: "Base libera acesso; cosmético informa status; especial libera funções; administrativo gerencia a plataforma."
+              hint: "Base libera acesso; cosmético informa status; especial libera funções; administrativo gerencia a plataforma; máximo representa acesso total."
       f.input :discord_role_id, hint: "ID do role no Discord (obtido automaticamente via sincronização)"
       f.input :managed_by_app, label: "Gerenciado pelo App?", hint: "Roles gerenciadas pelo app serão reconciliadas no Discord nas próximas etapas."
       f.input :is_admin, label: "É Admin?"

@@ -6,7 +6,7 @@ class MissionSubmissionTest < ActiveSupport::TestCase
   test "deve ser válido com atributos válidos" do
     submission = MissionSubmission.new(
       mission: missions(:two),
-      user: users(:three),
+      user: users(:five),
       week_reference: "2026-W03"
     )
     assert submission.valid?
@@ -61,7 +61,7 @@ class MissionSubmissionTest < ActiveSupport::TestCase
   test "deve permitir usuários diferentes na mesma missão e semana" do
     submission = MissionSubmission.new(
       mission: missions(:one),
-      user: users(:three),
+      user: users(:five),
       week_reference: "2026-W03"
     )
     assert submission.valid?
@@ -74,6 +74,17 @@ class MissionSubmissionTest < ActiveSupport::TestCase
       week_reference: "2026-W03"
     )
     assert submission.valid?
+  end
+
+  test "não permite submissão para missão de outra guilda" do
+    submission = MissionSubmission.new(
+      mission: missions(:one),
+      user: users(:three),
+      week_reference: "2026-W99"
+    )
+
+    assert_not submission.valid?
+    assert_includes submission.errors[:mission], "deve pertencer à mesma guilda do usuário"
   end
 
   # === Relacionamentos ===
@@ -102,7 +113,7 @@ class MissionSubmissionTest < ActiveSupport::TestCase
   test "answers_json pode ser nil" do
     submission = MissionSubmission.new(
       mission: missions(:one),
-      user: users(:three),
+      user: users(:five),
       week_reference: "2026-W05",
       answers_json: nil
     )
@@ -133,7 +144,7 @@ class MissionSubmissionTest < ActiveSupport::TestCase
   test "week_reference deve seguir formato ISO 8601" do
     submission = MissionSubmission.new(
       mission: missions(:one),
-      user: users(:three),
+      user: users(:five),
       week_reference: "2026-W10"
     )
     assert submission.valid?

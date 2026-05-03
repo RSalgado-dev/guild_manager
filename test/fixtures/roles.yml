@@ -26,3 +26,39 @@ three:
   category: "administrative"
   managed_by_app: false
   discord_role_id: "345678901234567890"
+
+certificate_one:
+  guild: one
+  name: "Líder de Raid Certificado"
+  description: "Cargo cosmético do certificado de liderança"
+  is_admin: false
+  category: "cosmetic"
+  managed_by_app: false
+  discord_role_id:
+
+certificate_two:
+  guild: one
+  name: "Tank Certificado Visual"
+  description: "Cargo cosmético do certificado de tank"
+  is_admin: false
+  category: "cosmetic"
+  managed_by_app: false
+  discord_role_id:
+
+certificate_three:
+  guild: two
+  name: "Mestre Curandeiro Visual"
+  description: "Cargo cosmético do certificado de curandeiro"
+  is_admin: false
+  category: "cosmetic"
+  managed_by_app: false
+  discord_role_id:
+
+certificate_inactive:
+  guild: one
+  name: "Certificado Antigo Visual"
+  description: "Cargo cosmético legado"
+  is_admin: false
+  category: "cosmetic"
+  managed_by_app: false
+  discord_role_id:
