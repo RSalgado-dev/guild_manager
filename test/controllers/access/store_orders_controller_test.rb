@@ -51,5 +51,16 @@ module Access
       assert_equal 60, user.reload.currency_balance
       assert_equal 1, item.reload.stock_quantity
     end
+
+    test "orders page uses visible action links on dark background" do
+      user = users(:five)
+
+      sign_in(user)
+      get store_orders_path
+
+      assert_response :success
+      assert_includes response.body, "text-neon-cyan"
+      assert_not_includes response.body, "text-black"
+    end
   end
 end

@@ -12,7 +12,7 @@
           <p class="text-gray-500 text-xs font-mono uppercase">Saldo</p>
           <p class="text-white text-2xl font-bold"><%= current_user.currency_balance %> moedas</p>
         </div>
-        <%= link_to "Meus pedidos", store_orders_path, class: "inline-flex items-center justify-center bg-neon-cyan text-black font-bold rounded px-4 py-3 hover:opacity-90 transition-opacity" %>
+        <%= link_to "Meus pedidos", store_orders_path, class: "inline-flex items-center justify-center border border-neon-cyan/30 bg-dark-card text-neon-cyan font-bold rounded px-4 py-3 hover:border-neon-cyan transition-colors" %>
         <%= link_to "Dashboard", dashboard_path, class: "inline-flex items-center justify-center border border-neon-cyan/30 text-neon-cyan rounded px-4 py-3 hover:border-neon-cyan transition-colors" %>
       </div>
     </div>
@@ -40,11 +40,20 @@
             </div>
 
             <div class="mt-5">
-              <%= button_to (item.price.zero? ? "Resgatar grátis" : "Comprar por #{item.price} moedas"),
-                            store_orders_path(store_item_id: item.id),
-                            method: :post,
-                            disabled: !can_purchase,
-                            class: "w-full rounded px-4 py-3 font-bold #{can_purchase ? 'bg-neon-green text-black hover:opacity-90' : 'bg-gray-700 text-gray-400 cursor-not-allowed'}" %>
+              <% if can_purchase %>
+                <%= button_to (item.price.zero? ? "Resgatar grátis" : "Comprar por #{item.price} moedas"),
+                              store_orders_path(store_item_id: item.id),
+                              method: :post,
+                              data: {
+                                turbo_confirm: item.price.zero? ? "Confirmar resgate gratuito de #{item.name}?" : "Confirmar compra de #{item.name} por #{item.price} moedas?"
+                              },
+                              class: "w-full rounded border border-neon-green/40 bg-neon-green/20 px-4 py-3 font-bold text-neon-green hover:border-neon-green hover:bg-neon-green/30 transition-colors" %>
+              <% else %>
+                <%= button_tag (item.available_for_purchase? ? "Saldo insuficiente" : "Indisponível"),
+                               type: "button",
+                               disabled: true,
+                               class: "w-full rounded border border-gray-700 bg-gray-800 px-4 py-3 font-bold text-gray-400 cursor-not-allowed" %>
+              <% end %>
             </div>
           </div>
         <% end %>

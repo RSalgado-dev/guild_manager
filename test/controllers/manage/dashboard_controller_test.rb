@@ -8,6 +8,7 @@ class Manage::DashboardControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :success
     assert_includes response.body, "Gestão da Guilda"
+    assert_equal 1, response.body.scan("GUILD SYSTEM").size
   end
 
   test "usuário com permissão delegada acessa gestão mas não ActiveAdmin" do

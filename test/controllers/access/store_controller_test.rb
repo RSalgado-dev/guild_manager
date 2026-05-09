@@ -14,6 +14,10 @@ module Access
       assert_includes response.body, item.name
       assert_not_includes response.body, "Item inativo"
       assert_includes response.body, "Meus pedidos"
+      assert_includes response.body, "data-turbo-confirm"
+      assert_match(/<button[^>]*text-neon-green/, response.body)
+      assert_no_match(/<button[^>]*text-black/, response.body)
+      assert_not_includes response.body, "text-black"
     end
   end
 end
