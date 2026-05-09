@@ -74,7 +74,7 @@ class CertificateTest < ActiveSupport::TestCase
 
   test "deve destruir user_certificates ao ser destruído" do
     certificate = certificates(:two)
-    UserCertificate.create!(user: users(:three), certificate: certificate, status: "granted")
+    UserCertificate.create!(user: users(:five), certificate: certificate, status: "granted")
     user_cert_count = certificate.user_certificates.count
     assert user_cert_count > 0
 

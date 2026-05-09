@@ -31,6 +31,19 @@ Rails.application.routes.draw do
   # Dashboard para usuários com acesso
   get "/dashboard", to: "access/dashboard#show", as: :dashboard
 
+  namespace :manage do
+    root "dashboard#index"
+    get "/:resource_key", to: "resources#index", as: :resources
+    post "/:resource_key", to: "resources#create"
+    get "/:resource_key/new", to: "resources#new", as: :new_resource
+    get "/:resource_key/:id/edit", to: "resources#edit", as: :edit_resource
+    post "/:resource_key/:id/actions/:member_action", to: "resources#member_action", as: :resource_action
+    get "/:resource_key/:id", to: "resources#show", as: :resource
+    patch "/:resource_key/:id", to: "resources#update"
+    put "/:resource_key/:id", to: "resources#update"
+    delete "/:resource_key/:id", to: "resources#destroy"
+  end
+
   # Perfil do usuário
   get "/profile", to: "access/profiles#show", as: :profile
   get "/profile/edit", to: "access/profiles#edit", as: :edit_profile

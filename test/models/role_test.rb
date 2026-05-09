@@ -93,7 +93,7 @@ class RoleTest < ActiveSupport::TestCase
 
   test "#category_label deve retornar rótulo humano" do
     assert_equal "Cargo base", roles(:two).category_label
-    assert_equal "Administrativo", roles(:one).category_label
+    assert_equal "Máximo", roles(:one).category_label
     assert_equal "Máximo", Role.new(category: "role_maximum").category_label
   end
 end

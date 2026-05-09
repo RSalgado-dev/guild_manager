@@ -14,7 +14,7 @@ Troque o comando final por `bin/rails db:migrate`, `bin/rubocop`, `bin/rails con
 
 O login usa Discord OAuth. Após autenticação, o app sincroniza roles do Discord e valida o cargo base da guilda. Ações protegidas usam `PermissionGroup`, com permissões como `manage_events`, `manage_missions`, `manage_rankings`, `manage_store`, `fulfill_store_orders` e `view_audit_logs`.
 
-Usuários com `admin?` ou grupos administrativos acessam o ActiveAdmin em `/admin`. O escopo administrativo é limitado por guilda para usuários não superadmin.
+O ActiveAdmin em `/admin` é fallback técnico e exige cargo máximo (`Role.category = "maximum"`). A operação diária deve ocorrer em `/manage`, que fica disponível para cargo máximo e para cargos com permissões delegadas. O campo legado `is_admin` não concede acesso administrativo sozinho.
 
 Em desenvolvimento, rotas de sessão dev existem apenas com `Rails.env.development?`. Scripts de bootstrap administrativo, como `script/create_first_admin.rb`, também são bloqueados fora de desenvolvimento.
 
@@ -27,10 +27,11 @@ Em desenvolvimento, rotas de sessão dev existem apenas com `Rails.env.developme
 - `/rankings`: rankings configuráveis por guilda para usuários e squads.
 - `/squads`: criação, liderança, convites e revisão de alterações.
 - `/store` e `/store/orders`: catálogo, pedidos, cancelamento e saldo de moedas.
+- `/manage`: gestão in-app de módulos administrativos conforme cargo/permissão.
 
 ## Loja
 
-`StoreItem` controla preço, categoria, status e estoque opcional. `StoreOrder.checkout!` debita moedas imediatamente, reserva estoque e cria auditoria. Cancelamento ou rejeição reembolsa por `CurrencyTransaction` e restaura estoque quando aplicável. Fulfillment é manual via ActiveAdmin.
+`StoreItem` controla preço, categoria, status e estoque opcional. `StoreOrder.checkout!` debita moedas imediatamente, reserva estoque e cria auditoria. Cancelamento ou rejeição reembolsa por `CurrencyTransaction` e restaura estoque quando aplicável. Fulfillment é manual via `/manage/store_orders`.
 
 Permissões:
 
@@ -76,3 +77,13 @@ Em deploy single-server, habilite o supervisor da fila com `SOLID_QUEUE_IN_PUMA=
 ## Smoke Tests
 
 Além de `bin/rails test`, rode `bin/rails test:system` para validar navegação membro, compra na loja e leitura de auditoria no ActiveAdmin. O driver usa Chromium headless com flags compatíveis com o DevContainer.
+
+## Dados de Apresentação
+
+Para recriar uma guilda mock completa com 100 usuários e 30 dias de uso, execute no container:
+
+```bash
+bin/rails demo:seed_presentation_guild
+```
+
+Use `USERS=50` para reduzir o volume. A task recria apenas a guilda `Aurora do Abismo`.

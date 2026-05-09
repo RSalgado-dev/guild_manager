@@ -65,21 +65,28 @@ class ActionDispatch::IntegrationTest
 
     # Stub da API Discord - Guild Member (para sync_discord_roles)
     # Inclui o role requerido pela guild para que o usuário tenha acesso
+    synced_role_ids = ([ user.guild.required_discord_role_id ] + user.roles.pluck(:discord_role_id)).compact_blank.uniq
     stub_discord_guild_member(
       guild_id: user.guild.discord_guild_id,
       user_id: user.discord_id,
-      roles: [ user.guild.required_discord_role_id ] # Inclui o role requerido
+      roles: synced_role_ids # Inclui o role requerido e roles administrativas do fixture
     )
 
     # Stub da API Discord - Guild Roles (para sync_discord_roles)
+    synced_guild_roles = user.roles.where.not(discord_role_id: nil).map do |role|
+      {
+        "id" => role.discord_role_id,
+        "name" => role.name
+      }
+    end
+    synced_guild_roles << {
+      "id" => user.guild.required_discord_role_id,
+      "name" => user.guild.required_discord_role_name || "Membro"
+    }
+
     stub_discord_guild_roles(
       guild_id: user.guild.discord_guild_id,
-      roles: [
-        {
-          "id" => user.guild.required_discord_role_id,
-          "name" => user.guild.required_discord_role_name || "Membro"
-        }
-      ]
+      roles: synced_guild_roles.uniq { |role| role["id"] }
     )
 
     # Simula o callback do OAuth que cria a sessão

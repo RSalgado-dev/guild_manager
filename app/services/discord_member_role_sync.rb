@@ -69,6 +69,7 @@ class DiscordMemberRoleSync
                     .joins(:role)
                     .where.not(role_id: current_role_ids)
                     .where(roles: { managed_by_app: false })
+                    .where.not(role_id: local_authorization_role_ids)
     return if old_roles.empty?
 
     Rails.logger.info "🗑️  Removendo #{old_roles.size} roles antigos"
@@ -76,6 +77,13 @@ class DiscordMemberRoleSync
       audit_role_assignment!(user_role.role, "discord_user_role_removed")
     end
     old_roles.destroy_all
+  end
+
+  def local_authorization_role_ids
+    user.roles
+        .where(guild: guild, category: %w[maximum administrative])
+        .where(discord_role_id: [ nil, "" ])
+        .ids
   end
 
   def audit_role_assignment!(role, action)

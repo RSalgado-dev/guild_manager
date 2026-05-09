@@ -96,8 +96,16 @@ class User < ApplicationRecord
     is_admin == true
   end
 
+  def maximum_role?
+    roles.where(guild: guild, category: "maximum").exists?
+  end
+
+  def manage_area_access?
+    maximum_role? || permission_groups.exists?
+  end
+
   def admin_panel_access?
-    admin? || permission_groups.exists?
+    maximum_role?
   end
 
   def level
@@ -167,7 +175,7 @@ class User < ApplicationRecord
 
   def has_permission?(permission_key)
     key = permission_key.to_s
-    return true if admin?
+    return true if maximum_role?
     return false if role_ids.empty?
 
     guild.permission_groups

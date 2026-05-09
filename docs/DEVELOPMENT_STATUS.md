@@ -1,10 +1,10 @@
 # Status Atual do Desenvolvimento
 
-Última atualização: 2026-05-02
+Última atualização: 2026-05-05
 
 ## Visão Geral
 
-A aplicação está funcional como plataforma multi-guild com login Discord, sincronização de roles, controle de permissões por grupo, módulos de membros e operação administrativa via ActiveAdmin. A execução local deve ocorrer dentro do DevContainer `guild_manager_devcontainer-app-1`.
+A aplicação está funcional como plataforma multi-guild com login Discord, sincronização de roles, controle de permissões por grupo, módulos de membros e operação administrativa dentro da própria aplicação em `/manage`. O ActiveAdmin permanece como fallback técnico restrito ao cargo máximo. A execução local deve ocorrer dentro do DevContainer `guild_manager_devcontainer-app-1`.
 
 ## Módulos Implementados
 
@@ -16,6 +16,7 @@ A aplicação está funcional como plataforma multi-guild com login Discord, sin
 - Cargo base opcional por guilda (`required_discord_role_id`).
 - Roles categorizadas como base, cosmética, especial, administrativa ou máxima.
 - `PermissionGroup` com permissões granulares: membros, roles, eventos, missões, conquistas, certificados, rankings, loja e auditoria.
+- `/admin` exige cargo máximo; permissões delegadas operam em `/manage`.
 - Tokens Discord são criptografados com Active Record Encryption.
 
 ### Perfil, Personagens e Squads
@@ -45,10 +46,12 @@ A aplicação está funcional como plataforma multi-guild com login Discord, sin
 - `StoreOrder` com débito imediato, reserva de estoque, cancelamento/rejeição com reembolso e auditoria.
 - ActiveAdmin para itens e pedidos com permissões `manage_store` e `fulfill_store_orders`.
 
-### ActiveAdmin e Auditoria
+### Gestão In-App, ActiveAdmin e Auditoria
 
+- `/manage` reúne CRUD e ações administrativas para guilda, membros, cargos, permissões, squads, eventos, missões, conquistas, certificados, rankings, loja e auditoria.
+- Cargo máximo acessa todos os módulos; cargos delegados acessam apenas módulos permitidos por `PermissionGroup`.
 - Recursos administrativos para guilds, users, roles, permission groups, squads, events, missions, achievements, certificates, rankings, store items, store orders e audit logs.
-- Escopo por guilda para usuários não superadmin.
+- ActiveAdmin em `/admin` é fallback técnico max-only com escopo por guilda.
 - `AuditLog` exposto como leitura em `/admin/audit_logs`.
 - Ações administrativas relevantes usam `AuditLog.record!`.
 - Metadados de auditoria filtram tokens, segredos, senhas, authorization headers e emails antes da gravação.
@@ -65,7 +68,7 @@ A aplicação está funcional como plataforma multi-guild com login Discord, sin
 
 - Suite completa executada dentro do container.
 - RuboCop sem offenses.
-- Testes cobrem modelos, controllers, jobs, serviços, permissões, Discord WebMock, rankings, loja, squads, missões, eventos e smoke/system.
+- Testes cobrem modelos, controllers, jobs, serviços, permissões, área `/manage`, Discord WebMock, rankings, loja, squads, missões, eventos e smoke/system.
 
 ## Próximos Pontos Técnicos
 

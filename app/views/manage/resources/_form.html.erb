@@ -1,0 +1,56 @@
+<% if @resource.errors.any? %>
+  <div class="border border-red-500/40 bg-red-500/10 rounded p-4 mb-6 text-red-200">
+    <p class="font-bold mb-2">Não foi possível salvar:</p>
+    <ul class="list-disc pl-5">
+      <% @resource.errors.full_messages.each do |message| %>
+        <li><%= message %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>
+
+<%= form_with model: @resource,
+              url: @resource.persisted? ? manage_resource_path(@resource_key, @resource) : manage_resources_path(@resource_key),
+              class: "border border-gray-800 bg-dark-card rounded p-6 space-y-5" do |form| %>
+  <% @config[:fields].reject { |field| field[:readonly] }.each do |field| %>
+    <div>
+      <%= form.label field[:name], field[:label], class: "block text-sm font-mono text-gray-300 mb-2" %>
+
+      <% case field[:type] %>
+      <% when :text %>
+        <%= form.text_area field[:name], rows: 4, class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2" %>
+      <% when :json %>
+        <%= form.text_area field[:name], value: manage_json_form_value(@resource, field), rows: 8, class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2 font-mono text-sm" %>
+      <% when :integer %>
+        <%= form.number_field field[:name], class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2" %>
+      <% when :boolean %>
+        <label class="inline-flex items-center gap-2 text-gray-200">
+          <%= form.check_box field[:name], class: "rounded border-gray-700 bg-dark-bg" %>
+          <span>Ativo</span>
+        </label>
+      <% when :datetime %>
+        <%= form.datetime_local_field field[:name], class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2" %>
+      <% when :select %>
+        <%= form.select field[:name],
+                        manage_collection_options(field[:collection]),
+                        { include_blank: field[:optional] },
+                        class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2" %>
+      <% when :multiselect %>
+        <%= form.select field[:name],
+                        manage_collection_options(field[:collection]),
+                        {},
+                        multiple: true,
+                        class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2 min-h-40" %>
+      <% else %>
+        <%= form.text_field field[:name], class: "w-full rounded bg-dark-bg border border-gray-700 text-white px-3 py-2" %>
+      <% end %>
+    </div>
+  <% end %>
+
+  <div class="flex items-center gap-3 pt-4">
+    <%= form.submit "Salvar", class: "rounded border border-neon-green/50 bg-neon-green/10 px-5 py-2 text-neon-green font-mono text-sm hover:border-neon-green" %>
+    <%= link_to "Cancelar",
+                @resource.persisted? ? manage_resource_path(@resource_key, @resource) : manage_resources_path(@resource_key),
+                class: "rounded border border-gray-700 px-5 py-2 text-gray-300 font-mono text-sm hover:border-gray-500" %>
+  </div>
+<% end %>

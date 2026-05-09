@@ -29,19 +29,25 @@ class AdminAuditSmokeTest < ApplicationSystemTestCase
       access_token: user.discord_access_token || "fake_token",
       guilds: [ { "id" => user.guild.discord_guild_id, "name" => user.guild.name } ]
     )
+    synced_role_ids = ([ user.guild.required_discord_role_id ] + user.roles.pluck(:discord_role_id)).compact_blank.uniq
     stub_discord_guild_member(
       guild_id: user.guild.discord_guild_id,
       user_id: user.discord_id,
-      roles: [ user.guild.required_discord_role_id ]
+      roles: synced_role_ids
     )
+    synced_guild_roles = user.roles.where.not(discord_role_id: nil).map do |role|
+      {
+        "id" => role.discord_role_id,
+        "name" => role.name
+      }
+    end
+    synced_guild_roles << {
+      "id" => user.guild.required_discord_role_id,
+      "name" => user.guild.required_discord_role_name || "Membro"
+    }
     stub_discord_guild_roles(
       guild_id: user.guild.discord_guild_id,
-      roles: [
-        {
-          "id" => user.guild.required_discord_role_id,
-          "name" => user.guild.required_discord_role_name || "Membro"
-        }
-      ]
+      roles: synced_guild_roles.uniq { |role| role["id"] }
     )
 
     OmniAuth.config.mock_auth[:discord] = OmniAuth::AuthHash.new(

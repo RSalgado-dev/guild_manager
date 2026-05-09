@@ -4,6 +4,8 @@ class UserCertificate < ApplicationRecord
   belongs_to :granted_by, class_name: "User", optional: true
 
   validates :user_id, uniqueness: { scope: :certificate_id }
+  validate :user_must_belong_to_certificate_guild
+  validate :granter_must_belong_to_certificate_guild
 
   enum :status, {
     granted: "granted",
@@ -42,6 +44,20 @@ class UserCertificate < ApplicationRecord
 
   def set_default_granted_at
     self.granted_at ||= Time.current
+  end
+
+  def user_must_belong_to_certificate_guild
+    return if user.blank? || certificate.blank?
+    return if user.guild_id == certificate.guild_id
+
+    errors.add(:user, "deve pertencer à mesma guilda do certificado")
+  end
+
+  def granter_must_belong_to_certificate_guild
+    return if granted_by.blank? || certificate.blank?
+    return if granted_by.guild_id == certificate.guild_id
+
+    errors.add(:granted_by, "deve pertencer à mesma guilda do certificado")
   end
 
   def apply_grant_effects!

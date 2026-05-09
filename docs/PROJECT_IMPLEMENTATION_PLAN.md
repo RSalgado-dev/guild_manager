@@ -120,10 +120,18 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 - Adicionados `/up/full`, webhook interno de atualização de membro Discord, rankings públicos por guilda, seeds idempotentes, avaliação automática de missões adicionais e avaliador de conquistas.
 - Validações executadas: `bin/rails test`, `bin/rails test:system`, `bin/rubocop`, `git diff --check`.
 
+### Etapa 11 - Gestão In-App e ActiveAdmin Max-Only (concluída)
+
+- `/admin` foi reduzido a fallback técnico acessível apenas por cargo máximo.
+- `/manage` concentra operação administrativa dentro da aplicação, com visibilidade por `PermissionGroup`.
+- Cargo máximo acessa todos os módulos; permissões delegadas seguem limitadas por módulo.
+- Backfill garante role máxima para usuários legados com `is_admin=true`.
+- Fluxos administrativos cobertos em `/manage`: CRUD operacional, concessão/revogação de certificados, missões, eventos, loja, rankings, squads, membros, cargos, grupos de permissão e auditoria.
+
 ## Interfaces e Contratos Principais
 
 - Rotas membro novas: `/missions`, `/achievements`, `/certificates`, `/rankings`, `/store`, `/store/orders`.
-- Rotas públicas/operacionais novas: `/public/guilds/:guild_id/rankings`, `/up/full` e `POST /webhooks/discord/member_update`.
+- Rotas públicas/operacionais novas: `/public/guilds/:guild_id/rankings`, `/up/full`, `/manage` e `POST /webhooks/discord/member_update`.
 - ActiveAdmin evoluído para: guilds, users, roles, permission groups, events, missions, mission requests, achievements, certificates, rankings, store items, store orders e audit logs.
 - Serviços novos: Discord client/sync/reconcile, reward distribution, mission evaluation, achievement evaluator, ranking calculator e store checkout/refund.
 - Jobs novos: sync recorrente de roles/membros Discord, reconciliação de cargos gerenciados, avaliação periódica de missões automáticas e conquistas.
@@ -139,7 +147,7 @@ Todos os comandos de desenvolvimento, teste e CI devem rodar dentro do DevContai
 
 ## Assumptions Fixadas
 
-- ActiveAdmin será o painel administrativo padrão.
+- `/manage` é o painel operacional padrão; ActiveAdmin é fallback técnico max-only.
 - O app é autoritativo apenas para roles marcadas como `managed_by_app`; roles externas continuam espelhadas do Discord.
 - Loja v1 usa pedido manual com débito imediato e reembolso em rejeição/cancelamento.
 - Missões v1 incluem fluxo manual completo e uma automação inicial de atualização do personagem principal.

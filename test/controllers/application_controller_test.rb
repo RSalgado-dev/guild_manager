@@ -13,6 +13,7 @@ class ApplicationControllerTest < ActionDispatch::IntegrationTest
     assert ApplicationController.private_method_defined?(:has_guild_access?) || ApplicationController.method_defined?(:has_guild_access?)
     assert ApplicationController.private_method_defined?(:has_permission?) || ApplicationController.method_defined?(:has_permission?)
     assert ApplicationController.private_method_defined?(:admin_panel_access?) || ApplicationController.method_defined?(:admin_panel_access?)
+    assert ApplicationController.private_method_defined?(:manage_area_access?) || ApplicationController.method_defined?(:manage_area_access?)
     assert ApplicationController.private_method_defined?(:require_login) || ApplicationController.method_defined?(:require_login)
     assert ApplicationController.private_method_defined?(:require_guild_access) || ApplicationController.method_defined?(:require_guild_access)
     assert ApplicationController.private_method_defined?(:require_admin) || ApplicationController.method_defined?(:require_admin)

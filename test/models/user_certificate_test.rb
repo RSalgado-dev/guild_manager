@@ -7,7 +7,7 @@ class UserCertificateTest < ActiveSupport::TestCase
 
   test "deve ser válido com atributos válidos" do
     user_cert = UserCertificate.new(
-      user: users(:two),
+      user: users(:five),
       certificate: certificates(:two),
       status: "granted"
     )
@@ -35,6 +35,29 @@ class UserCertificateTest < ActiveSupport::TestCase
     )
     assert_not duplicate.valid?
     assert_includes duplicate.errors[:user_id], "has already been taken"
+  end
+
+  test "não permite usuário de outra guilda" do
+    user_cert = UserCertificate.new(
+      user: users(:three),
+      certificate: certificates(:one),
+      status: "granted"
+    )
+
+    assert_not user_cert.valid?
+    assert_includes user_cert.errors[:user], "deve pertencer à mesma guilda do certificado"
+  end
+
+  test "não permite concedente de outra guilda" do
+    user_cert = UserCertificate.new(
+      user: users(:five),
+      certificate: certificates(:one),
+      granted_by: users(:three),
+      status: "granted"
+    )
+
+    assert_not user_cert.valid?
+    assert_includes user_cert.errors[:granted_by], "deve pertencer à mesma guilda do certificado"
   end
 
   test "mesmo usuário pode ter múltiplos certificados diferentes" do
@@ -85,7 +108,7 @@ class UserCertificateTest < ActiveSupport::TestCase
 
   test "deve definir granted_at automaticamente ao criar" do
     user_cert = UserCertificate.new(
-      user: users(:three),
+      user: users(:five),
       certificate: certificates(:two),
       status: "granted"
     )
@@ -99,7 +122,7 @@ class UserCertificateTest < ActiveSupport::TestCase
   test "não deve sobrescrever granted_at se já estiver definido" do
     custom_time = 10.days.ago
     user_cert = UserCertificate.new(
-      user: users(:three),
+      user: users(:five),
       certificate: certificates(:two),
       granted_at: custom_time,
       status: "granted"

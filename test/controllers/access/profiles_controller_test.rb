@@ -47,7 +47,7 @@ module Access
 
       # Criar alguns dados de teste
       role = roles(:one)
-      @user.user_roles.create!(role: role)
+      @user.user_roles.find_or_create_by!(role: role)
 
       get profile_path
 

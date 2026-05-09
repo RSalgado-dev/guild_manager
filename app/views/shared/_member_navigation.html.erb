@@ -28,6 +28,12 @@
                     class: "shrink-0 px-3 py-2 rounded border font-mono text-xs transition-colors #{active ? 'border-neon-cyan bg-neon-cyan/10 text-neon-cyan' : 'border-gray-700 bg-dark-card text-gray-300 hover:border-neon-cyan/40 hover:text-neon-cyan'}" %>
       <% end %>
 
+      <% if current_user.manage_area_access? %>
+        <%= link_to "Gestão",
+                    manage_root_path,
+                    class: "shrink-0 px-3 py-2 rounded border border-neon-green/40 bg-neon-green/10 text-neon-green font-mono text-xs hover:border-neon-green transition-colors" %>
+      <% end %>
+
       <% if current_user.admin_panel_access? %>
         <%= link_to "Admin",
                     admin_root_path,

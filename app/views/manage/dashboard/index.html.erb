@@ -1,0 +1,33 @@
+<%= render "shared/member_navigation" %>
+
+<main class="min-h-screen bg-dark-bg text-gray-100">
+  <section class="max-w-7xl mx-auto px-4 py-8">
+    <div class="mb-8">
+      <p class="text-neon-cyan font-mono text-sm uppercase tracking-wide"><%= @guild.name %></p>
+      <h1 class="text-3xl font-black text-white mt-2">Gestão da Guilda</h1>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+      <% @stats.each do |label, value| %>
+        <div class="border border-gray-800 bg-dark-card rounded p-4">
+          <p class="text-gray-400 text-xs font-mono uppercase"><%= label.to_s.humanize %></p>
+          <p class="text-2xl font-bold text-neon-cyan mt-1"><%= value %></p>
+        </div>
+      <% end %>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+      <% @resource_configs.each do |key, config| %>
+        <%= link_to manage_resources_path(key), class: "block border border-gray-800 bg-dark-card rounded p-5 hover:border-neon-cyan/60 transition-colors" do %>
+          <div class="flex items-center justify-between gap-4">
+            <div>
+              <h2 class="text-lg font-bold text-white"><%= config[:label] %></h2>
+              <p class="text-xs font-mono text-gray-500 mt-1"><%= key %></p>
+            </div>
+            <span class="text-neon-cyan text-xl">→</span>
+          </div>
+        <% end %>
+      <% end %>
+    </div>
+  </section>
+</main>

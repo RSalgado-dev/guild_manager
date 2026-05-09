@@ -93,6 +93,14 @@ class UserTest < ActiveSupport::TestCase
   test "#admin_panel_access? retorna true para usuário com grupos de permissão" do
     user = users(:two)
 
+    assert user.manage_area_access?
+    assert_not user.admin_panel_access?
+  end
+
+  test "#admin_panel_access? retorna true somente para cargo máximo" do
+    user = users(:one)
+
+    assert user.maximum_role?
     assert user.admin_panel_access?
   end
 
@@ -100,6 +108,7 @@ class UserTest < ActiveSupport::TestCase
     user = users(:five)
 
     assert_not user.admin?
+    assert_not user.manage_area_access?
     assert_not user.admin_panel_access?
   end
 

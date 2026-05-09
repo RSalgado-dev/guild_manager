@@ -18,8 +18,8 @@ two:
 
 three:
   user: two
-  certificate: three
-  granted_by: three
+  certificate: two
+  granted_by: one
   granted_at: <%= 2.days.ago %>
   expires_at: <%= 1.day.ago %>
   status: "granted"

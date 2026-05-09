@@ -3,6 +3,7 @@ class UserAchievement < ApplicationRecord
   belongs_to :achievement
 
   validates :user_id, uniqueness: { scope: :achievement_id }
+  validate :user_must_belong_to_achievement_guild
 
   before_validation :set_default_earned_at, on: :create
   after_create :apply_rewards!
@@ -23,6 +24,13 @@ class UserAchievement < ApplicationRecord
 
   def set_default_earned_at
     self.earned_at ||= Time.current
+  end
+
+  def user_must_belong_to_achievement_guild
+    return if user.blank? || achievement.blank?
+    return if user.guild_id == achievement.guild_id
+
+    errors.add(:user, "deve pertencer à mesma guilda da conquista")
   end
 
   def apply_rewards!

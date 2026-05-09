@@ -1,4 +1,6 @@
 # Idempotent demo data for local development and TCC presentation.
+# For the full 100-user presentation dataset, run:
+# bin/rails demo:seed_presentation_guild
 
 guild = Guild.find_or_create_by!(discord_guild_id: "000000000000000001") do |record|
   record.name = "Guild Demonstracao"
@@ -12,6 +14,13 @@ base_role = guild.roles.find_or_create_by!(name: "Membro") do |role|
   role.discord_role_id = guild.required_discord_role_id.presence || "000000000000000101"
 end
 
+maximum_role = guild.roles.find_or_create_by!(category: "maximum") do |role|
+  role.name = "Cargo Máximo"
+  role.description = "Cargo máximo para acesso técnico e gestão total."
+  role.is_admin = true
+  role.managed_by_app = false
+end
+
 cosmetic_role = guild.roles.find_or_create_by!(name: "Certificado Visual") do |role|
   role.description = "Cargo cosmético concedido por certificado"
   role.category = "cosmetic"
@@ -22,7 +31,7 @@ admin_group = guild.permission_groups.find_or_initialize_by(name: "Administracao
 admin_group.description = "Grupo com acesso total para administradores da demo."
 admin_group.all_access = true
 admin_group.permissions = PermissionGroup::AVAILABLE_PERMISSIONS
-admin_group.roles = [ base_role ] if admin_group.roles.empty?
+admin_group.roles = [ maximum_role ] if admin_group.roles.empty?
 admin_group.save!
 
 Achievement.find_or_create_by!(guild: guild, code: "first_steps") do |achievement|

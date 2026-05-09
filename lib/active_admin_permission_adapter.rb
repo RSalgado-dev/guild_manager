@@ -24,31 +24,30 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
 
   def authorized?(action, subject = nil)
     return false unless user
-    return true if user.admin?
-    return false unless user.has_guild_access?
+    return false unless user.admin_panel_access?
 
     subject ||= default_subject
-    return user.admin_panel_access? if dashboard_page?(subject)
+    return true if dashboard_page?(subject)
 
-    permission = permission_for(subject)
-    return false unless permission
-    return false if administrative_role_subject?(subject) && !user.has_permission?(:manage_administrative_roles)
-
-    user.has_permission?(permission)
+    permission_for(subject).present?
   end
 
   def scope_collection(collection, action = ActiveAdmin::Auth::READ)
-    return collection if user&.admin?
     return collection.none unless user&.guild_id
 
-    if collection.klass == StoreOrder
-      collection.joins(:store_item).where(store_items: { guild_id: user.guild_id })
-    elsif collection.klass == CurrencyTransaction
-      collection.joins(:user).where(users: { guild_id: user.guild_id })
-    elsif collection.klass == User || collection.klass.column_names.include?("guild_id")
-      collection.where(guild_id: user.guild_id)
+    collection_class = collection.respond_to?(:klass) ? collection.klass : collection
+    scoped_collection = collection.respond_to?(:where) ? collection : collection_class.all
+
+    if collection_class == StoreOrder
+      scoped_collection.joins(:store_item).where(store_items: { guild_id: user.guild_id })
+    elsif collection_class == CurrencyTransaction
+      scoped_collection.joins(:user).where(users: { guild_id: user.guild_id })
+    elsif collection_class == Guild
+      scoped_collection.where(id: user.guild_id)
+    elsif collection_class == User || collection_class.column_names.include?("guild_id")
+      scoped_collection.where(guild_id: user.guild_id)
     else
-      collection
+      scoped_collection
     end
   end
 
@@ -72,9 +71,5 @@ class ActiveAdminPermissionAdapter < ActiveAdmin::AuthorizationAdapter
     return subject.name if subject.is_a?(Class)
 
     subject.class.name
-  end
-
-  def administrative_role_subject?(subject)
-    subject.is_a?(Role) && (subject.administrative? || subject.role_maximum?)
   end
 end

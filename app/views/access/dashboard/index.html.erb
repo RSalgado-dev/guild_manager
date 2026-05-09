@@ -72,12 +72,12 @@
               </div>
             <% end %>
 
-            <% if current_user.admin_panel_access? %>
-              <%= link_to admin_root_path, class: "group relative overflow-hidden bg-gradient-to-r from-neon-purple to-neon-magenta p-[2px] rounded-lg hover:shadow-neon-purple transition-all duration-300 transform hover:scale-105" do %>
+            <% if current_user.manage_area_access? %>
+              <%= link_to manage_root_path, class: "group relative overflow-hidden bg-gradient-to-r from-neon-purple to-neon-magenta p-[2px] rounded-lg hover:shadow-neon-purple transition-all duration-300 transform hover:scale-105" do %>
                 <div class="bg-dark-bg rounded-lg p-6 h-full flex flex-col items-center justify-center gap-3">
                   <span class="text-5xl group-hover:animate-pulse">⚙️</span>
-                  <span class="text-neon-purple font-bold text-xl uppercase tracking-wide">Admin</span>
-                  <span class="text-gray-400 text-sm font-mono">Painel de controle</span>
+                  <span class="text-neon-purple font-bold text-xl uppercase tracking-wide">Gestão</span>
+                  <span class="text-gray-400 text-sm font-mono">Operação da guild</span>
                 </div>
               <% end %>
             <% end %>

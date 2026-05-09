@@ -28,11 +28,20 @@ end
 # Garante que is_admin está true
 user.update(is_admin: true) unless user.is_admin?
 
+maximum_role = user.guild.roles.find_or_create_by!(category: "maximum") do |role|
+  role.name = "Cargo Máximo"
+  role.description = "Cargo com acesso máximo ao sistema da guilda."
+  role.is_admin = true
+  role.managed_by_app = false
+end
+user.user_roles.find_or_create_by!(role: maximum_role)
+
 puts "✅ Usuário administrador criado/atualizado:"
 puts ""
 puts "   Discord ID: #{user.discord_id}"
 puts "   Username: #{user.discord_username}"
 puts "   Is Admin: #{user.is_admin}"
+puts "   Cargo Máximo: #{maximum_role.name}"
 puts "   Guild: #{user.guild.name}"
 puts ""
 puts "⚠️  IMPORTANTE: Este é um usuário temporário para acesso inicial."

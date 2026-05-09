@@ -2,18 +2,18 @@ require "test_helper"
 require "ostruct"
 
 class ActiveAdminPermissionAdapterTest < ActiveSupport::TestCase
-  test "superadmin tem acesso total" do
+  test "cargo máximo tem acesso total ao ActiveAdmin" do
     adapter = adapter_for(users(:one), Role)
 
     assert adapter.authorized?(:read, Role)
     assert adapter.authorized?(:destroy, roles(:one))
   end
 
-  test "usuário com permissão operacional acessa apenas recurso correspondente" do
+  test "usuário com permissão operacional não acessa ActiveAdmin" do
     adapter = adapter_for(users(:two), Role)
 
-    assert adapter.authorized?(:read, Squad)
-    assert adapter.authorized?(:read, Event)
+    assert_not adapter.authorized?(:read, Squad)
+    assert_not adapter.authorized?(:read, Event)
     assert_not adapter.authorized?(:read, Role)
   end
 

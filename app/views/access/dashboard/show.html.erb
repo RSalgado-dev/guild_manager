@@ -259,24 +259,24 @@
             </div>
           <% end %>
 
-          <!-- Admin Panel (if admin) -->
-          <% if @user.admin_panel_access? %>
-            <%= link_to admin_root_path, class: "group bg-dark-card border border-neon-pink/20 rounded-lg p-6 hover:border-neon-pink hover:shadow-lg transition-all duration-300 block" do %>
+          <!-- Management Area -->
+          <% if @user.manage_area_access? %>
+            <%= link_to manage_root_path, class: "group bg-dark-card border border-neon-green/20 rounded-lg p-6 hover:border-neon-green hover:shadow-lg transition-all duration-300 block" do %>
               <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                   <span class="text-5xl group-hover:animate-pulse">⚙️</span>
                   <div>
-                    <h4 class="text-neon-pink font-bold text-lg uppercase">Admin</h4>
-                    <p class="text-gray-400 text-sm font-mono">Control Panel</p>
+                    <h4 class="text-neon-green font-bold text-lg uppercase">Gestão</h4>
+                    <p class="text-gray-400 text-sm font-mono">Guild Operations</p>
                   </div>
                 </div>
               </div>
               <p class="text-gray-400 text-sm mb-4">
-                Acesse o painel administrativo para gerenciar todo o sistema da guild.
+                Gerencie os módulos permitidos para seu cargo diretamente no sistema da guild.
               </p>
               <div class="flex items-center justify-between text-xs">
                 <span class="text-gray-500 font-mono">Status:</span>
-                <span class="text-neon-green font-bold font-mono">ADMIN_ACCESS</span>
+                <span class="text-neon-green font-bold font-mono">MANAGE_ACCESS</span>
               </div>
             <% end %>
           <% end %>

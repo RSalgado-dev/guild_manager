@@ -33,6 +33,16 @@ class UserAchievementTest < ActiveSupport::TestCase
     assert_includes duplicate.errors[:user_id], "has already been taken"
   end
 
+  test "não permite usuário de outra guilda" do
+    user_achievement = UserAchievement.new(
+      user: users(:three),
+      achievement: achievements(:one)
+    )
+
+    assert_not user_achievement.valid?
+    assert_includes user_achievement.errors[:user], "deve pertencer à mesma guilda da conquista"
+  end
+
   test "mesmo usuário pode ter múltiplas conquistas diferentes" do
     user = users(:one)
     achievement1 = user_achievements(:one)
@@ -62,7 +72,7 @@ class UserAchievementTest < ActiveSupport::TestCase
   test "deve definir earned_at automaticamente ao criar" do
     user_achievement = UserAchievement.new(
       user: users(:two),
-      achievement: achievements(:three)
+      achievement: achievements(:one)
     )
     assert_nil user_achievement.earned_at
 
@@ -75,7 +85,7 @@ class UserAchievementTest < ActiveSupport::TestCase
     custom_time = 10.days.ago
     user_achievement = UserAchievement.new(
       user: users(:two),
-      achievement: achievements(:three),
+      achievement: achievements(:one),
       earned_at: custom_time
     )
     user_achievement.save!
@@ -93,7 +103,7 @@ class UserAchievementTest < ActiveSupport::TestCase
   test "source_type e source_id são opcionais" do
     user_achievement = UserAchievement.new(
       user: users(:two),
-      achievement: achievements(:three)
+      achievement: achievements(:one)
     )
     assert user_achievement.valid?
     user_achievement.save!
