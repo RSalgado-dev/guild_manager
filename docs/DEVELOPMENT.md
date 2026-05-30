@@ -1,108 +1,98 @@
-# 🚀 Como Rodar o Projeto em Desenvolvimento
+# Desenvolvimento
 
-## Método 1: Com Auto-reload (Recomendado) ⚡
+Este projeto deve ser executado dentro do DevContainer `guild_manager_devcontainer-app-1`. Use sempre binstubs Rails.
 
-O comando `bin/dev` inicia automaticamente:
-- ✅ **Rails server** na porta 3000
-- ✅ **Tailwind CSS watcher** (compila automaticamente ao editar arquivos)
+## Wrapper de Comando
+
+```bash
+docker exec guild_manager_devcontainer-app-1 bash -lc 'export PATH=/home/vscode/.rbenv/bin:/home/vscode/.rbenv/shims:$PATH; cd /workspace && <command>'
+```
+
+Substitua `<command>` por `bin/rails test`, `bin/rubocop`, `bin/rails db:migrate`, `bin/dev` ou outro comando do projeto.
+
+## Primeira Configuração
+
+Copie `.env.example` se precisar alterar os padrões de banco:
+
+```bash
+cp .env.example .env
+```
+
+As credenciais Discord ficam em Rails credentials:
+
+```bash
+EDITOR="vim" bin/rails credentials:edit
+```
+
+Formato:
+
+```yaml
+discord:
+  client_id: "..."
+  client_secret: "..."
+  bot_token: "..."
+```
+
+No Discord Developer Portal, configure o redirect local:
+
+```text
+http://localhost:3000/auth/discord/callback
+```
+
+Prepare dependências e banco:
+
+```bash
+bin/setup --skip-server
+```
+
+Crie o admin temporário de desenvolvimento:
+
+```bash
+bin/rails runner script/create_first_admin.rb
+```
+
+## Rodando o App
 
 ```bash
 bin/dev
 ```
 
-Edite qualquer arquivo `.html.erb` e o Tailwind recompila automaticamente!
+`bin/dev` inicia Rails e o watcher do Tailwind via `Procfile.dev`.
 
----
+Rotas úteis em desenvolvimento:
 
-## Método 2: Manualmente
+- `http://localhost:3000`: app.
+- `http://localhost:3000/dev/login`: login local com usuário temporário.
+- `http://localhost:3000/manage`: gestão operacional.
+- `http://localhost:3000/admin`: ActiveAdmin técnico.
+- `http://localhost:3000/up/full`: health check completo.
 
-Se preferir controlar cada processo:
+## Banco e Assets
 
-### Terminal 1: Rails Server
 ```bash
-bin/rails server
-```
-
-### Terminal 2: Tailwind Watcher
-```bash
-bin/rails tailwindcss:watch
-```
-
-Ou compilar uma vez:
-```bash
+bin/rails db:prepare
+bin/rails db:migrate
+bin/rails db:rollback
+bin/rails db:seed
 bin/rails tailwindcss:build
 ```
 
----
+Use `bin/setup --skip-server --reset` quando precisar recriar o banco local.
 
-## 📁 Estrutura de Assets
+## Jobs
 
-```
-app/assets/
-  ├── stylesheets/
-  │   ├── application.tailwind.css  # Fonte Tailwind (@tailwind directives)
-  │   ├── application.css           # CSS geral da aplicação
-  │   └── active_admin.scss         # Estilos do ActiveAdmin
-  ├── builds/
-  │   └── tailwind.css              # Tailwind COMPILADO (gerado automaticamente)
-  └── config/
-      └── manifest.js               # Configuração do asset pipeline
-```
+Em produção, os jobs recorrentes ficam em `config/recurring.yml` e rodam via Solid Queue. Para testar manualmente:
 
----
-
-## ✅ Checklist de Desenvolvimento
-
-- [ ] Rodei `bin/dev` para iniciar servidor + Tailwind watcher
-- [ ] Acesso http://localhost:3000
-- [ ] Edito arquivos `.html.erb`
-- [ ] Tailwind recompila automaticamente
-- [ ] Dou refresh no navegador (F5)
-- [ ] Mudanças aparecem instantaneamente!
-
----
-
-## 🎨 Usando Tailwind CSS
-
-### Classes estão disponíveis em todas as views:
-
-```erb
-<div class="bg-blue-500 text-white p-4 rounded-lg shadow-lg">
-  <h1 class="text-2xl font-bold">Hello Tailwind!</h1>
-</div>
-```
-
-### Configuração:
-- **Tailwind Config**: `config/tailwind.config.js`
-- **Fonte CSS**: `app/assets/stylesheets/application.tailwind.css`
-
----
-
-## 🐛 Troubleshooting
-
-**Classes Tailwind não funcionam:**
 ```bash
-# Recompilar Tailwind
-bin/rails tailwindcss:build
-
-# Ou iniciar watcher
-bin/rails tailwindcss:watch
+bin/rails runner 'DiscordGuildRolesSyncJob.perform_now'
+bin/rails runner 'DiscordMembersSyncJob.perform_now'
+bin/rails runner 'DiscordManagedRoleReconciliationJob.perform_now'
 ```
 
-**Servidor não inicia:**
-```bash
-# Matar processos Rails/Puma
-pkill -f puma
+## Problemas Comuns
 
-# Reiniciar
-bin/dev
-```
+Se o login Discord falhar, confira as credentials, o redirect URI e se o usuário pertence a uma guilda cadastrada.
 
-**Foreman não encontrado:**
-```bash
-gem install foreman
-```
+Se o acesso interno cair em `/restricted`, confira `Guild#required_discord_role_id`, roles sincronizadas e `User#has_guild_access`.
 
----
-
-**Desenvolvido com ❤️ usando Rails 8.1 + Tailwind CSS**
+Se assets não atualizarem, rode `bin/rails tailwindcss:build` ou reinicie `bin/dev`.
