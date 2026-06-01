@@ -1,10 +1,4 @@
-# Changelog
-
-Este changelog foi reconstruido a partir do historico local do Git em 2026-05-30.
-
-O repositorio ainda nao possui tags de versao, entao as entradas abaixo seguem a ordem de entrada no `main` usando `git log --first-parent --reverse`. Commits de manutencao do Dependabot foram agrupados pela data em que entraram no `main`.
-
-## [Nao publicado]
+## 2026-05-30
 
 ### Documentacao
 
@@ -12,7 +6,6 @@ O repositorio ainda nao possui tags de versao, entao as entradas abaixo seguem a
 - Remove guias historicos ou duplicados de setup, ActiveAdmin, controle de acesso, quick start, status de desenvolvimento e cobertura antiga.
 - Reconstroi este changelog a partir do historico de commits para evitar entradas antigas ou especulativas.
 
-## 2026-05-30
 
 ### Manutencao
 
