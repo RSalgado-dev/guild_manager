@@ -108,4 +108,23 @@ class AchievementTest < ActiveSupport::TestCase
     assert_not achievement.valid?
     assert_includes achievement.errors[:criteria], "deve estar em JSON válido"
   end
+
+  test "criteria_json retorna e atualiza critérios estruturados" do
+    achievement = achievements(:one)
+    achievement.criteria = { "event_participations" => 3 }
+
+    assert_includes achievement.criteria_json, "\"event_participations\": 3"
+
+    achievement.criteria_json = '{ "mission_submissions": 5 }'
+    assert achievement.valid?
+    assert_equal({ "mission_submissions" => 5 }, achievement.criteria)
+  end
+
+  test "criteria precisa ser objeto JSON" do
+    achievement = achievements(:one)
+    achievement.criteria_json = "[1, 2, 3]"
+
+    assert_not achievement.valid?
+    assert_includes achievement.errors[:criteria], "deve ser um objeto"
+  end
 end

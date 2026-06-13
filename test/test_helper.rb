@@ -1,9 +1,22 @@
 ENV["RAILS_ENV"] ||= "test"
+
+require_relative "simplecov_setup"
 require_relative "../config/environment"
 require "rails/test_help"
 require "webmock/minitest"
 require "ostruct"
 require "mocha/minitest"
+
+ActiveSupport::Testing::Parallelization.after_fork_hook do |worker|
+  SimpleCov.command_name "rails-tests-worker-#{worker}"
+  SimpleCov.print_error_status = false
+  SimpleCov.formatter SimpleCov::Formatter::SimpleFormatter
+  SimpleCov.minimum_coverage 0
+end
+
+ActiveSupport::Testing::Parallelization.run_cleanup_hook do |_worker|
+  SimpleCov.result
+end
 
 # Configura WebMock para permitir requisições locais
 WebMock.disable_net_connect!(allow_localhost: true)
@@ -20,6 +33,11 @@ module ActiveSupport
     fixtures :all
 
     # Add more helper methods to be used by all tests here...
+
+    def stub_discord_bot_token
+      Rails.application.credentials.stubs(:dig).returns(nil)
+      Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    end
 
     # Helper para stub da API Discord fetch_user_guilds
     def stub_discord_user_guilds(access_token: "fake_access_token", guilds: [])
@@ -55,7 +73,7 @@ class ActionDispatch::IntegrationTest
   # Simula login do usuário definindo a sessão diretamente
   def sign_in(user)
     # Configurar bot token fake para testes
-    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    stub_discord_bot_token
 
     # Stub da API Discord - User Guilds
     stub_discord_user_guilds(
@@ -111,7 +129,7 @@ class ActionDispatch::IntegrationTest
 
   # Simula login de usuário SEM o role requerido (para testar acesso restrito)
   def sign_in_without_role(user)
-    Rails.application.credentials.stubs(:dig).with(:discord, :bot_token).returns("fake_bot_token")
+    stub_discord_bot_token
 
     stub_discord_user_guilds(
       access_token: user.discord_access_token || "fake_token",

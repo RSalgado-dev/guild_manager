@@ -193,6 +193,44 @@ class UserCertificateTest < ActiveSupport::TestCase
     assert_not user.roles.exists?(role.id)
   end
 
+  test "revogar certificado mantém role quando outro certificado ativo concede o mesmo cargo" do
+    user = users(:five)
+    role = Role.create!(
+      guild: user.guild,
+      name: "Cargo Compartilhado",
+      category: "cosmetic"
+    )
+    certificate_one = Certificate.create!(
+      guild: user.guild,
+      role: role,
+      code: "shared_role_one",
+      name: "Certificado Compartilhado 1"
+    )
+    certificate_two = Certificate.create!(
+      guild: user.guild,
+      role: role,
+      code: "shared_role_two",
+      name: "Certificado Compartilhado 2"
+    )
+    first_grant = UserCertificate.create!(
+      user: user,
+      certificate: certificate_one,
+      granted_by: users(:one),
+      expires_at: 1.year.from_now
+    )
+    UserCertificate.create!(
+      user: user,
+      certificate: certificate_two,
+      granted_by: users(:one),
+      expires_at: 1.year.from_now
+    )
+
+    first_grant.revoke!(revoked_by: users(:one))
+
+    assert_equal "revoked", first_grant.reload.status
+    assert user.roles.exists?(role.id)
+  end
+
   test "certificado com role gerenciada agenda reconciliação Discord" do
     user = users(:five)
     role = Role.create!(

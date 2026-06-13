@@ -105,4 +105,14 @@ class StoreOrderTest < ActiveSupport::TestCase
       end
     end
   end
+
+  test "order requires buyer and item from same guild" do
+    order = StoreOrder.new(
+      user: users(:three),
+      store_item: StoreItem.create!(guild: guilds(:one), name: "Item da guilda um", price: 10, stock_quantity: 1)
+    )
+
+    assert_not order.valid?
+    assert_includes order.errors[:user], "deve pertencer à mesma guilda do item"
+  end
 end

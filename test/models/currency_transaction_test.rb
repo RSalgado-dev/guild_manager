@@ -99,6 +99,18 @@ class CurrencyTransactionTest < ActiveSupport::TestCase
     assert_nil transaction.reason
   end
 
+  test "#reason deve retornar nil quando reason_id está em branco" do
+    transaction = CurrencyTransaction.create!(
+      user: users(:one),
+      amount: 10,
+      balance_after: users(:one).currency_balance + 10,
+      reason_type: "Mission",
+      reason_id: nil
+    )
+
+    assert_nil transaction.reason
+  end
+
   test "#reason retorna nil para tipo não permitido" do
     transaction = CurrencyTransaction.create!(
       user: users(:one),

@@ -1,4 +1,7 @@
 require "test_helper"
+require_relative "support/system_authentication_helper"
+
+SimpleCov.command_name "rails-system-tests" if defined?(SimpleCov)
 
 Capybara.register_driver :headless_chrome_container do |app|
   options = Selenium::WebDriver::Chrome::Options.new
@@ -11,5 +14,7 @@ Capybara.register_driver :headless_chrome_container do |app|
 end
 
 class ApplicationSystemTestCase < ActionDispatch::SystemTestCase
+  include SystemAuthenticationHelper
+
   driven_by :headless_chrome_container, screen_size: [ 1400, 1400 ]
 end

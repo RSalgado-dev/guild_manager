@@ -9,19 +9,19 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Estatísticas Gerais" do
           div class: "stats-grid" do
             div class: "stat-card" do
-              p "Guilds"
+              para "Guilds"
               h3 Guild.count
             end
             div class: "stat-card" do
-              p "Usuários"
+              para "Usuários"
               h3 User.count
             end
             div class: "stat-card" do
-              p "Com Acesso"
+              para "Com Acesso"
               h3 User.where(has_guild_access: true).count
             end
             div class: "stat-card" do
-              p "Squads"
+              para "Squads"
               h3 Squad.count
             end
           end

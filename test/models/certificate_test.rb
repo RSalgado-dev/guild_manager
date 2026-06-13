@@ -111,4 +111,8 @@ class CertificateTest < ActiveSupport::TestCase
     assert_not certificate.valid?
     assert_includes certificate.errors[:role], "deve pertencer à guilda"
   end
+
+  test "grants_role? indica se certificado concede cargo" do
+    assert certificates(:one).grants_role?
+  end
 end

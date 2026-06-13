@@ -30,24 +30,24 @@ class SquadInvitation < ApplicationRecord
     [ "squad", "inviter", "invitee" ]
   end
 
-  def accept!(user:)
+  def accept!(user:, accepted_at: Time.current)
     raise ArgumentError, "Convite inválido" unless invitee == user
     raise ArgumentError, "Convite não está pendente" unless pending?
-    raise ArgumentError, "Convite expirado" if expires_at <= Time.current
+    raise ArgumentError, "Convite expirado" if expires_at <= accepted_at
     raise ArgumentError, "Usuário já possui squad" if invitee.squad_id.present?
 
     transaction do
-      update!(status: "accepted", responded_at: Time.current)
+      update!(status: "accepted", responded_at: accepted_at)
       invitee.update!(squad: squad)
-      self.class.where(invitee: invitee, status: "pending").where.not(id: id).update_all(status: "revoked", responded_at: Time.current)
+      self.class.where(invitee: invitee, status: "pending").where.not(id: id).update_all(status: "revoked", responded_at: accepted_at)
     end
   end
 
-  def decline!(user:)
+  def decline!(user:, declined_at: Time.current)
     raise ArgumentError, "Convite inválido" unless invitee == user
     raise ArgumentError, "Convite não está pendente" unless pending?
 
-    update!(status: "declined", responded_at: Time.current)
+    update!(status: "declined", responded_at: declined_at)
   end
 
   private

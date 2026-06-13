@@ -34,6 +34,31 @@ class AutomaticMissionEvaluatorTest < ActiveSupport::TestCase
     end
   end
 
+  test "não recompensa atualização de personagem secundário" do
+    user = users(:one)
+    secondary = user.game_characters.create!(
+      nickname: "AltAutomatic",
+      level: 20,
+      power: 1_000,
+      is_primary: false
+    )
+    mission = Mission.create!(
+      guild: user.guild,
+      name: "Atualizar secundário não conta",
+      description: "Somente personagem principal deve contar.",
+      mission_type: "automatic",
+      frequency: "weekly",
+      reward_mode: "fixed",
+      reward_xp: 15,
+      reward_currency: 5,
+      metadata: { "trigger" => "primary_character_updated" }
+    )
+
+    assert_no_difference -> { MissionSubmission.where(mission: mission, user: user).count } do
+      AutomaticMissionEvaluator.evaluate_primary_character_update!(character: secondary)
+    end
+  end
+
   test "recompensa missão automática de primeiro login da semana" do
     user = users(:five)
     mission = Mission.create!(
@@ -89,6 +114,70 @@ class AutomaticMissionEvaluatorTest < ActiveSupport::TestCase
 
     assert_difference -> { MissionSubmission.where(mission: mission, user: user).count }, 1 do
       AutomaticMissionEvaluator.evaluate_event_attended_count!(participation: participation)
+    end
+  end
+
+  test "não recompensa presença acumulada abaixo do mínimo" do
+    user = users(:five)
+    event = Event.create!(
+      guild: user.guild,
+      creator: users(:one),
+      title: "Evento abaixo do mínimo",
+      event_type: "raid",
+      starts_at: 2.days.ago,
+      ends_at: 2.days.ago + 1.hour,
+      status: "completed"
+    )
+    participation = event.event_participations.find_by!(user: user)
+    participation.update!(rsvp_status: "confirmed", final_status: "participated", attended: true)
+    mission = Mission.create!(
+      guild: user.guild,
+      name: "Participar de três eventos",
+      description: "Exige mais presença acumulada.",
+      mission_type: "automatic",
+      frequency: "weekly",
+      reward_mode: "fixed",
+      reward_xp: 10,
+      metadata: { "trigger" => "event_attended_count", "min_count" => 3 }
+    )
+
+    assert_no_difference -> { MissionSubmission.where(mission: mission, user: user).count } do
+      AutomaticMissionEvaluator.evaluate_event_attended_count!(participation: participation)
+    end
+  end
+
+  test "recompensa missão automática por streak de missões recompensadas" do
+    user = users(:five)
+    first_submission = MissionSubmission.create!(
+      mission: missions(:one),
+      user: user,
+      week_reference: "2026-W70",
+      period_sequence: 1,
+      status: "rewarded",
+      rewarded_at: Time.current
+    )
+    MissionSubmission.create!(
+      mission: missions(:two),
+      user: user,
+      week_reference: "2026-W70",
+      period_sequence: 1,
+      status: "rewarded",
+      rewarded_at: Time.current
+    )
+    mission = Mission.create!(
+      guild: user.guild,
+      name: "Duas missões recompensadas",
+      description: "Recompensa streak de missões.",
+      mission_type: "automatic",
+      frequency: "weekly",
+      reward_mode: "fixed",
+      reward_xp: 12,
+      reward_currency: 4,
+      metadata: { "trigger" => "mission_completed_streak", "min_count" => 2 }
+    )
+
+    assert_difference -> { MissionSubmission.where(mission: mission, user: user).count }, 1 do
+      AutomaticMissionEvaluator.evaluate_mission_completed_streak!(submission: first_submission)
     end
   end
 end

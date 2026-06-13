@@ -252,4 +252,74 @@ class GameCharacterTest < ActiveSupport::TestCase
     @character.character_data = { "classe" => "Arqueiro" }
     assert @character.valid?
   end
+
+  test "status screenshot must be an allowed image type" do
+    @character.status_screenshot.attach(
+      io: StringIO.new("not an image"),
+      filename: "status.txt",
+      content_type: "text/plain"
+    )
+
+    assert_not @character.valid?
+    assert_includes @character.errors[:status_screenshot], "deve ser uma imagem (JPEG, PNG ou WEBP)"
+  end
+
+  test "status screenshot must be at most five megabytes" do
+    @character.status_screenshot.attach(
+      io: StringIO.new("x" * (5.megabytes + 1)),
+      filename: "status.png",
+      content_type: "image/png"
+    )
+
+    assert_not @character.valid?
+    assert_includes @character.errors[:status_screenshot], "deve ter no máximo 5MB"
+  end
+
+  test "template custom fields reject unknown keys" do
+    @guild.update!(
+      character_template: [
+        { key: "nickname", label: "Nickname", field_type: "string", required: true },
+        { key: "level", label: "Nível", field_type: "integer", required: true },
+        { key: "power", label: "Poder", field_type: "integer", required: true },
+        { key: "classe", label: "Classe", field_type: "string", required: false }
+      ]
+    )
+
+    @character.character_data = { "classe" => "Arqueiro", "forbidden" => "x" }
+
+    assert_not @character.valid?
+    assert_includes @character.errors[:character_data], "possui campos não permitidos: forbidden"
+  end
+
+  test "template custom fields validate integer decimal and boolean values" do
+    @guild.update!(
+      character_template: [
+        { key: "nickname", label: "Nickname", field_type: "string", required: true },
+        { key: "level", label: "Nível", field_type: "integer", required: true },
+        { key: "power", label: "Poder", field_type: "integer", required: true },
+        { key: "gear_score", label: "Gear Score", field_type: "integer", required: true },
+        { key: "crit_rate", label: "Taxa Crítica", field_type: "decimal", required: true },
+        { key: "support", label: "Suporte", field_type: "boolean", required: true }
+      ]
+    )
+
+    @character.character_data = {
+      "gear_score" => "abc",
+      "crit_rate" => "muito",
+      "support" => "talvez"
+    }
+
+    assert_not @character.valid?
+    assert_includes @character.errors.full_messages.join, "Gear Score deve ser inteiro"
+    assert_includes @character.errors.full_messages.join, "Taxa Crítica deve ser numérico"
+    assert_includes @character.errors.full_messages.join, "Suporte deve ser verdadeiro ou falso"
+
+    @character.character_data = {
+      "gear_score" => "750",
+      "crit_rate" => "12.5",
+      "support" => "false"
+    }
+
+    assert @character.valid?
+  end
 end

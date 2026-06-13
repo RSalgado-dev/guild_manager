@@ -194,4 +194,31 @@ class MissionTest < ActiveSupport::TestCase
     assert_not mission.accepts_submission_from?(user, period)
     assert_nil mission.next_period_sequence_for(user, period)
   end
+
+  test "metadata_json retorna e atualiza metadados estruturados" do
+    mission = missions(:one)
+    mission.metadata = { "target" => 5, "kind" => "dungeon" }
+
+    assert_includes mission.metadata_json, "\"target\": 5"
+
+    mission.metadata_json = '{ "target": 10, "kind": "raid" }'
+    assert mission.valid?
+    assert_equal({ "target" => 10, "kind" => "raid" }, mission.metadata)
+  end
+
+  test "metadata_json precisa ser JSON válido" do
+    mission = missions(:one)
+    mission.metadata_json = "{invalid"
+
+    assert_not mission.valid?
+    assert_includes mission.errors[:metadata], "deve estar em JSON válido"
+  end
+
+  test "metadata precisa ser objeto JSON" do
+    mission = missions(:one)
+    mission.metadata_json = "[1, 2, 3]"
+
+    assert_not mission.valid?
+    assert_includes mission.errors[:metadata], "deve ser um objeto"
+  end
 end

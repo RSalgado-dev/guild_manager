@@ -339,14 +339,14 @@ class PresentationGuildSeeder
         inviter: squad.leader,
         invitee: invitee,
         note: "Convite mock para compor #{squad.name}.",
-        expires_at: status == :accepted ? reference_time + SquadInvitation::INVITATION_TTL : invited_at + SquadInvitation::INVITATION_TTL
+        expires_at: invited_at + SquadInvitation::INVITATION_TTL
       )
 
       case status
       when :accepted
-        invitation.accept!(user: invitee)
+        invitation.accept!(user: invitee, accepted_at: invited_at + 1.day)
       when :declined
-        invitation.decline!(user: invitee)
+        invitation.decline!(user: invitee, declined_at: invited_at + 1.day)
       when :revoked
         invitation.update!(status: "revoked", responded_at: invited_at + 1.day)
       when :expired

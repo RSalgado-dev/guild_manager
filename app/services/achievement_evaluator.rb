@@ -36,7 +36,10 @@ class AchievementEvaluator
   def criteria_met?(criteria)
     return false if criteria.blank?
 
-    criteria.slice(*SUPPORTED_CRITERIA).all? do |key, value|
+    supported_criteria = criteria.slice(*SUPPORTED_CRITERIA)
+    return false if supported_criteria.blank?
+
+    supported_criteria.all? do |key, value|
       criteria_value_met?(key, value.to_i)
     end
   end

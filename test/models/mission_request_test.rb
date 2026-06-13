@@ -24,6 +24,59 @@ class MissionRequestTest < ActiveSupport::TestCase
     assert_includes request.errors[:requester], "deve pertencer à guilda"
   end
 
+  test "reviewer deve pertencer à guilda" do
+    request = MissionRequest.new(
+      guild: guilds(:one),
+      requester: users(:five),
+      reviewer: users(:three),
+      title: "Pedido com revisor inválido",
+      description: "Revisor de outra guilda."
+    )
+
+    assert_not request.valid?
+    assert_includes request.errors[:reviewer], "deve pertencer à guilda"
+  end
+
+  test "requester pode criar quando possui cargo especial" do
+    requester = users(:five)
+    role = Role.create!(
+      guild: requester.guild,
+      name: "Explorador Especial",
+      category: "special"
+    )
+    requester.user_roles.create!(role: role)
+    request = MissionRequest.new(
+      guild: requester.guild,
+      requester: requester,
+      title: "Expedição especial",
+      description: "Explorar uma rota rara."
+    )
+
+    assert request.requester_can_create?
+  end
+
+  test "requester pode criar quando tem permissão de missões" do
+    request = MissionRequest.new(
+      guild: users(:one).guild,
+      requester: users(:one),
+      title: "Missão administrativa",
+      description: "Pedido feito por gestor."
+    )
+
+    assert request.requester_can_create?
+  end
+
+  test "requester comum não pode criar pedido especial" do
+    request = MissionRequest.new(
+      guild: users(:five).guild,
+      requester: users(:five),
+      title: "Pedido comum",
+      description: "Sem cargo especial."
+    )
+
+    assert_not request.requester_can_create?
+  end
+
   test "aprova e audita requisição" do
     request = MissionRequest.create!(
       guild: guilds(:one),

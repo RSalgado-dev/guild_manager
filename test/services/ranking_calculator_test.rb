@@ -9,6 +9,22 @@ class RankingCalculatorTest < ActiveSupport::TestCase
     assert_equal 1, entries.first.rank
   end
 
+  test "calcula ranking de usuários por nível" do
+    ranking = Ranking.new(
+      guild: guilds(:one),
+      name: "Nível dos membros",
+      ranking_scope: "users",
+      metric: "user_level",
+      sort_direction: "desc",
+      entries_limit: 5
+    )
+
+    entries = RankingCalculator.new(ranking).entries
+
+    assert_equal users(:one), entries.first.record
+    assert_equal users(:one).level, entries.first.value
+  end
+
   test "calcula ranking de usuários por moedas ganhas" do
     entries = rankings(:user_currency).entries
 
@@ -80,5 +96,18 @@ class RankingCalculatorTest < ActiveSupport::TestCase
 
     assert_equal 1, entries.size
     assert_equal users(:five), entries.first.record
+  end
+
+  test "retorna lista vazia para métrica desconhecida" do
+    ranking = Ranking.new(
+      guild: guilds(:one),
+      name: "Métrica inválida",
+      ranking_scope: "users",
+      metric: "unknown_metric",
+      sort_direction: "desc",
+      entries_limit: 5
+    )
+
+    assert_empty RankingCalculator.new(ranking).entries
   end
 end
