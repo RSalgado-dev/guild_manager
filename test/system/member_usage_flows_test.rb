@@ -84,6 +84,64 @@ class MemberUsageFlowsTest < ApplicationSystemTestCase
     assert_equal invitation.squad_id, @member.reload.squad_id
   end
 
+  test "member confirms presence for an upcoming event" do
+    event = Event.create!(
+      guild: @member.guild,
+      creator: users(:one),
+      title: "Raid de Confirmação do Membro",
+      description: "Evento para validar confirmação de presença pela interface",
+      event_type: "raid",
+      starts_at: 2.days.from_now,
+      ends_at: 2.days.from_now + 2.hours,
+      recurrence: "unique",
+      reward_xp: 100,
+      reward_currency: 50
+    )
+
+    system_sign_in(@member)
+
+    click_link "Eventos"
+    assert_text event.title
+
+    click_link event.title
+    assert_text "Sua resposta"
+
+    choose "event_participation_rsvp_status_confirmed"
+    click_button "Salvar resposta"
+
+    assert_text "Sua resposta foi registrada"
+    assert_text "Confirmado"
+
+    participation = event.event_participations.find_by!(user: @member)
+    assert_equal "confirmed", participation.rsvp_status
+    assert_nil participation.justification
+    assert_not_nil participation.responded_at
+  end
+
+  test "member cancels a pending store order and is refunded" do
+    item = StoreItem.create!(guild: @member.guild, name: "Item Reembolsável", price: 25, stock_quantity: 5)
+
+    system_sign_in(@member)
+
+    click_link "Loja"
+    assert_text "Loja da Guild"
+    assert_text item.name
+
+    click_button "Comprar por 25 moedas"
+    assert_text "Meus pedidos"
+    assert_text item.name
+    assert_text "pending"
+    assert_equal 75, @member.reload.currency_balance
+
+    click_button "Cancelar"
+
+    assert_text "Pedido cancelado e moedas reembolsadas"
+
+    order = @member.store_orders.order(:created_at).last
+    assert_equal "canceled", order.reload.status
+    assert_equal 100, @member.reload.currency_balance
+  end
+
   test "member registers a game character from the profile" do
     character_owner = users(:six)
     character_owner.update!(has_guild_access: true)
