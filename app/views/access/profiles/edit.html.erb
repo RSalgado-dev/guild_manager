@@ -5,7 +5,7 @@
     <div class="mb-8">
       <div class="flex items-center justify-between mb-4">
         <h1 class="text-4xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta bg-clip-text text-transparent">
-          ⚙️ Editar Perfil
+          Editar perfil
         </h1>
         <%= link_to profile_path, class: "px-4 py-2 bg-dark-surface border border-neon-cyan/30 rounded-lg text-neon-cyan hover:bg-neon-cyan/10 hover:border-neon-cyan hover:shadow-neon-cyan transition-all duration-300" do %>
           ← Voltar ao Perfil
@@ -39,7 +39,7 @@
             </li>
             <li class="flex items-center space-x-2">
               <span class="text-neon-green">✓</span>
-              <span><strong class="text-white">Apelido:</strong> Nome customizado para exibição (diferente do username do Discord)</span>
+              <span><strong class="text-white">Apelido:</strong> Nome personalizado para exibição (diferente do usuário no Discord)</span>
             </li>
           </ul>
           
@@ -67,7 +67,7 @@
           
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-sm font-medium text-gray-400 mb-2">Username do Discord</label>
+              <label class="block text-sm font-medium text-gray-400 mb-2">Usuário no Discord</label>
               <div class="px-4 py-3 bg-dark-bg/50 border border-gray-700 rounded-lg text-gray-500">
                 <%= @user.discord_username %>
               </div>
@@ -95,7 +95,7 @@
             <!-- Email -->
             <div>
               <label for="user_email" class="block text-sm font-medium text-gray-300 mb-2">
-                📧 Email
+                Email
                 <span class="text-neon-cyan">*</span>
               </label>
               <%= f.email_field :email, 
@@ -110,7 +110,7 @@
             <!-- Discord Nickname -->
             <div>
               <label for="user_discord_nickname" class="block text-sm font-medium text-gray-300 mb-2">
-                🏷️ Apelido Customizado
+                Apelido
                 <span class="text-gray-500 text-xs font-normal">(opcional)</span>
               </label>
               <%= f.text_field :discord_nickname, 
@@ -135,12 +135,12 @@
           <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
               <div class="text-2xl font-bold text-neon-cyan"><%= @user.xp_points %></div>
-              <div class="text-xs text-gray-500 mt-1">XP Total</div>
+              <div class="text-xs text-gray-500 mt-1">XP total</div>
             </div>
             
             <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
               <div class="text-2xl font-bold text-neon-green"><%= @user.currency_balance %></div>
-              <div class="text-xs text-gray-500 mt-1">Moeda</div>
+              <div class="text-xs text-gray-500 mt-1">Moedas</div>
             </div>
             
             <div class="p-4 bg-dark-bg/50 border border-gray-700 rounded-lg">
@@ -156,23 +156,23 @@
                   ?
                 <% end %>
               </div>
-              <div class="text-xs text-gray-500 mt-1">Guild</div>
+              <div class="text-xs text-gray-500 mt-1">Guilda</div>
             </div>
           </div>
           
           <p class="text-xs text-gray-600 mt-4">
-            💡 XP, moeda e nível são conquistados através de participação em eventos, missões e atividades da guilda.
+            XP, moedas e nível são conquistados através de participação em eventos, missões e atividades da guilda.
           </p>
         </div>
 
         <!-- Botões de Ação -->
         <div class="flex items-center justify-between pt-6 border-t border-gray-700">
           <div class="flex space-x-4">
-            <%= f.submit "💾 Salvar Alterações", 
+            <%= f.submit "Salvar alterações", 
                 class: "px-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold hover:shadow-neon-cyan transition-all duration-300 cursor-pointer animate-pulse-slow" %>
             
             <%= link_to profile_path, class: "px-6 py-3 bg-dark-surface border border-gray-700 rounded-lg text-gray-400 hover:text-white hover:border-gray-500 transition-all duration-300" do %>
-              ❌ Cancelar
+              Cancelar
             <% end %>
           </div>
           
@@ -184,7 +184,6 @@
         <!-- Aviso de Privacidade -->
         <div class="p-4 bg-dark-bg/30 border border-gray-800 rounded-lg">
           <p class="text-xs text-gray-600 flex items-start space-x-2">
-            <span class="text-neon-cyan">🔒</span>
             <span>
               <strong class="text-gray-500">Privacidade:</strong>
               Suas informações são privadas e usadas apenas para melhorar sua experiência na plataforma. 

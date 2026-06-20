@@ -2,11 +2,15 @@
   <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-neon-cyan font-mono text-xs">[ EVENT_DETAILS ]</p>
-        <h1 class="text-3xl font-black text-white mt-2"><%= @event.title %></h1>
+        <h1 class="text-3xl font-black text-white"><%= @event.title %></h1>
         <p class="text-gray-400 mt-2"><%= @event.description.presence || "Sem descrição cadastrada." %></p>
       </div>
       <div class="flex gap-3">
+        <% if has_permission?(:manage_events) %>
+          <%= link_to attendance_event_path(@event), class: "px-4 py-2 bg-neon-cyan/20 border border-neon-cyan/40 rounded-lg text-neon-cyan font-mono text-sm" do %>
+            Acompanhar presença
+          <% end %>
+        <% end %>
         <% if has_permission?(:manage_events) && @event.review_available? %>
           <%= link_to review_event_path(@event), class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded-lg text-neon-purple font-mono text-sm" do %>
             Fechar evento
@@ -25,7 +29,7 @@
       </div>
       <div class="bg-dark-card border border-neon-purple/20 rounded-lg p-4">
         <p class="text-gray-500 text-xs font-mono uppercase">Recorrência</p>
-        <p class="text-white mt-2"><%= @event.recurrence.humanize %></p>
+        <p class="text-white mt-2"><%= enum_label(@event.recurrence) %></p>
       </div>
       <div class="bg-dark-card border border-neon-green/20 rounded-lg p-4">
         <p class="text-gray-500 text-xs font-mono uppercase">XP</p>
@@ -88,7 +92,7 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div class="p-4 bg-dark-bg border border-neon-purple/20 rounded-lg">
             <p class="text-gray-500 text-xs font-mono uppercase">Status</p>
-            <p class="text-white mt-2"><%= my_result.humanize %></p>
+            <p class="text-white mt-2"><%= enum_label(my_result) %></p>
           </div>
           <div class="p-4 bg-dark-bg border border-neon-green/20 rounded-lg">
             <p class="text-gray-500 text-xs font-mono uppercase">XP recebido</p>

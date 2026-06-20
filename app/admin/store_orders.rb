@@ -41,7 +41,9 @@ ActiveAdmin.register StoreOrder do
     column :user
     column :store_item
     column :price_paid
-    column :status
+    column "Status" do |order|
+      ApplicationController.helpers.enum_label(order.status)
+    end
     column :fulfilled_at
     column :rejected_at
     column :canceled_at
@@ -51,7 +53,7 @@ ActiveAdmin.register StoreOrder do
 
   filter :user
   filter :store_item
-  filter :status, as: :select, collection: StoreOrder::STATUSES
+  filter :status, as: :select, collection: StoreOrder::STATUSES.map { |status| [ ApplicationController.helpers.enum_label(status), status ] }
   filter :created_at
 
   form do |f|
@@ -66,7 +68,9 @@ ActiveAdmin.register StoreOrder do
       row :user
       row :store_item
       row :price_paid
-      row :status
+      row "Status" do |order|
+        ApplicationController.helpers.enum_label(order.status)
+      end
       row :admin_notes
       row :fulfilled_by
       row :fulfilled_at

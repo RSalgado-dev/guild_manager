@@ -27,9 +27,9 @@ class DevSessionsController < ApplicationController
         entity_id: user.id
       )
 
-      redirect_to admin_root_path, notice: "✅ Logado como: #{user.discord_username}"
+      redirect_to admin_root_path, notice: "Entrada realizada como #{user.discord_username}."
     else
-      redirect_to root_path, alert: "❌ Usuário não encontrado. Execute: bin/rails runner script/create_first_admin.rb"
+      redirect_to root_path, alert: "Usuário não encontrado. Execute: bin/rails runner script/create_first_admin.rb"
     end
   end
 
@@ -38,7 +38,7 @@ class DevSessionsController < ApplicationController
     user = User.find_by(discord_id: "000000000000000000")
 
     unless user
-      return redirect_to root_path, alert: "❌ Admin temporário não encontrado. Execute: bin/rails runner script/create_first_admin.rb"
+      return redirect_to root_path, alert: "Admin temporário não encontrado. Execute: bin/rails runner script/create_first_admin.rb"
     end
 
     session[:user_id] = user.id
@@ -51,7 +51,7 @@ class DevSessionsController < ApplicationController
       entity_id: user.id
     )
 
-    redirect_to admin_root_path, notice: "✅ Login admin dev realizado!"
+    redirect_to admin_root_path, notice: "Entrada de desenvolvimento realizada."
   end
 
   private

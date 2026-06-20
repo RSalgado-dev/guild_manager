@@ -1,0 +1,77 @@
+<div class="min-h-screen bg-dark-bg">
+  <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
+    <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+      <div>
+        <h1 class="text-3xl font-black text-white">Acompanhamento de presença</h1>
+        <p class="text-gray-400 mt-2"><%= @event.title %></p>
+      </div>
+
+      <div class="flex flex-wrap gap-3">
+        <% if @event.review_available? && !@event.completed? %>
+          <%= link_to "Fechar evento", review_event_path(@event), class: "px-4 py-2 bg-neon-purple/20 border border-neon-purple/40 rounded-lg text-neon-purple font-mono text-sm" %>
+        <% end %>
+        <%= link_to "← Evento", event_path(@event), class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" %>
+      </div>
+    </div>
+
+    <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div class="bg-dark-card border border-gray-800 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Status</p>
+        <p class="text-white mt-2"><%= event_status_label(@event) %></p>
+      </div>
+      <div class="bg-dark-card border border-neon-green/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Confirmados</p>
+        <p class="text-white text-3xl font-bold mt-1"><%= @confirmed_participations.count %></p>
+      </div>
+      <div class="bg-dark-card border border-yellow-400/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Justificaram ausência</p>
+        <p class="text-white text-3xl font-bold mt-1"><%= @justified_participations.count %></p>
+      </div>
+      <div class="bg-dark-card border border-neon-cyan/20 rounded-lg p-4">
+        <p class="text-gray-500 text-xs font-mono uppercase">Sem resposta</p>
+        <p class="text-white text-3xl font-bold mt-1"><%= @pending_participations.count %></p>
+      </div>
+    </section>
+
+    <% sections = [
+      [ "Confirmaram presença", @confirmed_participations, "border-neon-green/30", "text-neon-green", "Esses membros informaram que irão comparecer." ],
+      [ "Justificaram ausência", @justified_participations, "border-yellow-400/30", "text-yellow-300", "Esses membros informaram que não irão comparecer e registraram justificativa." ],
+      [ "Ainda não responderam", @pending_participations, "border-neon-cyan/30", "text-neon-cyan", "Esses membros ainda não registraram uma resposta para o evento." ]
+    ] %>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+      <% sections.each do |title, participations, border_class, title_class, description| %>
+        <section class="bg-dark-card border <%= border_class %> rounded-lg p-5">
+          <div class="mb-4">
+            <h2 class="<%= title_class %> text-lg font-bold"><%= title %> (<%= participations.count %>)</h2>
+            <p class="text-gray-400 text-sm mt-1"><%= description %></p>
+          </div>
+
+          <% if participations.any? %>
+            <div class="space-y-3">
+              <% participations.each do |participation| %>
+                <div class="p-4 bg-dark-bg border border-gray-800 rounded-lg">
+                  <p class="text-white font-semibold"><%= participation.user.display_name_with_squad_tag %></p>
+                  <p class="text-gray-500 text-xs mt-1">
+                    <% if participation.responded_at.present? %>
+                      Respondido em <%= l(participation.responded_at, format: :short) %>
+                    <% else %>
+                      Sem resposta registrada
+                    <% end %>
+                  </p>
+                  <% if participation.justification.present? %>
+                    <p class="text-gray-300 text-sm mt-3 whitespace-pre-line"><%= participation.justification %></p>
+                  <% end %>
+                </div>
+              <% end %>
+            </div>
+          <% else %>
+            <div class="p-6 border border-dashed border-gray-700 rounded-lg text-center text-gray-500">
+              Nenhum membro neste grupo.
+            </div>
+          <% end %>
+        </section>
+      <% end %>
+    </div>
+  </div>
+</div>

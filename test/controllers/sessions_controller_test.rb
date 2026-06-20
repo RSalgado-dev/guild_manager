@@ -222,7 +222,7 @@ class SessionsControllerTest < ActionDispatch::IntegrationTest
 
     assert_response :redirect
     assert_redirected_to root_path
-    assert_equal "Logout realizado com sucesso!", flash[:notice]
+    assert_equal "Saída realizada com sucesso.", flash[:notice]
   end
 
   test "deve criar audit log ao fazer logout" do

@@ -2,8 +2,8 @@ module Access
   class EventsController < AccessController
     before_action :require_guild_access
     before_action :load_user_context
-    before_action :set_event, only: [ :show, :respond, :review, :complete ]
-    before_action :require_manage_events_permission, only: [ :new, :create, :review, :complete ]
+    before_action :set_event, only: [ :show, :respond, :attendance, :review, :complete ]
+    before_action :require_manage_events_permission, only: [ :new, :create, :attendance, :review, :complete ]
     before_action :ensure_event_can_be_reviewed!, only: [ :review, :complete ]
 
     def index
@@ -60,12 +60,15 @@ module Access
       end
     end
 
+    def attendance
+      load_attendance_groups
+    end
+
     def review
-      participation_scope = @event.event_participations.joins(:user).includes(:user).order("users.discord_username ASC")
-      @participations = participation_scope
-      @confirmed_participations = participation_scope.where(rsvp_status: :confirmed)
-      @justified_participations = participation_scope.where(rsvp_status: :declined).where.not(justification: [ nil, "" ])
-      @absent_participations = participation_scope.where.not(id: @confirmed_participations.select(:id)).where.not(id: @justified_participations.select(:id))
+      load_attendance_groups
+      @absent_participations = @participation_scope
+                               .where.not(id: @confirmed_participations.select(:id))
+                               .where.not(id: @justified_participations.select(:id))
     end
 
     def complete
@@ -113,6 +116,14 @@ module Access
 
         sanitized[participation_id.to_s] = normalized_status
       end
+    end
+
+    def load_attendance_groups
+      @participation_scope = @event.event_participations.joins(:user).includes(:user).order("users.discord_username ASC")
+      @participations = @participation_scope
+      @confirmed_participations = @participation_scope.where(rsvp_status: :confirmed)
+      @justified_participations = @participation_scope.where(rsvp_status: :declined).where.not(justification: [ nil, "" ])
+      @pending_participations = @participation_scope.where(rsvp_status: :pending)
     end
 
     def require_manage_events_permission

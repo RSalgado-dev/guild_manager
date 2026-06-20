@@ -57,6 +57,7 @@ Rails.application.routes.draw do
   resources :events, controller: "access/events", only: [ :index, :show, :new, :create ] do
     member do
       patch :respond
+      get :attendance
       get :review
       patch :complete
     end

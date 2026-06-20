@@ -2,8 +2,7 @@
   <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
     <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-neon-blue font-mono text-xs">[ CERTIFICATE_DETAILS ]</p>
-        <h1 class="text-3xl font-black text-white mt-2"><%= @certificate.name %></h1>
+        <h1 class="text-3xl font-black text-white"><%= @certificate.name %></h1>
         <p class="text-gray-400 mt-2"><%= @certificate.description.presence || "Sem descrição cadastrada." %></p>
       </div>
       <%= link_to certificates_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>

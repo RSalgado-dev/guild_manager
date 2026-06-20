@@ -1,18 +1,12 @@
-<div class="min-h-screen bg-dark-bg relative overflow-hidden">
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-20 left-8 w-80 h-80 bg-neon-purple opacity-10 rounded-full blur-3xl animate-pulse-slow"></div>
-    <div class="absolute bottom-12 right-8 w-96 h-96 bg-neon-cyan opacity-10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1.3s;"></div>
-  </div>
-
-  <div class="relative z-10 min-h-screen">
+<div class="min-h-screen bg-dark-bg">
+  <div class="min-h-screen">
     <header class="border-b border-gray-800 backdrop-blur-sm bg-dark-surface/50">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex items-center justify-between gap-4">
           <div>
             <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
-              GUILD SYSTEM
+              Revisões de squads
             </h1>
-            <p class="text-neon-cyan/70 font-mono text-xs">[ SQUAD_REVIEW_QUEUE ]</p>
           </div>
           <%= link_to squads_path, class: "px-4 py-2 bg-dark-card border border-gray-700 hover:border-neon-cyan/30 text-gray-300 rounded-lg transition-all duration-300 font-mono text-sm" do %>
             ← Voltar

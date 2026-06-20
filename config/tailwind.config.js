@@ -21,15 +21,15 @@ module.exports = {
         'dark-card': '#1a1a2e',
       },
       boxShadow: {
-        'neon-cyan': '0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3)',
-        'neon-magenta': '0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3)',
-        'neon-purple': '0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3)',
-        'neon-green': '0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3)',
-        'neon-blue': '0 0 20px rgba(4, 217, 255, 0.5), 0 0 40px rgba(4, 217, 255, 0.3)',
+        'neon-cyan': '0 0 12px rgba(0, 255, 255, 0.18)',
+        'neon-magenta': '0 0 12px rgba(255, 0, 255, 0.18)',
+        'neon-purple': '0 0 12px rgba(176, 38, 255, 0.18)',
+        'neon-green': '0 0 12px rgba(57, 255, 20, 0.18)',
+        'neon-blue': '0 0 12px rgba(4, 217, 255, 0.18)',
       },
       animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'glow': 'glow 2s ease-in-out infinite alternate',
+        'pulse-slow': 'none',
+        'glow': 'none',
       },
       keyframes: {
         glow: {
@@ -41,4 +41,3 @@ module.exports = {
   },
   plugins: [],
 }
-

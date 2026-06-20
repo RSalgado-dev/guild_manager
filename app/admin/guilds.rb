@@ -108,7 +108,7 @@ ActiveAdmin.register Guild do
     panel "Usuários" do
       table_for guild.users.order(created_at: :desc).limit(10) do
         column :id
-        column "Discord Username" do |user|
+        column "Usuário Discord" do |user|
           link_to user.discord_username, admin_user_path(user)
         end
         column "Tem Acesso" do |user|

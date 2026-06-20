@@ -2,7 +2,6 @@
   <div class="max-w-7xl mx-auto px-4 py-8">
     <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       <div>
-        <p class="text-neon-cyan/70 font-mono text-xs uppercase">Store</p>
         <h1 class="text-4xl font-black text-white">Loja da Guild</h1>
         <p class="text-gray-400 mt-2">Use suas moedas para resgatar itens e benefícios manuais.</p>
       </div>
@@ -13,7 +12,7 @@
           <p class="text-white text-2xl font-bold"><%= current_user.currency_balance %> moedas</p>
         </div>
         <%= link_to "Meus pedidos", store_orders_path, class: "inline-flex items-center justify-center border border-neon-cyan/30 bg-dark-card text-neon-cyan font-bold rounded px-4 py-3 hover:border-neon-cyan transition-colors" %>
-        <%= link_to "Dashboard", dashboard_path, class: "inline-flex items-center justify-center border border-neon-cyan/30 text-neon-cyan rounded px-4 py-3 hover:border-neon-cyan transition-colors" %>
+        <%= link_to "Painel", dashboard_path, class: "inline-flex items-center justify-center border border-neon-cyan/30 text-neon-cyan rounded px-4 py-3 hover:border-neon-cyan transition-colors" %>
       </div>
     </div>
 
@@ -87,7 +86,7 @@
                   <td class="py-3 text-gray-300">#<%= order.id %></td>
                   <td class="py-3 text-white"><%= order.store_item.name %></td>
                   <td class="py-3 text-neon-magenta"><%= order.price_paid %></td>
-                  <td class="py-3 text-neon-cyan"><%= order.status %></td>
+                  <td class="py-3 text-neon-cyan"><%= enum_label(order.status) %></td>
                 </tr>
               <% end %>
             </tbody>
