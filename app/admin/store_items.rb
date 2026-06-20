@@ -42,16 +42,20 @@ ActiveAdmin.register StoreItem do
     column :category
     column :price
     column :stock_quantity
-    column :status
-    column :fulfillment_type
+    column "Status" do |item|
+      ApplicationController.helpers.enum_label(item.status)
+    end
+    column "Entrega" do |item|
+      ApplicationController.helpers.enum_label(item.fulfillment_type)
+    end
     actions
   end
 
   filter :guild
   filter :name
   filter :category
-  filter :status, as: :select, collection: StoreItem::STATUSES
-  filter :fulfillment_type, as: :select, collection: StoreItem::FULFILLMENT_TYPES
+  filter :status, as: :select, collection: StoreItem::STATUSES.map { |status| [ ApplicationController.helpers.enum_label(status), status ] }
+  filter :fulfillment_type, as: :select, collection: StoreItem::FULFILLMENT_TYPES.map { |type| [ ApplicationController.helpers.enum_label(type), type ] }
 
   form do |f|
     f.inputs "Item da loja" do
@@ -61,8 +65,8 @@ ActiveAdmin.register StoreItem do
       f.input :category
       f.input :price
       f.input :stock_quantity, hint: "Deixe vazio para estoque ilimitado."
-      f.input :status, as: :select, collection: StoreItem::STATUSES
-      f.input :fulfillment_type, as: :select, collection: StoreItem::FULFILLMENT_TYPES
+      f.input :status, as: :select, collection: StoreItem::STATUSES.map { |status| [ ApplicationController.helpers.enum_label(status), status ] }
+      f.input :fulfillment_type, as: :select, collection: StoreItem::FULFILLMENT_TYPES.map { |type| [ ApplicationController.helpers.enum_label(type), type ] }
     end
     f.actions
   end
@@ -75,8 +79,12 @@ ActiveAdmin.register StoreItem do
       row :category
       row :price
       row :stock_quantity
-      row :status
-      row :fulfillment_type
+      row "Status" do |item|
+        ApplicationController.helpers.enum_label(item.status)
+      end
+      row "Entrega" do |item|
+        ApplicationController.helpers.enum_label(item.fulfillment_type)
+      end
       row :created_at
       row :updated_at
     end
@@ -86,7 +94,9 @@ ActiveAdmin.register StoreItem do
         column :id
         column :user
         column :price_paid
-        column :status
+        column "Status" do |order|
+          ApplicationController.helpers.enum_label(order.status)
+        end
         column :created_at
       end
     end

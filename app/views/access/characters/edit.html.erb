@@ -3,7 +3,7 @@
     <div class="mb-8 flex items-center justify-between">
       <div>
         <h1 class="text-4xl font-bold bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta bg-clip-text text-transparent">
-          ⚙️ Editar Personagem
+          Editar personagem
         </h1>
         <p class="text-gray-400 mt-2">Atualize os dados conforme o modelo da guilda</p>
       </div>
@@ -19,7 +19,7 @@
       <%= form_with model: @character, url: character_path(@character), method: :patch, local: true, class: "space-y-6" do |f| %>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="md:col-span-2">
-            <%= f.label :nickname, (nickname_field&.dig("label") || "Nickname"), class: "block text-sm font-medium text-gray-300 mb-2" %>
+            <%= f.label :nickname, (nickname_field&.dig("label") || "Apelido"), class: "block text-sm font-medium text-gray-300 mb-2" %>
             <%= f.text_field :nickname,
                 required: nickname_field&.dig("required") != false,
                 placeholder: nickname_field&.dig("placeholder"),
@@ -47,7 +47,7 @@
 
         <% if custom_fields.any? %>
           <div class="pt-6 border-t border-gray-700">
-            <h3 class="text-lg font-semibold text-neon-cyan mb-4">Campos do Modelo da Guilda</h3>
+            <h3 class="text-lg font-semibold text-neon-cyan mb-4">Campos do modelo da guilda</h3>
             <div class="space-y-4">
               <% custom_fields.each do |field| %>
                 <div>
@@ -85,10 +85,10 @@
 
         <div class="flex items-center justify-between pt-4">
           <div class="flex gap-4">
-            <%= f.submit "💾 Salvar Alterações", class: "px-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold cursor-pointer" %>
+            <%= f.submit "Salvar alterações", class: "px-6 py-3 bg-gradient-to-r from-neon-cyan to-neon-purple rounded-lg text-white font-semibold cursor-pointer" %>
             <%= link_to "Cancelar", profile_path, class: "px-6 py-3 bg-dark-surface border border-gray-700 rounded-lg text-gray-300" %>
           </div>
-          <%= button_to "🗑️ Remover", character_path(@character), method: :delete, data: { confirm: "Tem certeza que deseja remover este personagem?" }, class: "px-4 py-2 bg-dark-surface border border-neon-magenta/30 rounded-lg text-neon-magenta text-sm" %>
+          <%= button_to "Remover", character_path(@character), method: :delete, data: { confirm: "Tem certeza que deseja remover este personagem?" }, class: "px-4 py-2 bg-dark-surface border border-neon-magenta/30 rounded-lg text-neon-magenta text-sm" %>
         </div>
       <% end %>
     </div>

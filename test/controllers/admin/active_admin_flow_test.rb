@@ -153,7 +153,7 @@ class ActiveAdminFlowTest < ActionDispatch::IntegrationTest
     store_order = StoreOrder.checkout!(user: users(:five), store_item: store_item)
 
     [
-      { index_path: :admin_root_path, show_path: :admin_root_path, record: nil, index_text: "Estatísticas Gerais", show_text: "Guilds Recentes" },
+      { index_path: :admin_root_path, show_path: :admin_root_path, record: nil, index_text: "Estatísticas Gerais", show_text: "Guildas Recentes" },
       { index_path: :admin_guilds_path, show_path: :admin_guild_path, record: guilds(:one), index_text: "Guilda dos Guerreiros", show_text: "Estatísticas" },
       { index_path: :admin_users_path, show_path: :admin_user_path, record: users(:one), index_text: "warrior_one", show_text: "Cargos" },
       { index_path: :admin_roles_path, show_path: :admin_role_path, record: roles(:one), index_text: "Cargo Máximo", show_text: "Usuários com este Cargo" },
@@ -168,7 +168,7 @@ class ActiveAdminFlowTest < ActionDispatch::IntegrationTest
       { index_path: :admin_rankings_path, show_path: :admin_ranking_path, record: rankings(:user_xp), index_text: "XP dos membros", show_text: "XP" },
       { index_path: :admin_squads_path, show_path: :admin_squad_path, record: squads(:one), index_text: "Esquadrão Alpha", show_text: "Membros" },
       { index_path: :admin_store_items_path, show_path: :admin_store_item_path, record: store_item, index_text: "Item AA leitura", show_text: "Pedidos recentes" },
-      { index_path: :admin_store_orders_path, show_path: :admin_store_order_path, record: store_order, index_text: "pending", show_text: "Price Paid" },
+      { index_path: :admin_store_orders_path, show_path: :admin_store_order_path, record: store_order, index_text: "Pendente", show_text: "Price Paid" },
       { index_path: :admin_audit_logs_path, show_path: :admin_audit_log_path, record: audit_logs(:one), index_text: "create_squad", show_text: "Metadata" }
     ]
   end

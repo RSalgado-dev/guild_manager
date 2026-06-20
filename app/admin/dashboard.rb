@@ -1,15 +1,15 @@
 # frozen_string_literal: true
 
 ActiveAdmin.register_page "Dashboard" do
-  menu priority: 1, label: proc { I18n.t("active_admin.dashboard") }
+  menu priority: 1, label: "Painel"
 
-  content title: proc { I18n.t("active_admin.dashboard") } do
+  content title: "Painel" do
     columns do
       column do
         panel "Estatísticas Gerais" do
           div class: "stats-grid" do
             div class: "stat-card" do
-              para "Guilds"
+              para "Guildas"
               h3 Guild.count
             end
             div class: "stat-card" do
@@ -31,7 +31,7 @@ ActiveAdmin.register_page "Dashboard" do
 
     columns do
       column do
-        panel "Guilds Recentes" do
+        panel "Guildas Recentes" do
           table_for Guild.order(created_at: :desc).limit(5) do
             column "Nome" do |guild|
               link_to guild.name, admin_guild_path(guild)
@@ -50,10 +50,10 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Usuários Recentes" do
           table_for User.order(created_at: :desc).limit(5) do
-            column "Username" do |user|
+            column "Usuário" do |user|
               link_to user.discord_username, admin_user_path(user)
             end
-            column "Guild" do |user|
+            column "Guilda" do |user|
               user.guild&.name
             end
             column "Acesso" do |user|
@@ -70,14 +70,14 @@ ActiveAdmin.register_page "Dashboard" do
         panel "Usuários sem Acesso" do
           if User.where(has_guild_access: false).count > 0
             table_for User.where(has_guild_access: false).limit(10) do
-              column "Username" do |user|
+              column "Usuário" do |user|
                 link_to user.discord_username, admin_user_path(user)
               end
-              column "Guild" do |user|
+              column "Guilda" do |user|
                 link_to user.guild.name, admin_guild_path(user.guild) if user.guild
               end
               column "Cargo Requerido" do |user|
-                user.guild&.required_discord_role_name || "N/A"
+                user.guild&.required_discord_role_name || "-"
               end
             end
             div do

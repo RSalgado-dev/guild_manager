@@ -2,8 +2,7 @@
   <div class="max-w-5xl mx-auto px-4 py-8 space-y-6">
     <header class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-neon-purple font-mono text-xs">[ MISSION_DETAILS ]</p>
-        <h1 class="text-3xl font-black text-white mt-2"><%= @mission.name %></h1>
+        <h1 class="text-3xl font-black text-white"><%= @mission.name %></h1>
         <p class="text-gray-400 mt-2"><%= @mission.description.presence || "Sem descrição cadastrada." %></p>
       </div>
       <%= link_to missions_path, class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
@@ -14,7 +13,7 @@
     <section class="grid grid-cols-1 md:grid-cols-4 gap-4">
       <div class="bg-dark-card border border-neon-cyan/20 rounded-lg p-4">
         <p class="text-gray-500 text-xs font-mono uppercase">Tipo</p>
-        <p class="text-white mt-2"><%= @mission.mission_type.humanize %></p>
+        <p class="text-white mt-2"><%= enum_label(@mission.mission_type) %></p>
       </div>
       <div class="bg-dark-card border border-neon-purple/20 rounded-lg p-4">
         <p class="text-gray-500 text-xs font-mono uppercase">Período</p>
@@ -80,7 +79,7 @@
                   <% end %>
                 </div>
                 <div class="flex gap-2 text-xs font-mono">
-                  <span class="px-2 py-1 bg-dark-bg border border-gray-700 rounded text-gray-300"><%= submission.status.humanize %></span>
+                  <span class="px-2 py-1 bg-dark-bg border border-gray-700 rounded text-gray-300"><%= enum_label(submission.status) %></span>
                   <span class="px-2 py-1 bg-neon-green/10 border border-neon-green/30 rounded text-neon-green"><%= submission.reward_xp_awarded %> XP</span>
                   <span class="px-2 py-1 bg-yellow-400/10 border border-yellow-400/30 rounded text-yellow-300"><%= submission.reward_currency_awarded %> moedas</span>
                 </div>

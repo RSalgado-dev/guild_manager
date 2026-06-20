@@ -18,7 +18,7 @@ class MemberNavigationSmokeTest < ApplicationSystemTestCase
   test "member navigates dashboard, store, orders and rankings" do
     system_sign_in(@user)
 
-    assert_text "GUILD SYSTEM"
+    assert_text "Guild Manager"
     assert_link "Eventos"
     assert_link "Missões"
     assert_link "Rankings"
@@ -31,7 +31,7 @@ class MemberNavigationSmokeTest < ApplicationSystemTestCase
     click_button "Comprar por 25 moedas"
     assert_text "Meus pedidos"
     assert_text @item.name
-    assert_text "pending"
+    assert_text "Pendente"
 
     click_link "Rankings"
     assert_text "Rankings"

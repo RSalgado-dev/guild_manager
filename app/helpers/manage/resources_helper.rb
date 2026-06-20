@@ -31,6 +31,8 @@ module Manage
         tag.pre(json_value, class: "whitespace-pre-wrap text-xs text-gray-300")
       when :multiselect
         Array(value).join(", ")
+      when :select
+        manage_select_field_value(value, field)
       else
         value.presence || "-"
       end
@@ -66,39 +68,39 @@ module Manage
       when :role_categories
         Role.categories.keys.map { |key| [ Role::CATEGORY_LABELS[key] || key, key ] }
       when :event_recurrences
-        Event.recurrences.keys.map { |key| [ key, key ] }
+        Event.recurrences.keys.map { |key| [ enum_label(key), key ] }
       when :event_statuses
-        Event.statuses.keys.map { |key| [ key, key ] }
+        Event.statuses.keys.map { |key| [ enum_label(key), key ] }
       when :mission_types
-        Mission.mission_types.keys.map { |key| [ key, key ] }
+        Mission.mission_types.keys.map { |key| [ enum_label(key), key ] }
       when :mission_frequencies
-        Mission.frequencies.keys.map { |key| [ key, key ] }
+        Mission.frequencies.keys.map { |key| [ enum_label(key), key ] }
       when :mission_reward_modes
-        Mission.reward_modes.keys.map { |key| [ key, key ] }
+        Mission.reward_modes.keys.map { |key| [ enum_label(key), key ] }
       when :mission_submission_statuses
-        MissionSubmission.statuses.keys.map { |key| [ key, key ] }
+        MissionSubmission.statuses.keys.map { |key| [ enum_label(key), key ] }
       when :mission_request_statuses
-        MissionRequest.statuses.keys.map { |key| [ key, key ] }
+        MissionRequest.statuses.keys.map { |key| [ enum_label(key), key ] }
       when :achievement_types
-        Achievement.achievement_types.keys.map { |key| [ key, key ] }
+        Achievement.achievement_types.keys.map { |key| [ enum_label(key), key ] }
       when :achievement_visibilities
-        Achievement.visibilities.keys.map { |key| [ key, key ] }
+        Achievement.visibilities.keys.map { |key| [ enum_label(key), key ] }
       when :user_certificate_statuses
-        UserCertificate.statuses.keys.map { |key| [ key, key ] }
+        UserCertificate.statuses.keys.map { |key| [ enum_label(key), key ] }
       when :ranking_scopes
-        Ranking::RANKING_SCOPES.map { |key| [ key, key ] }
+        Ranking::RANKING_SCOPES.map { |key| [ enum_label(key), key ] }
       when :ranking_metrics
         Ranking::METRIC_LABELS.map { |key, label| [ label, key ] }
       when :ranking_sort_directions
-        Ranking::SORT_DIRECTIONS.map { |key| [ key, key ] }
+        Ranking::SORT_DIRECTIONS.map { |key| [ enum_label(key), key ] }
       when :store_item_statuses
-        StoreItem.statuses.keys.map { |key| [ key, key ] }
+        StoreItem.statuses.keys.map { |key| [ enum_label(key), key ] }
       when :store_fulfillment_types
-        StoreItem.fulfillment_types.keys.map { |key| [ key, key ] }
+        StoreItem.fulfillment_types.keys.map { |key| [ enum_label(key), key ] }
       when :store_order_statuses
-        StoreOrder.statuses.keys.map { |key| [ key, key ] }
+        StoreOrder.statuses.keys.map { |key| [ enum_label(key), key ] }
       when :squad_profile_statuses
-        Squad.profile_change_statuses.keys.map { |key| [ key, key ] }
+        Squad.profile_change_statuses.keys.map { |key| [ enum_label(key), key ] }
       else
         []
       end
@@ -126,6 +128,13 @@ module Manage
       elsif field[:name].to_s.end_with?("_json")
         record.public_send(field[:name].to_s.delete_suffix("_json"))
       end
+    end
+
+    def manage_select_field_value(value, field)
+      return "-" if value.blank?
+
+      collection = Array(manage_collection_options(field[:collection])).to_h { |label, key| [ key, label ] }
+      collection[value] || collection[value.to_s] || enum_label(value)
     end
   end
 end

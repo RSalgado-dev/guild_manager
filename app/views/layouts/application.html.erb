@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html class="bg-dark-bg">
   <head>
-    <title><%= content_for(:title) || "Guild System" %></title>
+    <title><%= content_for(:title) || "Guild Manager" %></title>
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="application-name" content="Guild System">
+    <meta name="application-name" content="Guild Manager">
     <meta name="mobile-web-app-capable" content="yes">
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
@@ -97,10 +97,10 @@
       .border-neon-green\/20 { border-color: rgba(57, 255, 20, 0.2) !important; }
       .border-neon-blue\/30 { border-color: rgba(4, 217, 255, 0.3) !important; }
       
-      .shadow-neon-cyan { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3) !important; }
-      .shadow-neon-magenta { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3) !important; }
-      .shadow-neon-purple { box-shadow: 0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3) !important; }
-      .shadow-neon-green { box-shadow: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3) !important; }
+      .shadow-neon-cyan { box-shadow: 0 0 12px rgba(0, 255, 255, 0.18) !important; }
+      .shadow-neon-magenta { box-shadow: 0 0 12px rgba(255, 0, 255, 0.18) !important; }
+      .shadow-neon-purple { box-shadow: 0 0 12px rgba(176, 38, 255, 0.18) !important; }
+      .shadow-neon-green { box-shadow: 0 0 12px rgba(57, 255, 20, 0.18) !important; }
       
       .from-neon-cyan { --tw-gradient-from: #00ffff !important; }
       .from-neon-purple { --tw-gradient-from: #b026ff !important; }
@@ -108,8 +108,8 @@
       .to-neon-magenta { --tw-gradient-to: #ff00ff !important; }
       .via-neon-purple { --tw-gradient-via: #b026ff !important; }
       
-      .animate-pulse-slow { animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite !important; }
-      .animate-glow { animation: glow 2s ease-in-out infinite alternate !important; }
+      .animate-pulse-slow { animation: none !important; }
+      .animate-glow { animation: none !important; }
       
       @keyframes pulse {
         0%, 100% { opacity: 1; }
@@ -125,12 +125,13 @@
       .hover\:border-neon-purple:hover { border-color: #b026ff !important; }
       .hover\:border-neon-magenta:hover { border-color: #ff00ff !important; }
       .hover\:border-neon-green:hover { border-color: #39ff14 !important; }
-      .hover\:shadow-neon-cyan:hover { box-shadow: 0 0 20px rgba(0, 255, 255, 0.5), 0 0 40px rgba(0, 255, 255, 0.3) !important; }
-      .hover\:shadow-neon-purple:hover { box-shadow: 0 0 20px rgba(176, 38, 255, 0.5), 0 0 40px rgba(176, 38, 255, 0.3) !important; }
-      .hover\:shadow-neon-magenta:hover { box-shadow: 0 0 20px rgba(255, 0, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3) !important; }
-      .hover\:shadow-neon-green:hover { box-shadow: 0 0 20px rgba(57, 255, 20, 0.5), 0 0 40px rgba(57, 255, 20, 0.3) !important; }
+      .hover\:shadow-neon-cyan:hover { box-shadow: 0 0 14px rgba(0, 255, 255, 0.22) !important; }
+      .hover\:shadow-neon-purple:hover { box-shadow: 0 0 14px rgba(176, 38, 255, 0.22) !important; }
+      .hover\:shadow-neon-magenta:hover { box-shadow: 0 0 14px rgba(255, 0, 255, 0.22) !important; }
+      .hover\:shadow-neon-green:hover { box-shadow: 0 0 14px rgba(57, 255, 20, 0.22) !important; }
       
-      .group:hover .group-hover\:animate-pulse { animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite !important; }
+      .group:hover .group-hover\:animate-pulse { animation: none !important; }
+      .hover\:scale-105:hover { scale: 1 !important; transform: none !important; }
     </style>
     <% end %>
   </head>

@@ -31,7 +31,7 @@ ActiveAdmin.register Squad do
   filter :guild
   filter :guild_name, as: :string, label: "Nome da Guild"
   filter :leader, as: :select, collection: -> { User.all.map { |u| [ u.discord_username, u.id ] } }
-  filter :leader_discord_username, as: :string, label: "Username do Líder"
+  filter :leader_discord_username, as: :string, label: "Usuário do líder"
   filter :created_at
 
   form do |f|

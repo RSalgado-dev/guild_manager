@@ -2,8 +2,7 @@
   <div class="max-w-6xl mx-auto px-4 py-8 space-y-6">
     <div class="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
       <div>
-        <p class="text-neon-purple font-mono text-xs">[ EVENT_REVIEW ]</p>
-        <h1 class="text-3xl font-black text-white mt-2">Fechamento de <%= @event.title %></h1>
+        <h1 class="text-3xl font-black text-white">Fechamento de <%= @event.title %></h1>
         <p class="text-gray-400 mt-2">Defina o resultado final de cada jogador para distribuir XP e moedas.</p>
       </div>
       <%= link_to event_path(@event), class: "px-4 py-2 bg-dark-card border border-gray-700 rounded-lg text-gray-300 font-mono text-sm" do %>
@@ -33,7 +32,7 @@
                     <div>
                       <p class="text-white font-semibold"><%= participation.user.display_name_with_squad_tag %></p>
                       <p class="text-gray-500 text-sm">
-                        RSVP: <%= participation.rsvp_status.humanize %>
+                        Resposta: <%= enum_label(participation.rsvp_status) %>
                         <% if participation.justification.present? %>
                           • "<%= participation.justification %>"
                         <% end %>
@@ -43,7 +42,7 @@
                       <select name="results[<%= participation.id %>]" class="px-4 py-2 bg-dark-card border border-neon-purple/20 rounded-lg text-white">
                         <% EventParticipation.final_statuses.keys.each do |status_value| %>
                           <option value="<%= status_value %>" <%= "selected" if participation.default_final_status == status_value %>>
-                            <%= status_value.humanize %>
+                            <%= enum_label(status_value) %>
                           </option>
                         <% end %>
                       </select>

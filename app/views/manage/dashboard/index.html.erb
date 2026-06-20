@@ -6,9 +6,16 @@
     </div>
 
     <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 mb-8">
+      <% stat_labels = {
+        users: "Usuários",
+        events: "Eventos",
+        pending_mission_submissions: "Missões pendentes",
+        pending_store_orders: "Pedidos pendentes",
+        audit_logs: "Auditoria"
+      } %>
       <% @stats.each do |label, value| %>
         <div class="border border-gray-800 bg-dark-card rounded p-4">
-          <p class="text-gray-400 text-xs font-mono uppercase"><%= label.to_s.humanize %></p>
+          <p class="text-gray-400 text-xs font-mono uppercase"><%= stat_labels[label] || enum_label(label) %></p>
           <p class="text-2xl font-bold text-neon-cyan mt-1"><%= value %></p>
         </div>
       <% end %>
@@ -20,7 +27,6 @@
           <div class="flex items-center justify-between gap-4">
             <div>
               <h2 class="text-lg font-bold text-white"><%= config[:label] %></h2>
-              <p class="text-xs font-mono text-gray-500 mt-1"><%= key %></p>
             </div>
             <span class="text-neon-cyan text-xl">→</span>
           </div>

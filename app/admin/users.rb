@@ -64,7 +64,7 @@ ActiveAdmin.register User do
   form do |f|
     f.inputs "Informações do Discord" do
       f.input :discord_id, label: "Discord ID"
-      f.input :discord_username, label: "Discord Username"
+      f.input :discord_username, label: "Usuário Discord"
       f.input :discord_avatar_url, label: "Avatar URL"
       f.input :email, label: "Email"
     end
@@ -129,7 +129,7 @@ ActiveAdmin.register User do
       end
     end
 
-    panel "Conquistas (Achievements)" do
+    panel "Conquistas" do
       table_for user.user_achievements.includes(:achievement).order(earned_at: :desc).limit(10) do
         column "Conquista" do |ua|
           ua.achievement.name

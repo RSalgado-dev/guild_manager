@@ -1,11 +1,5 @@
-<div class="min-h-screen bg-dark-bg relative overflow-hidden">
-  <div class="absolute inset-0 overflow-hidden pointer-events-none">
-    <div class="absolute top-16 left-8 w-80 h-80 bg-neon-cyan opacity-10 rounded-full blur-3xl animate-pulse-slow"></div>
-    <div class="absolute bottom-12 right-8 w-96 h-96 bg-neon-purple opacity-10 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 1.2s;"></div>
-    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[32rem] h-[32rem] bg-neon-magenta opacity-5 rounded-full blur-3xl animate-pulse-slow" style="animation-delay: 2s;"></div>
-  </div>
-
-  <div class="relative z-10 min-h-screen">
+<div class="min-h-screen bg-dark-bg">
+  <div class="min-h-screen">
     <header class="border-b border-gray-800 backdrop-blur-sm bg-dark-surface/50">
       <div class="max-w-7xl mx-auto px-4 py-4">
         <div class="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -14,9 +8,8 @@
               <span class="text-3xl">🛡️</span>
               <div>
                 <h1 class="text-xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan to-neon-purple">
-                  GUILD SYSTEM
+                  Squads
                 </h1>
-                <p class="text-neon-cyan/70 font-mono text-xs">[ SQUADS_CENTER ]</p>
               </div>
             <% end %>
           </div>
@@ -31,7 +24,7 @@
               <% end %>
             <% end %>
             <%= link_to dashboard_path, class: "px-4 py-2 bg-dark-card border border-gray-700 hover:border-neon-cyan/30 text-gray-300 rounded-lg transition-all duration-300 font-mono text-sm" do %>
-              ← Dashboard
+              ← Painel
             <% end %>
           </div>
         </div>
@@ -42,9 +35,6 @@
       <section class="bg-dark-card border border-neon-cyan/20 rounded-lg p-8">
         <div class="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
           <div class="space-y-3">
-            <span class="inline-flex items-center px-3 py-1 bg-neon-cyan/20 border border-neon-cyan rounded-full text-neon-cyan text-sm font-mono">
-              Estrutura da guilda
-            </span>
             <div>
               <h2 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-neon-cyan via-neon-purple to-neon-magenta">
                 Squads da Guilda
@@ -121,10 +111,7 @@
               <%= squad.description.presence || "Sem descrição cadastrada no momento." %>
             </p>
 
-            <div class="mt-4 flex items-center justify-between gap-3">
-              <span class="px-3 py-1 bg-neon-purple/20 border border-neon-purple/30 rounded-full text-neon-purple text-xs font-mono uppercase">
-                Squad
-              </span>
+            <div class="mt-4 flex items-center justify-end gap-3">
               <%= link_to squad_path(squad), class: "px-4 py-2 bg-dark-bg border border-neon-cyan/30 hover:border-neon-cyan text-neon-cyan rounded-lg transition-all duration-300 text-sm font-mono" do %>
                 Ver Perfil
               <% end %>

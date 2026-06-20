@@ -11,7 +11,7 @@ module Access
     test "should get index when not logged in" do
       get root_path
       assert_response :success
-      assert_select "h1", /GUILD SYSTEM/
+      assert_select "h1", /Guild Manager/
     end
 
     test "should redirect to dashboard when logged in with access" do

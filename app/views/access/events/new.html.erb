@@ -25,14 +25,14 @@
 
           <div>
             <%= f.label :recurrence, "Recorrência", class: "block text-sm text-gray-300 mb-2" %>
-            <%= f.select :recurrence, Event.recurrences.keys.map { |value| [ value.humanize, value ] }, {}, class: "w-full px-4 py-3 bg-dark-bg border border-neon-purple/20 rounded-lg text-white" %>
+            <%= f.select :recurrence, Event.recurrences.keys.map { |value| [ enum_label(value), value ] }, {}, class: "w-full px-4 py-3 bg-dark-bg border border-neon-purple/20 rounded-lg text-white" %>
           </div>
 
           <div>
             <% starts_at_value = @event.starts_at&.in_time_zone(Time.zone) %>
             <%= f.label :starts_at, "Data e hora de início", class: "block text-sm text-gray-300 mb-2" %>
             <%= f.datetime_local_field :starts_at, value: starts_at_value&.strftime("%Y-%m-%dT%H:%M"), step: 60, class: "native-datetime-field w-full px-4 py-3 bg-dark-bg border border-neon-cyan/20 rounded-lg text-white", required: true %>
-            <p class="text-xs text-gray-500 mt-2">Horario fixo em Brasilia (UTC-3). O suporte a timezone por usuario fica para depois.</p>
+            <p class="text-xs text-gray-500 mt-2">Horário fixo em Brasília (UTC-3). O suporte a fuso horário por usuário fica para depois.</p>
           </div>
 
           <div>

@@ -25,7 +25,7 @@ class SessionsController < ApplicationController
     if user.nil?
       Rails.logger.warn "Login falhou: Nenhum servidor Discord encontrado nas configurações"
       # Usuário não pertence a nenhuma guild configurada
-      redirect_to root_path, alert: "❌ Nenhum servidor Discord encontrado. Você precisa estar em um servidor Discord autorizado para fazer login. Se você já autorizou este app antes, revogue a autorização nas configurações do Discord e tente novamente."
+      redirect_to root_path, alert: "Nenhum servidor Discord encontrado. Você precisa estar em um servidor Discord autorizado para entrar. Se você já autorizou este app antes, revogue a autorização nas configurações do Discord e tente novamente."
     elsif user.persisted?
       session[:user_id] = user.id
       Rails.logger.info "Login bem-sucedido: User ID #{user.id} (#{user.discord_username})"
@@ -43,9 +43,9 @@ class SessionsController < ApplicationController
 
       # Redireciona baseado no acesso
       if user.has_guild_access
-        redirect_to root_path, notice: "Login realizado com sucesso! Bem-vindo, #{user.discord_username}!"
+        redirect_to root_path, notice: "Entrada realizada com sucesso. Bem-vindo, #{user.discord_username}!"
       else
-        redirect_to restricted_access_path, notice: "Login realizado, porém você não possui o cargo necessário para acessar os recursos internos."
+        redirect_to restricted_access_path, notice: "Entrada realizada, porém você não possui o cargo necessário para acessar os recursos internos."
       end
     else
       Rails.logger.error "Login falhou: User não foi persistido"
@@ -63,7 +63,7 @@ class SessionsController < ApplicationController
     end
 
     session[:user_id] = nil
-    redirect_to root_path, notice: "Logout realizado com sucesso!"
+    redirect_to root_path, notice: "Saída realizada com sucesso."
   end
 
   def failure

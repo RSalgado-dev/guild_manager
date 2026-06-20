@@ -15,7 +15,7 @@ module Manage
           { name: :discord_name, label: "Nome no Discord", type: :string },
           { name: :required_discord_role_id, label: "ID do cargo base", type: :string },
           { name: :required_discord_role_name, label: "Nome do cargo base", type: :string },
-          { name: :character_template, label: "Template de personagem", type: :json }
+          { name: :character_template, label: "Modelo de personagem", type: :json }
         ],
         actions: [ "sync_access" ]
       },
@@ -46,7 +46,7 @@ module Manage
           { name: :category, label: "Categoria", type: :select, collection: :role_categories },
           { name: :discord_role_id, label: "Discord Role ID", type: :string },
           { name: :managed_by_app, label: "Gerenciado pelo app", type: :boolean },
-          { name: :is_admin, label: "Flag admin legado", type: :boolean }
+          { name: :is_admin, label: "Admin legado", type: :boolean }
         ]
       },
       "permission_groups" => {
@@ -123,7 +123,7 @@ module Manage
           { name: :title, label: "Título", type: :string },
           { name: :description, label: "Descrição", type: :text },
           { name: :status, label: "Status", type: :select, collection: :mission_request_statuses },
-          { name: :admin_notes, label: "Notas admin", type: :text }
+          { name: :admin_notes, label: "Notas administrativas", type: :text }
         ],
         actions: [ "approve", "reject" ]
       },
@@ -221,7 +221,7 @@ module Manage
           { name: :store_item_id, label: "Item", type: :select, collection: :store_items, readonly: true },
           { name: :status, label: "Status", type: :select, collection: :store_order_statuses, readonly: true },
           { name: :price_paid, label: "Preço pago", type: :integer, readonly: true },
-          { name: :admin_notes, label: "Notas admin", type: :text }
+          { name: :admin_notes, label: "Notas administrativas", type: :text }
         ],
         actions: [ "fulfill", "reject", "cancel" ]
       },
